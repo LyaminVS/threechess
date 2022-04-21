@@ -1,0 +1,14 @@
+{% extends 'main/base.html' %}
+
+{% block title %}
+главная
+{% endblock %}
+
+{% block main %}
+{% load static %}
+    <div class="row center-block">
+        <div class="w-50 container-fluid d-flex justify-content-center align-items-center p-0">
+            <img src="{% static 'main/img/chess.svg' %}" class="rounded mx-auto d-block">
+        </div>
+    </div>
+{% endblock %}
