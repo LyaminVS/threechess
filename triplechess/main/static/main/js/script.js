@@ -68,7 +68,7 @@ $(document).on("click", ".cell_item", function() {
 
 
 
-function test_ajax(){
+function ajax(){
     $.ajax({
         type: "POST",
         url: "test/",
@@ -82,4 +82,4 @@ function test_ajax(){
             console.log(data.code)
         }
     });
- }
+}
