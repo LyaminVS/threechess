@@ -53,6 +53,7 @@ window.onload = function() {
             set_cell_picture(board, grey_circle, cell)
         }
     }
+    test_ajax()
 
  };
 
@@ -64,3 +65,21 @@ $(document).on("click", ".cell_item", function() {
 //    remove_cell_picture($(".cell_itemA1"));});
 //
 //remove_cell_picture($(".cell_itemA1"))
+
+
+
+function test_ajax(){
+    $.ajax({
+        type: "POST",
+        url: "test/",
+        headers: {
+            "X-CSRFTOKEN": "{{ csrf_token }}"
+        },
+        data: {
+            'hello': 'world',
+        },
+        success: function(data){
+            console.log(data.code)
+        }
+    });
+ }
