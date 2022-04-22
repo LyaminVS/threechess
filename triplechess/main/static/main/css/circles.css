@@ -1,498 +1,595 @@
 .cell_item{
-    height: 20px;
-    width: 20px;
+    height: 30px;
+    width: 30px;
     position: absolute;
+
 }
 
 .cell_itemA1{
-    top: 510px;
-    left: 165px;
+    top: 520px;
+    left: 175px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemB1{
-    top: 507.5px;
-    left: 200px;
+    top: 517.5px;
+    left: 210px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemC1{
-    top: 505px;
-    left: 235px;
+    top: 515px;
+    left: 245px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemD1{
-    top: 502.5px;
-    left: 270px;
+    top: 512.5px;
+    left: 280px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemE1{
-    top: 510px;
-    right: 165px;
+    top: 520px;
+    right: 175px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemF1{
-    top: 507.5px;
-    right: 200px;
+    top: 517.5px;
+    right: 210px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemG1{
-    top: 505px;
-    right: 235px;
+    top: 515px;
+    right: 245px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemH1{
-    top: 502.5px;
-    right: 270px;
+    top: 512.5px;
+    right: 280px;
+    transform: translate(+50%, -50%)
 }
 
 
 .cell_itemA2{
-    top: 477.5px;
-    left: 147.5px;
+    top: 487.5px;
+    left: 157.5px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemB2{
-    top: 467.5px;
-    left: 187.5px;
+    top: 477.5px;
+    left: 197.5px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemC2{
-    top: 457.5px;
-    left: 227.5px;
+    top: 467.5px;
+    left: 237.5px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemD2{
-    top: 447.5px;
-    left: 267.5px;
+    top: 457.5px;
+    left: 277.5px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemE2{
-    top: 477.5px;
-    right: 147.5px;
+    top: 487.5px;
+    right: 157.5px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemF2{
-    top: 467.5px;
-    right: 187.5px;
+    top: 477.5px;
+    right: 197.5px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemG2{
-    top: 457.5px;
-    right: 227.5px;
+    top: 467.5px;
+    right: 237.5px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemH2{
-    top: 447.5px;
-    right: 267.5px;
+    top: 457.5px;
+    right: 277.5px;
+    transform: translate(+50%, -50%)
 }
 
 
 .cell_itemA3{
-    top: 445px;
-    left: 135px;
+    top: 455px;
+    left: 145px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemB3{
-    top: 427.5px;
-    left: 177.5px;
+    top: 437.5px;
+    left: 187.5px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemC3{
-    top: 407.5px;
-    left: 222.5px;
+    top: 417.5px;
+    left: 232.5px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemD3{
-    top: 390px;
-    left: 267.5px;
+    top: 400px;
+    left: 277.5px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemE3{
-    top: 445px;
-    right: 135px;
+    top: 455px;
+    right: 145px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemF3{
-    top: 427.5px;
-    right: 177.5px;
+    top: 437.5px;
+    right: 187.5px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemG3{
-    top: 407.5px;
-    right: 222.5px;
+    top: 417.5px;
+    right: 232.5px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemH3{
-    top: 390px;
-    right: 267.5px;
+    top: 400px;
+    right: 277.5px;
+    transform: translate(+50%, -50%)
 }
 
 
 .cell_itemA4{
-    top: 410px;
-    left: 120px;
+    top: 420px;
+    left: 130px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemB4{
-    top: 385px;
-    left: 165px;
+    top: 395px;
+    left: 175px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemC4{
-    top: 360px;
-    left: 215px;
+    top: 370px;
+    left: 225px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemD4{
-    top: 335px;
-    left: 265px;
+    top: 345px;
+    left: 275px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemE4{
-    top: 410px;
-    right: 120px;
+    top: 420px;
+    right: 130px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemF4{
-    top: 385px;
-    right: 165px;
+    top: 395px;
+    right: 175px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemG4{
-    top: 360px;
-    right: 215px;
+    top: 370px;
+    right: 225px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemH4{
-    top: 335px;
-    right: 265px;
+    top: 345px;
+    right: 275px;
+    transform: translate(+50%, -50%)
 }
 
 
 .cell_itemA12{
-    top: 290px;
-    left: 35px;
+    top: 300px;
+    left: 45px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemB12{
-    top: 260px;
-    left: 57.5px;
+    top: 270px;
+    left: 67.5px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemC12{
-    top: 230px;
-    left: 80px;
+    top: 240px;
+    left: 90px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemD12{
-    top: 200px;
-    left: 102.5px;
+    top: 210px;
+    left: 112.5px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemA11{
-    top: 320px;
-    left: 57.5px;
+    top: 330px;
+    left: 67.5px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemA10{
-    top: 350px;
-    left: 80px;
+    top: 360px;
+    left: 90px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemA9{
-    top: 380px;
-    left: 102.5px;
+    top: 390px;
+    left: 112.5px;
+    transform: translate(-50%, -50%)
 }
 
 
 .cell_itemB11{
-    top: 290px;
-    left: 85px;
+    top: 300px;
+    left: 95px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemB10{
-    top: 320px;
-    left: 115px;
+    top: 330px;
+    left: 125px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemC11{
-    top: 260px;
-    left: 115px;
+    top: 270px;
+    left: 125px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemB9{
-    top: 350px;
-    left: 145px;
+    top: 360px;
+    left: 155px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemD11{
-    top: 230px;
-    left: 145px;
+    top: 240px;
+    left: 155px;
+    transform: translate(-50%, -50%)
 }
 
 
 .cell_itemC10{
-    top: 290px;
-    left: 155px;
+    top: 300px;
+    left: 165px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemD10{
-    top: 260px;
-    left: 190px;
+    top: 270px;
+    left: 200px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemC9{
-    top: 320px;
-    left: 190px;
+    top: 330px;
+    left: 200px;
+    transform: translate(-50%, -50%)
 }
 
 .cell_itemD9{
-    top: 290px;
-    left: 240px;
+    top: 300px;
+    left: 250px;
+    transform: translate(-50%, -50%)
 }
 
 
 .cell_itemH8{
-    top: 290px;
-    right: 35px;
+    top: 300px;
+    right: 45px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemG8{
-    top: 260px;
-    right: 57.5px;
+    top: 270px;
+    right: 67.5px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemF8{
-    top: 230px;
-    right: 80px;
+    top: 240px;
+    right: 90px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemE8{
-    top: 200px;
-    right: 102.5px;
+    top: 210px;
+    right: 112.5px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemH7{
-    top: 320px;
-    right: 57.5px;
+    top: 330px;
+    right: 67.5px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemH6{
-    top: 350px;
-    right: 80px;
+    top: 360px;
+    right: 90px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemH5{
-    top: 380px;
-    right: 102.5px;
+    top: 390px;
+    right: 112.5px;
+    transform: translate(+50%, -50%)
 }
 
 
 .cell_itemG7{
-    top: 290px;
-    right: 85px;
+    top: 300px;
+    right: 95px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemG6{
-    top: 320px;
-    right: 115px;
+    top: 330px;
+    right: 125px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemF7{
-    top: 260px;
-    right: 115px;
+    top: 270px;
+    right: 125px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemG5{
-    top: 350px;
-    right: 145px;
+    top: 360px;
+    right: 155px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemE7{
-    top: 230px;
-    right: 145px;
+    top: 240px;
+    right: 155px;
+    transform: translate(+50%, -50%)
 }
 
 
 .cell_itemF6{
-    top: 290px;
-    right: 155px;
+    top: 300px;
+    right: 165px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemE6{
-    top: 260px;
-    right: 190px;
+    top: 270px;
+    right: 200px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemF5{
-    top: 320px;
-    right: 190px;
+    top: 330px;
+    right: 200px;
+    transform: translate(+50%, -50%)
 }
 
 .cell_itemE5{
-    top: 290px;
-    right: 240px;
+    top: 300px;
+    right: 250px;
+    transform: translate(+50%, -50%)
 }
 
 
 .cell_itemN12{
-    bottom: 510px;
-    left: 165px;
+    bottom: 520px;
+    left: 175px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemN11{
-    bottom: 507.5px;
-    left: 200px;
+    bottom: 517.5px;
+    left: 210px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemN10{
-    bottom: 505px;
-    left: 235px;
+    bottom: 515px;
+    left: 245px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemN9{
-    bottom: 502.5px;
-    left: 270px;
+    bottom: 512.5px;
+    left: 280px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemN5{
-    bottom: 510px;
-    right: 165px;
+    bottom: 520px;
+    right: 175px;
+    transform: translate(+50%, +50%)
 }
 
 .cell_itemN6{
-    bottom: 507.5px;
-    right: 200px;
+    bottom: 517.5px;
+    right: 210px;
+    transform: translate(+50%, +50%)
 }
 
 .cell_itemN7{
-    bottom: 505px;
-    right: 235px;
+    bottom: 515px;
+    right: 245px;
+    transform: translate(+50%, +50%)
 }
 
 .cell_itemN8{
-    bottom: 502.5px;
-    right: 270px;
+    bottom: 512.5px;
+    right: 280px;
+    transform: translate(+50%, +50%)
 }
 
 
 .cell_itemM12{
-    bottom: 477.5px;
-    left: 147.5px;
+    bottom: 487.5px;
+    left: 157.5px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemM11{
-    bottom: 467.5px;
-    left: 187.5px;
+    bottom: 477.5px;
+    left: 197.5px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemM10{
-    bottom: 457.5px;
-    left: 227.5px;
+    bottom: 467.5px;
+    left: 237.5px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemM9{
-    bottom: 447.5px;
-    left: 267.5px;
+    bottom: 457.5px;
+    left: 277.5px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemM5{
-    bottom: 477.5px;
-    right: 147.5px;
+    bottom: 487.5px;
+    right: 157.5px;
+    transform: translate(+50%, +50%)
 }
 
 .cell_itemM6{
-    bottom: 467.5px;
-    right: 187.5px;
+    bottom: 477.5px;
+    right: 197.5px;
+    transform: translate(+50%, +50%)
 }
 
 .cell_itemM7{
-    bottom: 457.5px;
-    right: 227.5px;
+    bottom: 467.5px;
+    right: 237.5px;
+    transform: translate(+50%, +50%)
 }
 
 .cell_itemM8{
-    bottom: 447.5px;
-    right: 267.5px;
+    bottom: 457.5px;
+    right: 277.5px;
+    transform: translate(+50%, +50%)
 }
 
 
 .cell_itemL12{
-    bottom: 445px;
-    left: 135px;
+    bottom: 455px;
+    left: 145px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemL11{
-    bottom: 427.5px;
-    left: 177.5px;
+    bottom: 437.5px;
+    left: 187.5px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemL10{
-    bottom: 407.5px;
-    left: 222.5px;
+    bottom: 417.5px;
+    left: 232.5px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemL9{
-    bottom: 390px;
-    left: 267.5px;
+    bottom: 400px;
+    left: 277.5px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemL5{
-    bottom: 445px;
-    right: 135px;
+    bottom: 455px;
+    right: 145px;
+    transform: translate(+50%, +50%)
 }
 
 .cell_itemL6{
-    bottom: 427.5px;
-    right: 177.5px;
+    bottom: 437.5px;
+    right: 187.5px;
+    transform: translate(+50%, +50%)
 }
 
 .cell_itemL7{
-    bottom: 407.5px;
-    right: 222.5px;
+    bottom: 417.5px;
+    right: 232.5px;
+    transform: translate(+50%, +50%)
 }
 
 .cell_itemL8{
-    bottom: 390px;
-    right: 267.5px;
+    bottom: 400px;
+    right: 277.5px;
+    transform: translate(+50%, +50%)
 }
 
 
 .cell_itemK12{
-    bottom: 410px;
-    left: 120px;
+    bottom: 420px;
+    left: 130px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemK11{
-    bottom: 385px;
-    left: 165px;
+    bottom: 395px;
+    left: 175px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemK10{
-    bottom: 360px;
-    left: 215px;
+    bottom: 370px;
+    left: 225px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemK9{
-    bottom: 335px;
-    left: 265px;
+    bottom: 345px;
+    left: 275px;
+    transform: translate(-50%, +50%)
 }
 
 .cell_itemK5{
-    bottom: 410px;
-    right: 120px;
+    bottom: 420px;
+    right: 130px;
+    transform: translate(+50%, +50%)
 }
 
 .cell_itemK6{
-    bottom: 385px;
-    right: 165px;
+    bottom: 395px;
+    right: 175px;
+    transform: translate(+50%, +50%)
 }
 
 .cell_itemK7{
-    bottom: 360px;
-    right: 215px;
+    bottom: 370px;
+    right: 225px;
+    transform: translate(+50%, +50%)
 }
 
 .cell_itemK8{
-    bottom: 335px;
-    right: 265px;
+    bottom: 345px;
+    right: 275px;
+    transform: translate(+50%, +50%)
 }
