@@ -1,6 +1,9 @@
 function set_cell_picture(board, path, cell){
     board.after("<img src = '" + path + "' class='cell_item cell_item" + cell + "'>");
 }
+function remove_cell_picture(cell) {
+    cell.remove()
+}
 
 window.onload = function() {
     let grey_circle = '/static/main/img/grey_circle.png';
@@ -51,5 +54,13 @@ window.onload = function() {
         }
     }
 
-    
  };
+
+
+
+$(document).on("click", ".cell_item", function() {
+    remove_cell_picture($(".cell_item"));
+});
+//    remove_cell_picture($(".cell_itemA1"));});
+//
+//remove_cell_picture($(".cell_itemA1"))
