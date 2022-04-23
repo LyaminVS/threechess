@@ -14,5 +14,3 @@ def test(request):
     data = request.POST
     print(data['hello'])
     return JsonResponse({"code":10000, "content":""})
-    # return 123
-    # print(request)
