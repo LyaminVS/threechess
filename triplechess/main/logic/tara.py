@@ -12,7 +12,7 @@ class Tara:
     # массив2 - массив точек, которые эта фигура может съесть
     # входные данные - массивы точек вида [["A", "1"], ["E", "2"],...]
 
-    def __dots__(self, white, black, red):
+    def __dots__(self, white, black, red, grey):
         numbers = []
         if self.letter in consts.LETTERS_1:
             numbers += consts.NUMBERS_1 + consts.NUMBERS_3
@@ -46,6 +46,10 @@ class Tara:
                     if self.color != "red":
                         dots_eat.append([letters[i], self.number])
                         break
+                elif [letters[i], self.number] in grey:
+                    if self.color != "grey":
+                        dots_eat.append([letters[i], self.number])
+                        break
                 else:
                     dots.append([letters[i], self.number])
 
@@ -61,6 +65,10 @@ class Tara:
                         break
                 elif [self.letter, numbers[i]] in red:
                     if self.color != "red":
+                        dots_eat.append([self.letter, numbers[i]])
+                        break
+                elif [self.letter, numbers[i]] in grey:
+                    if self.color != "grey":
                         dots_eat.append([self.letter, numbers[i]])
                         break
                 else:
