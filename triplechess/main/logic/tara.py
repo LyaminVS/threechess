@@ -4,7 +4,7 @@ class Tara:
     def __init__(self, letter, number, color):
         self.letter = letter
         self.number = number
-        self.position = letter+number
+        self.cell = letter+number
         self.color = color
         self.is_walked = False
 
