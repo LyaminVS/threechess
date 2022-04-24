@@ -1,6 +1,6 @@
 import tara
 import officer
-
+import horse
 
 class Board:
     def __init__(self):
@@ -9,9 +9,8 @@ class Board:
         self.red = []
         self.officer = officer.Officer("A", "12", "white")
         self.tara = tara.Tara("K", "9", "white")
+        self.horse = horse.Horse("A", "1", "white")
 
 board = Board()
-
-print(board.officer.__dots__(["A12"],["L6"],[],[]))
-print(board.tara.__dots__(["K9"], ["L9", "D9", "K10"] ,[],[]))
+print(board.horse.__dots__(["E4", "B3"],[],[],[]))
 
