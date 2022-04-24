@@ -7,16 +7,11 @@ class Board:
         self.white = ["A12"]
         self.black = []
         self.red = []
-        self.officer = officer.Officer("D", "9", "white")
-        self.tara = tara.Tara("A", "12", "black")
-
+        self.officer = officer.Officer("A", "12", "white")
+        self.tara = tara.Tara("K", "9", "white")
 
 board = Board()
 
-print(board.officer.__dots__(["D9"],[""],[],[]))
-print(board.tara.__dots__([["A", "12"]], [["A"], ["11"]] ,[],[]))
-
-
-
-
+print(board.officer.__dots__(["A12"],["L6"],[],[]))
+print(board.tara.__dots__(["K9"], ["L9", "D9", "K10"] ,[],[]))
 
