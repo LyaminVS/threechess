@@ -12,3 +12,7 @@ NUMBERS_3 = ['9', '10', '11', '12']
 # 3 - 23
 
 BOARD_RULES = board_rules.BoardRules()
+
+
+def f(string):
+    return getattr(BOARD_RULES, string)
