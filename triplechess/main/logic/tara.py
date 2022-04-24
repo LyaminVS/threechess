@@ -36,7 +36,6 @@ class Tara:
             letters = ['H', 'G', 'F', 'E', 'K', 'L', 'M', 'N']
         if self.number in consts.NUMBERS_3:
             letters = ['A', 'B', 'C', 'D', 'K', 'L', 'M', 'N']
-        print(letters, numbers)
         dots = []
         dots_eat = []
         index_letter = letters.index(self.letter)

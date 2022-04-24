@@ -1,6 +1,7 @@
 import tara
 import officer
 import peshka
+import queen
 
 class Board:
     def __init__(self):
@@ -10,10 +11,11 @@ class Board:
         self.officer = officer.Officer("A", "12", "white")
         self.tara = tara.Tara("K", "9", "white")
         self.peshka = peshka.Peshka("E", "1", "red")
+        self.queen = queen.Queen("K", "9", "white")
 
 board = Board()
 
-print(board.peshka.__dots__(["B2"], ["E4", "K5"], [""], []))
+print(board.queen.__dots__(["K9"], [""], [""], []))
 # print(board.officer.__dots__(["A12"],["L6"],[],[]))
 # print(board.tara.__dots__(["K9"], ["L9", "D9", "K10"] ,[],[]))
 
