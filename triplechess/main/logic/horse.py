@@ -3,12 +3,17 @@ import consts
 
 class Horse:
 
-    def __init__(self, letter, number, color):
-        self.letter = letter
-        self.number = number
-        self.position = letter + number
-        self.cell = letter + number
+    def __init__(self, cell, color):
+        self.letter = cell[0]
+        self.number = cell[1::len(cell)]
+        self.cell = cell
         self.color = color
+
+    def __transform_position(self, cell):
+        self.letter = cell[0]
+        self.number = cell[1::len(cell)]
+        self.cell = cell
+
 
     def __dots__(self, white, black, red, grey):
 
@@ -23,14 +28,14 @@ class Horse:
 
         dots = []
         dots_eat = []
-        cells = [check(self.position, "top", "top", "right"),
-                 check(self.position, "top", "top", "left"),
-                 check(self.position, "right", "right", "top"),
-                 check(self.position, "right", "right", "bottom"),
-                 check(self.position, "bottom", "bottom", "right"),
-                 check(self.position, "bottom", "bottom", "left"),
-                 check(self.position, "left", "left", "top"),
-                 check(self.position, "left", "left", "bottom")]
+        cells = [check(self.cell, "top", "top", "right"),
+                 check(self.cell, "top", "top", "left"),
+                 check(self.cell, "right", "right", "top"),
+                 check(self.cell, "right", "right", "bottom"),
+                 check(self.cell, "bottom", "bottom", "right"),
+                 check(self.cell, "bottom", "bottom", "left"),
+                 check(self.cell, "left", "left", "top"),
+                 check(self.cell, "left", "left", "bottom")]
 
         for cell in cells:
             if cell in white:

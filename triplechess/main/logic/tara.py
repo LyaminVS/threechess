@@ -1,12 +1,18 @@
 import consts
 
 class Tara:
-    def __init__(self, letter, number, color):
-        self.letter = letter
-        self.number = number
-        self.cell = letter+number
+    def __init__(self, cell, color):
+        self.letter = cell[0]
+        self.number = cell[1::len(cell)]
+        self.cell = cell
         self.color = color
         self.is_walked = False
+
+    def __transform_position(self, cell):
+        self.letter = cell[0]
+        self.number = cell[1::len(cell)]
+        self.cell = cell
+
 
     # метод, который возвращает два массива:
     # массив1 - массив точек, на которые можно ходить
@@ -81,4 +87,5 @@ class Tara:
                         break
                 else:
                     dots.append(self.letter + numbers[i])
+
         return dots, dots_eat
