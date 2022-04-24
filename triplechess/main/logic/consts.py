@@ -7,6 +7,16 @@ NUMBERS_1 = ['1', '2', '3', '4']
 NUMBERS_2 = ['5', '6', '7', '8']
 NUMBERS_3 = ['9', '10', '11', '12']
 
+TURN_DIR = {
+    "right_bottom": "left_top",
+    "left_top": "right_bottom",
+    "right_top": "left_bottom",
+    "left_bottom": "right_top",
+    "top": "bottom",
+    "bottom": "top",
+    "left": "right",
+    "right": "left",
+}
 # 1 - 13
 # 2 - 12
 # 3 - 23
