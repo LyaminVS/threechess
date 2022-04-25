@@ -3,10 +3,8 @@ import figure
 
 
 class Officer(figure.Figure):
-    def __init__(self, letter, number, color):
-        super(Officer, self,).__init__(letter, number, color)
-        self.letter = letter
-        self.number = number
+    def __init__(self, cell, color):
+        super(Officer, self,).__init__(cell, color)
 
     def __iteration__(self, cell, white, black, red, grey, dots_eat, dots, dots_save, d):
         dots_eat_temp, dots_temp, dots_save_temp = self.__check__(cell, white, black, red, grey)

@@ -4,8 +4,8 @@ import figure
 
 
 class Peshka(figure.Figure):
-    def __init__(self, letter, number, color, on_road=False):
-        super(Peshka, self, ).__init__(letter, number, color)
+    def __init__(self, cell, color, on_road=False):
+        super(Peshka, self, ).__init__(cell, color)
         self.__div_cells__()
         self.__first_n_zero_cells__()
         self.on_road = on_road

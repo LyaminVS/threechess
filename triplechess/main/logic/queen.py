@@ -3,8 +3,8 @@ import tara
 
 
 class Queen(officer.Officer, tara.Tara):
-    def __init__(self, letter, number, color):
-        super(Queen, self).__init__(letter, number, color)
+    def __init__(self, cell, color):
+        super(Queen, self).__init__(cell, color)
 
     def __dots__(self, white, black, red, grey):
         dots = []

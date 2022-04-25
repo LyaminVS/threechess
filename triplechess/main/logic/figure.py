@@ -2,9 +2,11 @@ import consts
 
 
 class Figure:
-    def __init__(self, letter, number, color):
+    def __init__(self, cell, color):
         self.color = color
-        self.cell = consts.f(letter + number)
+        self.letter = cell[0]
+        self.number = cell[1::len(cell)]
+        self.cell = consts.f(self.letter + self.number)
 
     def __check__(self, cell, white, black, red, grey):
         dots_save_temp = []

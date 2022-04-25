@@ -30,34 +30,36 @@ class Board:
         self.white_cells = ["A1", "A2", "B1", "B2", "C1", "C2", "D1", "D2", "E1", "E2", "F1", "F2", "G1", "G2", "H1", "H2"]
 
 
-    def __king_is_checked__(self, color):
-        if color=="white":
-            king_position = self.king_white.cell
-            figures_1 = self.black
-            figures_2 = self.red
-        if color=="black":
-            king_position = self.king_black.cell
-            figures_1 = self.white
-            figures_2 = self.red
-        if color=="red":
-            king_position = self.king_red.cell
-            figures_1 = self.black
-            figures_2 = self.white
-
-        for elem in figures_1:
-            if king_position in elem.__dots__(self.white_cells, self.black_cells, self.red_cells, self.grey_cells)[1]:
-                return True
-        for elem in figures_1:
-            if king_position in elem.__dots__(self.white_cells, self.black_cells, self.red_cells, self.grey_cells)[1]:
-                return True
-        return False
 
 
+    # def __king_is_checked__(self, color):
+    #     if color=="white":
+    #         king_position = self.king_white.cell
+    #         figures_1 = self.black
+    #         figures_2 = self.red
+    #     if color=="black":
+    #         king_position = self.king_black.cell
+    #         figures_1 = self.white
+    #         figures_2 = self.red
+    #     if color=="red":
+    #         king_position = self.king_red.cell
+    #         figures_1 = self.black
+    #         figures_2 = self.white
+    #
+    #     for elem in figures_1:
+    #         if king_position in elem.__dots__(self.white_cells, self.black_cells, self.red_cells, self.grey_cells)[1]:
+    #             return True
+    #     for elem in figures_1:
+    #         if king_position in elem.__dots__(self.white_cells, self.black_cells, self.red_cells, self.grey_cells)[1]:
+    #             return True
+    #     return False
 
 
-# board = Board()
 
-# print(board.king.__dots__(["E4"], [], [], []))
+
+board = Board()
+
+print(board.queen_white.__dots__([], [], [], []))
 # print(board.officer.__dots__(["A12"],["L6"],[],[]))
 # print(board.tara.__dots__(["K9"], ["L9", "D9", "K10"] ,[],[]))
 
