@@ -91,18 +91,17 @@ class Board:
         array = []
         for elem in self.all_figures:
             _type = ""
-            _color = "white"
-            if (type(elem) == King):
+            if type(elem) == King:
                 _type = "King"
-            if (type(elem) == Peshka):
+            if type(elem) == Peshka:
                 _type = "Peshka"
-            if (type(elem) == Queen):
+            if type(elem) == Queen:
                 _type = "Queen"
-            if (type(elem) == Tara):
+            if type(elem) == Tara:
                 _type = "Tara"
-            if (type(elem) == Officer):
+            if type(elem) == Officer:
                 _type = "Officer"
-            if (type(elem) == Horse):
+            if type(elem) == Horse:
                 _type = "Horse"
             array.append([_type, elem.color, elem.letter + elem.number])
         return array
