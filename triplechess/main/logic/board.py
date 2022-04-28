@@ -87,6 +87,10 @@ class Board:
                 dots = figure.__dots__(self.white_cells, self.black_cells, self.red_cells, [])
                 return dots
     def __king_is_checked__(self, color):
+        king_position = ""
+        figures_1 = []
+        figures_2 = []
+
         if color=="white":
             king_position = self.king_white.cell
             figures_1 = self.black
