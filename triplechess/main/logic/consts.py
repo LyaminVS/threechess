@@ -1,4 +1,5 @@
-import board_rules
+# import board_rules
+from .board_rules import BoardRules
 
 LETTERS_1 = ['A', 'B', 'C', 'D']
 LETTERS_2 = ['E', 'F', 'G', 'H']
@@ -21,7 +22,7 @@ TURN_DIR = {
 # 2 - 12
 # 3 - 23
 
-BOARD_RULES = board_rules.BoardRules()
+BOARD_RULES = BoardRules()
 
 
 def f(string):

@@ -6,7 +6,8 @@ import sys
 # print(sys.path)
 # sys.path.insert(0, '/logic')
 # import logic.board as board
-# from logic import board
+
+from .logic.board import board
 #
 # board = logic.Board()
 #
@@ -26,7 +27,7 @@ def get_dots(request):
     data = request.POST
     letter = data["letter"]
     number = data["number"]
-    # dots = board.board.get_dots(letter + number)
-    # print(dots)
+    dots = board.board.get_dots(letter + number)
+    print(dots)
 
 

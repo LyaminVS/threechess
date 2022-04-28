@@ -1,29 +1,35 @@
-import tara
-import officer
-import peshka
-import queen
-import king
-import horse
+# import tara
+# import officer
+# import peshka
+# import queen
+# import king
+# import horse
+from .tara import Tara as Tara
+from .officer import Officer as Officer
+from .peshka import Peshka as Peshka
+from .queen import Queen as Queen
+from .king import King as King
+from .horse import Horse as Horse
 
 
 class Board:
     def __init__(self):
-        self.king_white = king.King("E1", "white")
-        self.queen_white = queen.Queen("D1", "white")
-        self.horse_white_1 = horse.Horse("C1", "white")
-        self.horse_white_2 = horse.Horse("F1", "white")
-        self.officer_white_1 = officer.Officer("B1", "white")
-        self.officer_white_2 = officer.Officer("G1", "white")
-        self.tara_white_1 = tara.Tara("A1", "white")
-        self.tara_white_2 = tara.Tara("H1", "white")
-        self.peshka_white_1 = peshka.Peshka("A2", "white")
-        self.peshka_white_2 = peshka.Peshka("B2", "white")
-        self.peshka_white_3 = peshka.Peshka("C2", "white")
-        self.peshka_white_4 = peshka.Peshka("D2", "white")
-        self.peshka_white_5 = peshka.Peshka("E2", "white")
-        self.peshka_white_6 = peshka.Peshka("F2", "white")
-        self.peshka_white_7 = peshka.Peshka("G2", "white")
-        self.peshka_white_8 = peshka.Peshka("H2", "white")
+        self.king_white = King("E1", "white")
+        self.queen_white = Queen("D1", "white")
+        self.horse_white_1 = Horse("C1", "white")
+        self.horse_white_2 = Horse("F1", "white")
+        self.officer_white_1 = Officer("B1", "white")
+        self.officer_white_2 = Officer("G1", "white")
+        self.tara_white_1 = Tara("A1", "white")
+        self.tara_white_2 = Tara("H1", "white")
+        self.peshka_white_1 = Peshka("A2", "white")
+        self.peshka_white_2 = Peshka("B2", "white")
+        self.peshka_white_3 = Peshka("C2", "white")
+        self.peshka_white_4 = Peshka("D2", "white")
+        self.peshka_white_5 = Peshka("E2", "white")
+        self.peshka_white_6 = Peshka("F2", "white")
+        self.peshka_white_7 = Peshka("G2", "white")
+        self.peshka_white_8 = Peshka("H2", "white")
         self.white = [self.king_white, self.queen_white, self.horse_white_1, self.horse_white_2,
                       self.officer_white_1, self.officer_white_2, self.tara_white_1, self.tara_white_2,
                       self.peshka_white_1, self.peshka_white_2, self.peshka_white_3, self.peshka_white_4,
@@ -31,22 +37,22 @@ class Board:
         self.white_cells = ["A1", "A2", "B1", "B2", "C1", "C2", "D1", "D2", "E1", "E2", "F1", "F2", "G1", "G2", "H1",
                             "H2"]
 
-        self.king_black = king.King("K8", "black")
-        self.queen_black = queen.Queen("E8", "black")
-        self.horse_black_1 = horse.Horse("M8", "black")
-        self.horse_black_2 = horse.Horse("G8", "black")
-        self.officer_black_1 = officer.Officer("L8", "black")
-        self.officer_black_2 = officer.Officer("F8", "black")
-        self.tara_black_1 = tara.Tara("N8", "black")
-        self.tara_black_2 = tara.Tara("H8", "black")
-        self.peshka_black_1 = peshka.Peshka("H7", "black")
-        self.peshka_black_2 = peshka.Peshka("G7", "black")
-        self.peshka_black_3 = peshka.Peshka("F7", "black")
-        self.peshka_black_4 = peshka.Peshka("E7", "black")
-        self.peshka_black_5 = peshka.Peshka("K7", "black")
-        self.peshka_black_6 = peshka.Peshka("L7", "black")
-        self.peshka_black_7 = peshka.Peshka("M7", "black")
-        self.peshka_black_8 = peshka.Peshka("N7", "black")
+        self.king_black = King("K8", "black")
+        self.queen_black = Queen("E8", "black")
+        self.horse_black_1 = Horse("M8", "black")
+        self.horse_black_2 = Horse("G8", "black")
+        self.officer_black_1 = Officer("L8", "black")
+        self.officer_black_2 = Officer("F8", "black")
+        self.tara_black_1 = Tara("N8", "black")
+        self.tara_black_2 = Tara("H8", "black")
+        self.peshka_black_1 = Peshka("H7", "black")
+        self.peshka_black_2 = Peshka("G7", "black")
+        self.peshka_black_3 = Peshka("F7", "black")
+        self.peshka_black_4 = Peshka("E7", "black")
+        self.peshka_black_5 = Peshka("K7", "black")
+        self.peshka_black_6 = Peshka("L7", "black")
+        self.peshka_black_7 = Peshka("M7", "black")
+        self.peshka_black_8 = Peshka("N7", "black")
         self.black = [self.king_black, self.queen_black, self.horse_black_1, self.horse_black_2,
                       self.officer_black_1, self.officer_black_2, self.tara_black_1, self.tara_black_2,
                       self.peshka_black_1, self.peshka_black_2, self.peshka_black_3, self.peshka_black_4,
@@ -54,22 +60,22 @@ class Board:
         self.black_cells = ["H8", "H7", "G8", "G7", "F8", "F7", "E8", "E7", "K8", "K7", "L8", "L7", "M8", "M7", "N8",
                             "N7"]
 
-        self.king_red = king.King("D12", "red")
-        self.queen_red = queen.Queen("K12", "red")
-        self.horse_red_1 = horse.Horse("B12", "red")
-        self.horse_red_2 = horse.Horse("M12", "red")
-        self.officer_red_1 = officer.Officer("C12", "red")
-        self.officer_red_2 = officer.Officer("L12", "red")
-        self.tara_red_1 = tara.Tara("A12", "red")
-        self.tara_red_2 = tara.Tara("N12", "red")
-        self.peshka_red_1 = peshka.Peshka("A11", "red")
-        self.peshka_red_2 = peshka.Peshka("B11", "red")
-        self.peshka_red_3 = peshka.Peshka("C11", "red")
-        self.peshka_red_4 = peshka.Peshka("D11", "red")
-        self.peshka_red_5 = peshka.Peshka("K11", "red")
-        self.peshka_red_6 = peshka.Peshka("L11", "red")
-        self.peshka_red_7 = peshka.Peshka("M11", "red")
-        self.peshka_red_8 = peshka.Peshka("N11", "red")
+        self.king_red = King("D12", "red")
+        self.queen_red = Queen("K12", "red")
+        self.horse_red_1 = Horse("B12", "red")
+        self.horse_red_2 = Horse("M12", "red")
+        self.officer_red_1 = Officer("C12", "red")
+        self.officer_red_2 = Officer("L12", "red")
+        self.tara_red_1 = Tara("A12", "red")
+        self.tara_red_2 = Tara("N12", "red")
+        self.peshka_red_1 = Peshka("A11", "red")
+        self.peshka_red_2 = Peshka("B11", "red")
+        self.peshka_red_3 = Peshka("C11", "red")
+        self.peshka_red_4 = Peshka("D11", "red")
+        self.peshka_red_5 = Peshka("K11", "red")
+        self.peshka_red_6 = Peshka("L11", "red")
+        self.peshka_red_7 = Peshka("M11", "red")
+        self.peshka_red_8 = Peshka("N11", "red")
         self.red = [self.king_red, self.queen_red, self.horse_red_1, self.horse_red_2,
                     self.officer_red_1, self.officer_red_2, self.tara_red_1, self.tara_red_2,
                     self.peshka_red_1, self.peshka_red_2, self.peshka_red_3, self.peshka_red_4,

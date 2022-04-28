@@ -1,12 +1,12 @@
-import consts
-
+# import .consts
+from .consts import *
 
 class Figure:
     def __init__(self, cell, color):
         self.color = color
         self.letter = cell[0]
         self.number = cell[1:len(cell)]
-        self.cell = consts.f(self.letter + self.number)
+        self.cell = f(self.letter + self.number)
 
     def __check__(self, cell, white, black, red, grey):
         dots_save_temp = []
@@ -33,4 +33,4 @@ class Figure:
 
     @staticmethod
     def __turn_dir__(d):
-        return consts.TURN_DIR[d]
+        return TURN_DIR[d]

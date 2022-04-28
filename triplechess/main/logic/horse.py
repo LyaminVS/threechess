@@ -1,5 +1,5 @@
-import consts
-
+# import consts
+from .consts import *
 
 class Horse:
 
@@ -18,11 +18,11 @@ class Horse:
     def __dots__(self, white, black, red, grey):
 
         def check(position, str1, str2, str3):
-            cell = getattr(getattr(consts.BOARD_RULES, position), str1)
+            cell = getattr(getattr(BOARD_RULES, position), str1)
             if cell[0] == "": return ""
-            cell = getattr(getattr(consts.BOARD_RULES, cell[0]), str2)
+            cell = getattr(getattr(BOARD_RULES, cell[0]), str2)
             if cell[0] == "": return ""
-            cell = getattr(getattr(consts.BOARD_RULES, cell[0]), str3)
+            cell = getattr(getattr(BOARD_RULES, cell[0]), str3)
 
             return cell[0]
 

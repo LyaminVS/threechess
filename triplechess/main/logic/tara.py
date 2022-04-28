@@ -1,4 +1,6 @@
-import consts
+# import consts
+from .consts import *
+
 
 class Tara:
     def __init__(self, cell, color):
@@ -28,19 +30,19 @@ class Tara:
                 return len(mas)
 
         numbers = []
-        if self.letter in consts.LETTERS_1:
+        if self.letter in LETTERS_1:
             numbers = ['12', '11', '10', '9', '4', '3', '2', '1']
-        if self.letter in consts.LETTERS_2:
+        if self.letter in LETTERS_2:
             numbers = ['1', '2', '3', '4', '5', '6', '7', '8']
-        if self.letter in consts.LETTERS_3:
+        if self.letter in LETTERS_3:
             numbers = ['8', '7', '6', '5', '9', '10', '11', '12']
 
         letters = []
-        if self.number in consts.NUMBERS_1:
+        if self.number in NUMBERS_1:
             letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-        if self.number in consts.NUMBERS_2:
+        if self.number in NUMBERS_2:
             letters = ['H', 'G', 'F', 'E', 'K', 'L', 'M', 'N']
-        if self.number in consts.NUMBERS_3:
+        if self.number in NUMBERS_3:
             letters = ['A', 'B', 'C', 'D', 'K', 'L', 'M', 'N']
         dots = []
         dots_eat = []

@@ -1,8 +1,8 @@
-from consts import f
-import figure
+from .consts import f
+# import figure
+from .figure import *
 
-
-class Officer(figure.Figure):
+class Officer(Figure):
     def __init__(self, cell, color):
         super(Officer, self,).__init__(cell, color)
 

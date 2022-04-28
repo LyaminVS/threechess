@@ -1,4 +1,5 @@
-import consts
+# import consts
+from .consts import *
 
 class King:
     def __init__(self, cell, color):
@@ -15,14 +16,14 @@ class King:
 
     def __dots__(self, white, black, red, grey):
         cells = []
-        cells += getattr(getattr(consts.BOARD_RULES, self.cell), "top")
-        cells += getattr(getattr(consts.BOARD_RULES, self.cell), "right")
-        cells += getattr(getattr(consts.BOARD_RULES, self.cell), "left")
-        cells += getattr(getattr(consts.BOARD_RULES, self.cell), "bottom")
-        cells += getattr(getattr(consts.BOARD_RULES, self.cell), "right_top")
-        cells += getattr(getattr(consts.BOARD_RULES, self.cell), "right_bottom")
-        cells += getattr(getattr(consts.BOARD_RULES, self.cell), "left_top")
-        cells += getattr(getattr(consts.BOARD_RULES, self.cell), "left_bottom")
+        cells += getattr(getattr(BOARD_RULES, self.cell), "top")
+        cells += getattr(getattr(BOARD_RULES, self.cell), "right")
+        cells += getattr(getattr(BOARD_RULES, self.cell), "left")
+        cells += getattr(getattr(BOARD_RULES, self.cell), "bottom")
+        cells += getattr(getattr(BOARD_RULES, self.cell), "right_top")
+        cells += getattr(getattr(BOARD_RULES, self.cell), "right_bottom")
+        cells += getattr(getattr(BOARD_RULES, self.cell), "left_top")
+        cells += getattr(getattr(BOARD_RULES, self.cell), "left_bottom")
 
         dots = []
         dots_eat = []
