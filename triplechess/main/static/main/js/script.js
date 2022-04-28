@@ -47,7 +47,6 @@ window.onload = function() {
             set_cell_picture(board, grey_circle, letter, number)
         }
     }
-    test_ajax()
 
  };
 
@@ -57,18 +56,15 @@ $(document).on("click", ".cell_item", function() {
     let id = $(this).attr('id')
     let letter = id.slice(0, 1)
     let number = id.slice(1)
-    send_turn(letter, number)
+    get_dots(letter, number)
 });
-//    remove_cell_picture($(".cell_itemA1"));});
-//
-//remove_cell_picture($(".cell_itemA1"))
 
 
 
-function send_turn(letter, number){
+function get_dots(letter, number){
     $.ajax({
         type: "POST",
-        url: "test/",
+        url: "get_dots/",
         headers: {
             "X-CSRFTOKEN": "{{ csrf_token }}"
         },
