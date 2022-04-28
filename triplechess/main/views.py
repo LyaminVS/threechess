@@ -2,10 +2,14 @@ from django.shortcuts import render
 # Create your views here.
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-import logic.board as logic
-
-board = logic.Board()
-
+import sys
+# print(sys.path)
+# sys.path.insert(0, '/logic')
+# import logic.board as board
+# from logic import board
+#
+# board = logic.Board()
+#
 def index(request):
     return render(request, 'main/main.html')
 
@@ -22,7 +26,7 @@ def get_dots(request):
     data = request.POST
     letter = data["letter"]
     number = data["number"]
-    dots = logic.board.board.get_dots(letter + number)
-    print(dots)
+    # dots = board.board.get_dots(letter + number)
+    # print(dots)
 
 
