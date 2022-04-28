@@ -53,19 +53,19 @@ class Tara:
                 if letters[i] + self.number in white:
                     if self.color != "white":
                         dots_eat.append(letters[i] + self.number)
-                        break
+                    break
                 elif letters[i] + self.number in black:
                     if self.color != "black":
                         dots_eat.append(letters[i] + self.number)
-                        break
+                    break
                 elif letters[i] + self.number in red:
                     if self.color != "red":
                         dots_eat.append(letters[i] + self.number)
-                        break
+                    break
                 elif letters[i] + self.number in grey:
                     if self.color != "grey":
                         dots_eat.append(letters[i] + self.number)
-                        break
+                    break
                 else:
                     dots.append(letters[i] + self.number)
 
@@ -74,19 +74,19 @@ class Tara:
                 if self.letter + numbers[i] in white:
                     if self.color != "white":
                         dots_eat.append(self.letter + numbers[i])
-                        break
+                    break
                 elif self.letter + numbers[i] in black:
                     if self.color != "black":
                         dots_eat.append(self.letter + numbers[i])
-                        break
+                    break
                 elif self.letter + numbers[i] in red:
                     if self.color != "red":
                         dots_eat.append(self.letter + numbers[i])
-                        break
+                    break
                 elif self.letter + numbers[i] in grey:
                     if self.color != "grey":
                         dots_eat.append(self.letter + numbers[i])
-                        break
+                    break
                 else:
                     dots.append(self.letter + numbers[i])
 
