@@ -87,20 +87,40 @@ class Board:
                 dots = figure.__dots__(self.white_cells, self.black_cells, self.red_cells, [])
                 return dots
 
+    def __transform_to_dict__(self):
+        array = []
+        for elem in self.all_figures:
+            _type = ""
+            _color = "white"
+            if (type(elem) == King):
+                _type = "King"
+            if (type(elem) == Peshka):
+                _type = "Peshka"
+            if (type(elem) == Queen):
+                _type = "Queen"
+            if (type(elem) == Tara):
+                _type = "Tara"
+            if (type(elem) == Officer):
+                _type = "Officer"
+            if (type(elem) == Horse):
+                _type = "Horse"
+            array.append([_type, elem.color, elem.letter + elem.number])
+        return array
+
     def __king_is_checked__(self, color):
         king_position = ""
         figures_1 = []
         figures_2 = []
 
-        if color=="white":
+        if color == "white":
             king_position = self.king_white.cell
             figures_1 = self.black
             figures_2 = self.red
-        elif color=="black":
+        elif color == "black":
             king_position = self.king_black.cell
             figures_1 = self.white
             figures_2 = self.red
-        elif color=="red":
+        elif color == "red":
             king_position = self.king_red.cell
             figures_1 = self.black
             figures_2 = self.white

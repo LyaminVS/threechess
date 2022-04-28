@@ -33,6 +33,6 @@ def get_dots(request):
 
 @csrf_exempt
 def get_board(request):
-    print(132)
+    print(board.__transform_to_dict__())
     return JsonResponse({"board": board.all_figures})
 
