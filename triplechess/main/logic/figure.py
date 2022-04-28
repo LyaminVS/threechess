@@ -5,7 +5,7 @@ class Figure:
     def __init__(self, cell, color):
         self.color = color
         self.letter = cell[0]
-        self.number = cell[1::len(cell)]
+        self.number = cell[1:len(cell)]
         self.cell = consts.f(self.letter + self.number)
 
     def __check__(self, cell, white, black, red, grey):

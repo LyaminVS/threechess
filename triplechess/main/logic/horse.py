@@ -5,7 +5,7 @@ class Horse:
 
     def __init__(self, cell, color):
         self.letter = cell[0]
-        self.number = cell[1::len(cell)]
+        self.number = cell[1:len(cell)]
         self.cell = cell
         self.color = color
 
