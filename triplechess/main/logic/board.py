@@ -91,11 +91,11 @@ class Board:
             king_position = self.king_white.cell
             figures_1 = self.black
             figures_2 = self.red
-        if color=="black":
+        else if color=="black":
             king_position = self.king_black.cell
             figures_1 = self.white
             figures_2 = self.red
-        if color=="red":
+        else if color=="red":
             king_position = self.king_red.cell
             figures_1 = self.black
             figures_2 = self.white
