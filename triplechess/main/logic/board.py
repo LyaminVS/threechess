@@ -91,6 +91,7 @@ class Board:
         figures_1 = []
         figures_2 = []
 
+
         if color=="white":
             king_position = self.king_white.cell
             figures_1 = self.black
