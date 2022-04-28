@@ -27,7 +27,9 @@ def get_dots(request):
     data = request.POST
     letter = data["letter"]
     number = data["number"]
-    dots = board.board.get_dots(letter + number)
+    dots = board.get_dots(letter + number)
     print(dots)
+    return JsonResponse({"code": 10000, "content": ""})
+
 
 
