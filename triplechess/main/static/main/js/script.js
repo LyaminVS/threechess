@@ -5,6 +5,19 @@ function remove_cell_picture(cell) {
     cell.remove()
 }
 
+function get_board(){
+    $.ajax({
+        type: "POST",
+        url: "get_board/",
+        headers: {
+            "X-CSRFTOKEN": "{{ csrf_token }}"
+        },
+        success: function(data){
+            console.log(data.board)
+        }
+    });
+}
+
 window.onload = function() {
     let grey_circle = '/static/main/img/peshka_1.png';
     let letters_1 = ['A', 'B', 'C', 'D'];
@@ -14,6 +27,7 @@ window.onload = function() {
     let numbers_2 = ['5', '6', '7', '8']
     let numbers_3 = ['9', '10', '11', '12']
     let board = $(".board");
+    get_board();
     for (let i = 0; i < 4; i++) {
         let letter = letters_1[i]
         for (let i = 0; i < 4; i++) {

@@ -1,4 +1,3 @@
-# import board_rules
 from .board_rules import BoardRules
 
 LETTERS_1 = ['A', 'B', 'C', 'D']

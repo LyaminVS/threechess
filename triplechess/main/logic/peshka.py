@@ -1,6 +1,4 @@
-# import consts
 from .consts import f
-# import figure
 from .figure import *
 from .consts import *
 

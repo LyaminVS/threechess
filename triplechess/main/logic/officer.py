@@ -1,6 +1,6 @@
 from .consts import f
-# import figure
 from .figure import *
+
 
 class Officer(Figure):
     def __init__(self, cell, color):

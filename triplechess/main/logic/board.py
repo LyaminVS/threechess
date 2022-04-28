@@ -1,9 +1,3 @@
-# import tara
-# import officer
-# import peshka
-# import queen
-# import king
-# import horse
 from .tara import Tara as Tara
 from .officer import Officer as Officer
 from .peshka import Peshka as Peshka
@@ -92,6 +86,7 @@ class Board:
             if figure.letter + figure.number == cell:
                 dots = figure.__dots__(self.white_cells, self.black_cells, self.red_cells, [])
                 return dots
+
     def __king_is_checked__(self, color):
         king_position = ""
         figures_1 = []

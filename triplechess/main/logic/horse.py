@@ -1,4 +1,3 @@
-# import consts
 from .consts import *
 
 class Horse:

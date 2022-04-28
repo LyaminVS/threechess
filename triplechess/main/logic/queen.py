@@ -1,5 +1,3 @@
-# import officer
-# import tara
 from .officer import *
 from .tara import *
 from .consts import *
