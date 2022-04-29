@@ -1,5 +1,6 @@
 from .consts import *
 
+
 class Figure:
     def __init__(self, cell, color):
         self.color = color
@@ -33,3 +34,8 @@ class Figure:
     @staticmethod
     def __turn_dir__(d):
         return TURN_DIR[d]
+
+    def change_cell(self, cell):
+        self.letter = cell[0]
+        self.number = cell[1:len(cell)]
+        self.cell = f(self.letter + self.number)

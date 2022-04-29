@@ -3,6 +3,7 @@ function set_cell_picture(board, path, letter, number, add_class = false){
     if (add_class){
         img_class = add_class + img_class
     }
+    img_class = img_class.trim()
     board.after("<img src = '" + path + "' id='" + letter + number + "' class='" + img_class + letter + number + "'>");
 }
 function remove_cell_picture(letter, number) {
@@ -50,6 +51,10 @@ function get_board(board){
     });
 }
 
+function clear_board(){
+    $(".cell_item").remove()
+}
+
 window.onload = function() {
     let grey_circle = '/static/main/img/peshka_white.png';
     let letters_1 = ['A', 'B', 'C', 'D'];
@@ -65,10 +70,12 @@ window.onload = function() {
 
 
 $(document).on("click", ".cell_item", function() {
-    let id = $(this).attr('id')
-    let letter = id.slice(0, 1)
-    let number = id.slice(1)
-    get_dots(letter, number)
+    if (!($(this).attr("class").split(" ").includes("point"))){
+        let id = $(this).attr('id')
+        let letter = id.slice(0, 1)
+        let number = id.slice(1)
+        get_dots(letter, number)
+    }
 });
 
 
@@ -98,3 +105,27 @@ function get_dots(letter, number){
         }
     });
  }
+
+$(document).on("click", ".point", function() {
+    cell = $(this).attr("id")
+    $(".point").remove()
+    $.ajax({
+        type: "POST",
+        url: "change_position/",
+        headers: {
+            "X-CSRFTOKEN": "{{ csrf_token }}"
+        },
+        data: {
+            "cell": cell,
+        },
+        success: function(data){
+            let old_letter = data["old_cell"].slice(0, 1)
+            let old_number = data["old_cell"].slice(1)
+            let letter = data["cell"].slice(0, 1)
+            let number = data["cell"].slice(1)
+            remove_cell_picture(old_letter, old_number)
+            path = img_from_type(data["type"], data["color"])
+            set_cell_picture($(".board"), path, letter, number)
+        }
+    });
+});

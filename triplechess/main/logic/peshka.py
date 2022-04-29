@@ -1,6 +1,6 @@
-from .consts import f
 from .figure import *
 from .consts import *
+
 
 class Peshka(Figure):
     def __init__(self, cell, color, on_road=False):
@@ -8,6 +8,7 @@ class Peshka(Figure):
         self.__div_cells__()
         self.__first_n_zero_cells__()
         self.on_road = on_road
+        self.type = "Peshka"
 
     def __first_n_zero_cells__(self):
         self.first_red = []
@@ -66,7 +67,8 @@ class Peshka(Figure):
             dots += dots_temp
             dots_eat += dots_eat_temp
             if self.cell.cell[0] in self.first_white:
-                dots_eat_temp, dots_temp, dots_save_temp = self.__check__(f(self.cell.top[0]).top[0], white, black, red, grey)
+                dots_eat_temp, dots_temp, dots_save_temp = self.__check__(f(self.cell.top[0]).top[0], white, black, red,
+                                                                          grey)
                 dots += dots_temp
             if self.cell.cell[0] in self.zero_black or self.cell.cell[0] in self.zero_red:
                 dots_replace.append(self.cell.cell[0])
@@ -86,7 +88,8 @@ class Peshka(Figure):
                 dots += dots_temp
                 dots_eat += dots_eat_temp
                 if self.cell.cell[0] in self.first_black:
-                    dots_eat_temp, dots_temp, dots_save_temp = self.__check__(f(self.cell.bottom[0]).bottom[0], white, black,
+                    dots_eat_temp, dots_temp, dots_save_temp = self.__check__(f(self.cell.bottom[0]).bottom[0], white,
+                                                                              black,
                                                                               red, grey)
                     dots += dots_temp
         if self.color == "red":
@@ -104,7 +107,8 @@ class Peshka(Figure):
                 dots += dots_temp
                 dots_eat += dots_eat_temp
                 if self.cell.cell[0] in self.first_red:
-                    dots_eat_temp, dots_temp, dots_save_temp = self.__check__(f(self.cell.bottom[0]).bottom[0], white, black,
+                    dots_eat_temp, dots_temp, dots_save_temp = self.__check__(f(self.cell.bottom[0]).bottom[0], white,
+                                                                              black,
                                                                               red, grey)
                     dots += dots_temp
         return dots, dots_eat, dots_replace

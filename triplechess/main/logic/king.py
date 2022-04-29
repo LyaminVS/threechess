@@ -1,5 +1,6 @@
 from .consts import *
 
+
 class King:
     def __init__(self, cell, color):
         self.letter = cell[0]
@@ -7,6 +8,7 @@ class King:
         self.cell = cell
         self.color = color
         self.is_walked = False
+        self.type = "King"
 
     def __transform_position(self, cell):
         self.letter = cell[0]
@@ -41,7 +43,4 @@ class King:
                     dots_eat.append(cell)
             elif cell != "":
                 dots.append(cell)
-
-
-
         return dots, dots_eat

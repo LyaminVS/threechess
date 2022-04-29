@@ -1,29 +1,30 @@
 from .consts import *
 
-class Horse:
 
+class Horse:
     def __init__(self, cell, color):
         self.letter = cell[0]
         self.number = cell[1:len(cell)]
         self.cell = cell
         self.color = color
+        self.type = "Horse"
 
     def __transform_position(self, cell):
         self.letter = cell[0]
         self.number = cell[1::len(cell)]
         self.cell = cell
 
-
     def __dots__(self, white, black, red, grey):
 
         def check(position, str1, str2, str3):
-            cell = getattr(getattr(BOARD_RULES, position), str1)
-            if cell[0] == "": return ""
-            cell = getattr(getattr(BOARD_RULES, cell[0]), str2)
-            if cell[0] == "": return ""
-            cell = getattr(getattr(BOARD_RULES, cell[0]), str3)
-
-            return cell[0]
+            c = getattr(getattr(BOARD_RULES, position), str1)
+            if c[0] == "":
+                return ""
+            c = getattr(getattr(BOARD_RULES, c[0]), str2)
+            if c[0] == "":
+                return ""
+            c = getattr(getattr(BOARD_RULES, c[0]), str3)
+            return c[0]
 
         dots = []
         dots_eat = []
@@ -51,7 +52,5 @@ class Horse:
                     dots_eat.append(cell)
             elif cell != "":
                 dots.append(cell)
-
-
 
         return dots, dots_eat

@@ -9,12 +9,12 @@ class Tara:
         self.cell = cell
         self.color = color
         self.is_walked = False
+        self.type = "Tara"
 
     def __transform_position(self, cell):
         self.letter = cell[0]
         self.number = cell[1::len(cell)]
         self.cell = cell
-
 
     # метод, который возвращает два массива:
     # массив1 - массив точек, на которые можно ходить
@@ -23,10 +23,10 @@ class Tara:
 
     def __dots__(self, white, black, red, grey):
 
-        def check(step, mas):
-            if step==-1:
+        def check(flag, mas):
+            if flag == -1:
                 return -1
-            if step==1:
+            if flag == 1:
                 return len(mas)
 
         numbers = []
@@ -49,7 +49,7 @@ class Tara:
         index_letter = letters.index(self.letter)
         index_number = numbers.index(self.number)
         for step in range(-1, 2, 2):
-            for i in range(index_letter+step, check(step, letters), step):
+            for i in range(index_letter + step, check(step, letters), step):
                 if letters[i] + self.number in white:
                     if self.color != "white":
                         dots_eat.append(letters[i] + self.number)
@@ -70,7 +70,7 @@ class Tara:
                     dots.append(letters[i] + self.number)
 
         for step in range(-1, 2, 2):
-            for i in range(index_number+step, check(step, numbers), step):
+            for i in range(index_number + step, check(step, numbers), step):
                 if self.letter + numbers[i] in white:
                     if self.color != "white":
                         dots_eat.append(self.letter + numbers[i])
