@@ -1,12 +1,12 @@
 function set_cell_picture(board, path, letter, number, add_class = false){
-    let img_class = "cell_item cell_item"
+    let img_class = " cell_item cell_item"
     if (add_class){
         img_class = add_class + img_class
     }
     board.after("<img src = '" + path + "' id='" + letter + number + "' class='" + img_class + letter + number + "'>");
 }
-function remove_cell_picture(cell) {
-    cell.remove()
+function remove_cell_picture(letter, number) {
+    $("#" + letter + number).remove()
 }
 
 function img_from_type(type, color){
@@ -86,6 +86,7 @@ function get_dots(letter, number){
         },
         success: function(data){
             let grey_circle = '/static/main/img/grey_circle.png';
+            $(".point").remove()
             dots = data.dots
             dots[0].forEach(dot => {
                 let letter = dot.slice(0, 1)

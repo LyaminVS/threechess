@@ -28,12 +28,10 @@ def get_dots(request):
     letter = data["letter"]
     number = data["number"]
     dots = board.get_dots(letter + number)
-    print(dots)
     return JsonResponse({"dots": dots})
 
 
 @csrf_exempt
 def get_board(request):
-    # print(board.__transform_to_dict__())
     return JsonResponse({"figures": board.__transform_to_dict__()})
 
