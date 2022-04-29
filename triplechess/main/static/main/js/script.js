@@ -93,6 +93,24 @@ function reset(){
     });
 }
 
+function paint_dots(dots){
+    let red_circle = '/static/main/img/red_circle.png'
+    let grey_circle = '/static/main/img/grey_circle.png';
+    let green_circle = '/static/main/img/green_circle.png'
+    dots[0].forEach(dot => {
+        let letter = dot.slice(0, 1)
+        let number = dot.slice(1)
+        let board = $(".board");
+        set_cell_picture(board, grey_circle, letter, number, "point")
+    });
+    dots[1].forEach(dot => {
+        let letter = dot.slice(0, 1)
+        let number = dot.slice(1)
+        let board = $(".board");
+        set_cell_picture(board, red_circle, letter, number, "eat_point point", false)
+    });
+}
+
 function get_dots(letter, number){
     $.ajax({
         type: "POST",
@@ -105,23 +123,9 @@ function get_dots(letter, number){
             'number': number,
         },
         success: function(data){
-            let red_circle = '/static/main/img/red_circle.png'
-            let grey_circle = '/static/main/img/grey_circle.png';
-            let green_circle = '/static/main/img/green_circle.png'
             $(".point").remove()
             dots = data.dots
-            dots[0].forEach(dot => {
-                let letter = dot.slice(0, 1)
-                let number = dot.slice(1)
-                let board = $(".board");
-                set_cell_picture(board, grey_circle, letter, number, "point")
-            });
-            dots[1].forEach(dot => {
-                let letter = dot.slice(0, 1)
-                let number = dot.slice(1)
-                let board = $(".board");
-                set_cell_picture(board, red_circle, letter, number, "eat_point point", false)
-            });
+            paint_dots(dots)
         }
     });
  }
@@ -179,4 +183,16 @@ $(document).on("click", ".eat_point", function(){
             set_cell_picture($(".board"), path, letter, number)
         }
     });
+})
+
+$(document).on("click", ".board", function(){
+    $(".point").remove()
+    $.ajax({
+        type: "POST",
+        url: "reset_dots/",
+        headers: {
+            "X-CSRFTOKEN": "{{ csrf_token }}"
+        },
+    });
+
 })

@@ -35,3 +35,9 @@ def get_board(request):
 def reset(request):
     game.reset()
     return JsonResponse({})
+
+
+@csrf_exempt
+def reset_dots(request):
+    game.selected_figure = None
+    return JsonResponse({})
