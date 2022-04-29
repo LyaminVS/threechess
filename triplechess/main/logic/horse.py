@@ -26,14 +26,24 @@ class Horse(Figure):
 
         dots = []
         dots_eat = []
-        cells = [check(self.cell_str, "top", "top", "right"),
-                 check(self.cell_str, "top", "top", "left"),
-                 check(self.cell_str, "right", "right", "top"),
-                 check(self.cell_str, "right", "right", "bottom"),
-                 check(self.cell_str, "bottom", "bottom", "right"),
-                 check(self.cell_str, "bottom", "bottom", "left"),
-                 check(self.cell_str, "left", "left", "top"),
-                 check(self.cell_str, "left", "left", "bottom")]
+        if (self.number == "9" or self.number == "5") and self.letter in LETTERS_3:
+            cells = [check(self.cell_str, "top", "top", "right"),
+                     check(self.cell_str, "top", "top", "left"),
+                     check(self.cell_str, "right", "right", "top"),
+                     check(self.cell_str, "right", "right", "bottom"),
+                     check(self.cell_str, "bottom", "top", "right"),
+                     check(self.cell_str, "bottom", "top", "left"),
+                     check(self.cell_str, "left", "left", "top"),
+                     check(self.cell_str, "left", "left", "bottom")]
+        else:
+            cells = [check(self.cell_str, "top", "top", "right"),
+                     check(self.cell_str, "top", "top", "left"),
+                     check(self.cell_str, "right", "right", "top"),
+                     check(self.cell_str, "right", "right", "bottom"),
+                     check(self.cell_str, "bottom", "bottom", "right"),
+                     check(self.cell_str, "bottom", "bottom", "left"),
+                     check(self.cell_str, "left", "left", "top"),
+                     check(self.cell_str, "left", "left", "bottom")]
 
         for cell in cells:
             if cell in white:
