@@ -77,12 +77,14 @@ class Peshka(Figure):
             if self.cell.cell[0] in self.zero_white or self.cell.cell[0] in self.zero_red:
                 dots_replace.append(self.cell.cell[0])
                 self.on_road = True
-            if self.cell.cell in self.red:
+            if self.cell.cell[0] in self.red:
+
                 dots_temp, dots_eat_temp = self.__check_3_cells__("top", "left_top", "right_top", white, black, red,
                                                                   grey)
                 dots += dots_temp
                 dots_eat += dots_eat_temp
             else:
+
                 dots_temp, dots_eat_temp = self.__check_3_cells__("bottom", "left_bottom", "right_bottom", white, black,
                                                                   red, grey)
                 dots += dots_temp
@@ -96,7 +98,7 @@ class Peshka(Figure):
             if self.cell.cell[0] in self.zero_black or self.cell.cell[0] in self.zero_white:
                 dots_replace.append(self.cell.cell[0])
                 self.on_road = True
-            if self.cell.cell in self.black:
+            if self.cell.cell[0] in self.black:
                 dots_temp, dots_eat_temp = self.__check_3_cells__("top", "left_top", "right_top", white, black, red,
                                                                   grey)
                 dots += dots_temp
