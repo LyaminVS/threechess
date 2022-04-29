@@ -107,6 +107,7 @@ function get_dots(letter, number){
         success: function(data){
             let red_circle = '/static/main/img/red_circle.png'
             let grey_circle = '/static/main/img/grey_circle.png';
+            let green_circle = '/static/main/img/green_circle.png'
             $(".point").remove()
             dots = data.dots
             dots[0].forEach(dot => {
@@ -121,7 +122,6 @@ function get_dots(letter, number){
                 let board = $(".board");
                 set_cell_picture(board, red_circle, letter, number, "eat_point point", false)
             });
-            
         }
     });
  }

@@ -7,9 +7,12 @@ class Game:
         self.selected_figure = None
 
     def get_dots(self, cell):
+        if self.selected_figure and self.selected_figure.letter + self.selected_figure.number == cell:
+            self.selected_figure = None
+            return [[], [], []]
         for figure in self.board.all_figures:
             if figure.letter + figure.number == cell:
-                dots = figure.__dots__(self.board.white_cells, self.board.black_cells, self.board.red_cells, [])
+                dots = self.board.__update_dots__(figure)
                 self.selected_figure = figure
                 return dots
 

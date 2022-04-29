@@ -87,24 +87,162 @@ class Board:
         figures_2 = []
 
         if color == "white":
-            king_position = self.king_white.cell
+            king_position = self.king_white.cell_str
             figures_1 = self.black
             figures_2 = self.red
         elif color == "black":
-            king_position = self.king_black.cell
+            king_position = self.king_black.cell_str
             figures_1 = self.white
             figures_2 = self.red
         elif color == "red":
-            king_position = self.king_red.cell
+            king_position = self.king_red.cell_str
             figures_1 = self.black
             figures_2 = self.white
 
         for elem in figures_1:
-            if king_position in elem.__dots__(self.white_cells, self.black_cells, self.red_cells, self.grey_cells)[1]:
-                return True
+            if (elem.cell_str in self.red_cells) and (elem.color=="red") \
+                    or (elem.cell_str in self.black_cells) and (elem.color == "black") \
+                    or (elem.cell_str in self.white_cells) and (elem.color == "white"):
+               if king_position in elem.__dots__(self.white_cells, self.black_cells, self.red_cells, self.grey_cells)[1]:
+                    return True
         for elem in figures_2:
-            if king_position in elem.__dots__(self.white_cells, self.black_cells, self.red_cells, self.grey_cells)[1]:
-                return True
+            if (elem.cell_str in self.red_cells) and (elem.color=="red") \
+                    or (elem.cell_str in self.black_cells) and (elem.color == "black") \
+                    or (elem.cell_str in self.white_cells) and (elem.color == "white"):
+                if king_position in elem.__dots__(self.white_cells, self.black_cells, self.red_cells, self.grey_cells)[1]:
+                    return True
         return False
 
+    def __update_dots__(self, figure):
+        dots = figure.__dots__(self.white_cells, self.black_cells, self.red_cells, self.grey_cells)
+        cell = figure.cell_str
+        cell_temp = cell
+        i = 0
+        letter = figure.letter
+        number = figure.number
+        while i < (len(dots[0])):
+            if figure.color == "white":
+                self.white_cells.remove(cell_temp)
+                self.white_cells.append(dots[0][i])
+                figure.change_cell(dots[0][i])
+                cell_temp = dots[0][i]
+                if self.__king_is_checked__(figure.color):
+                    del dots[0][i]
+                    i -= 1
+            if figure.color == "black":
+                self.black_cells.remove(cell_temp)
+                self.black_cells.append(dots[0][i])
+                figure.change_cell(dots[0][i])
+                cell_temp = dots[0][i]
+                if self.__king_is_checked__(figure.color):
+                    del dots[0][i]
+                    i -= 1
+            if figure.color == "red":
+                self.red_cells.remove(cell_temp)
+                self.red_cells.append(dots[0][i])
+                figure.change_cell(dots[0][i])
+                cell_temp = dots[0][i]
+                if self.__king_is_checked__(figure.color):
+                    del dots[0][i]
+                    i -= 1
+            i += 1
+        figure.change_cell(cell)
+        if figure.color == "white":
+            self.white_cells.remove(cell_temp)
+            self.white_cells.append(cell)
+        if figure.color == "black":
+            self.black_cells.remove(cell_temp)
+            self.black_cells.append(cell)
+        if figure.color == "red":
+            self.red_cells.remove(cell_temp)
+            self.red_cells.append(cell)
 
+        cell_temp = cell
+        k = ""
+        i = 0
+        flag = 0
+        while i < (len(dots[1])):
+            if figure.color == "white":
+                self.white_cells.remove(cell_temp)
+                self.white_cells.append(dots[1][i])
+                figure.change_cell(dots[1][i])
+                if dots[1][i] in self.black_cells:
+                    self.black_cells.remove(dots[1][i])
+                    k = "black"
+                if dots[1][i] in self.red_cells:
+                    self.red_cells.remove(dots[1][i])
+                    k = "red"
+                cell_temp = dots[1][i]
+                if self.__king_is_checked__(figure.color):
+                    flag = 1
+
+                if k == "black":
+                    self.black_cells.append(dots[1][i])
+                    k = ""
+                if k == "red":
+                    self.red_cells.append(dots[1][i])
+                    k = ""
+                if flag == 1:
+                    flag = 0
+                    del dots[1][i]
+                    i -= 1
+            if figure.color == "black":
+                self.black_cells.remove(cell_temp)
+                self.black_cells.append(dots[1][i])
+                figure.change_cell(dots[1][i])
+                if dots[1][i] in self.white_cells:
+                    self.white_cells.remove(dots[1][i])
+                    k = "white"
+                if dots[1][i] in self.red_cells:
+                    self.red_cells.remove(dots[1][i])
+                    k = "red"
+                cell_temp = dots[1][i]
+                if self.__king_is_checked__(figure.color):
+                    flag = 1
+                if k == "white":
+                    self.white_cells.append(dots[1][i])
+                    k = ""
+                if k == "red":
+                    self.red_cells.append(dots[1][i])
+                    k = ""
+                if flag == 1:
+                    flag = 0
+                    del dots[1][i]
+                    i -= 1
+
+            if figure.color == "red":
+                self.red_cells.remove(cell_temp)
+                self.red_cells.append(dots[1][i])
+                figure.change_cell(dots[1][i])
+                if dots[1][i] in self.black_cells:
+                    self.black_cells.remove(dots[1][i])
+                    k = "black"
+                if dots[1][i] in self.white_cells:
+                    self.white_cells.remove(dots[1][i])
+                    k = "white"
+                cell_temp = dots[1][i]
+                if self.__king_is_checked__(figure.color):
+                    flag = 1
+                if k == "black":
+                    self.black_cells.append(dots[1][i])
+                    k = ""
+                if k == "white":
+                    self.white_cells.append(dots[1][i])
+                    k = ""
+                if flag == 1:
+                    flag = 0
+                    del dots[1][i]
+                    i -= 1
+
+            i += 1
+        figure.change_cell(cell)
+        if figure.color == "white":
+            self.white_cells.remove(cell_temp)
+            self.white_cells.append(cell)
+        if figure.color == "black":
+            self.black_cells.remove(cell_temp)
+            self.black_cells.append(cell)
+        if figure.color == "red":
+            self.red_cells.remove(cell_temp)
+            self.red_cells.append(cell)
+        return dots
