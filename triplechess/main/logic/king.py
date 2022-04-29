@@ -1,30 +1,28 @@
 from .consts import *
+from .figure import Figure
 
 
-class King:
+class King(Figure):
     def __init__(self, cell, color):
-        self.letter = cell[0]
-        self.number = cell[1:len(cell)]
-        self.cell = cell
-        self.color = color
+        super(King, self).__init__(cell, color)
         self.is_walked = False
         self.type = "King"
 
     def __transform_position(self, cell):
         self.letter = cell[0]
         self.number = cell[1::len(cell)]
-        self.cell = cell
+        self.cell_str = cell
 
     def __dots__(self, white, black, red, grey):
         cells = []
-        cells += getattr(getattr(BOARD_RULES, self.cell), "top")
-        cells += getattr(getattr(BOARD_RULES, self.cell), "right")
-        cells += getattr(getattr(BOARD_RULES, self.cell), "left")
-        cells += getattr(getattr(BOARD_RULES, self.cell), "bottom")
-        cells += getattr(getattr(BOARD_RULES, self.cell), "right_top")
-        cells += getattr(getattr(BOARD_RULES, self.cell), "right_bottom")
-        cells += getattr(getattr(BOARD_RULES, self.cell), "left_top")
-        cells += getattr(getattr(BOARD_RULES, self.cell), "left_bottom")
+        cells += getattr(getattr(BOARD_RULES, self.cell_str), "top")
+        cells += getattr(getattr(BOARD_RULES, self.cell_str), "right")
+        cells += getattr(getattr(BOARD_RULES, self.cell_str), "left")
+        cells += getattr(getattr(BOARD_RULES, self.cell_str), "bottom")
+        cells += getattr(getattr(BOARD_RULES, self.cell_str), "right_top")
+        cells += getattr(getattr(BOARD_RULES, self.cell_str), "right_bottom")
+        cells += getattr(getattr(BOARD_RULES, self.cell_str), "left_top")
+        cells += getattr(getattr(BOARD_RULES, self.cell_str), "left_bottom")
 
         dots = []
         dots_eat = []

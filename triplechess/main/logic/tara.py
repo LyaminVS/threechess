@@ -1,20 +1,17 @@
-# import consts
 from .consts import *
+from .figure import Figure
 
 
-class Tara:
+class Tara(Figure):
     def __init__(self, cell, color):
-        self.letter = cell[0]
-        self.number = cell[1:len(cell)]
-        self.cell = cell
-        self.color = color
+        super(Tara, self).__init__(cell, color)
         self.is_walked = False
         self.type = "Tara"
 
     def __transform_position(self, cell):
         self.letter = cell[0]
         self.number = cell[1::len(cell)]
-        self.cell = cell
+        self.cell_str = cell
 
     # метод, который возвращает два массива:
     # массив1 - массив точек, на которые можно ходить

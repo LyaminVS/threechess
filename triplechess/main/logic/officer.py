@@ -3,7 +3,7 @@ from .figure import *
 
 class Officer(Figure):
     def __init__(self, cell, color):
-        super(Officer, self,).__init__(cell, color)
+        super(Officer, self).__init__(cell, color)
         self.type = "Officer"
 
     def __iteration__(self, cell, white, black, red, grey, dots_eat, dots, dots_save, d):

@@ -12,8 +12,8 @@ class Queen(Officer, Tara):
         dots_eat = []
         dots_temp, dots_eat_temp = Officer.__dots__(self, white, black, red, grey)
         dots += dots_temp
-        dots_eat += dots_eat
+        dots_eat += dots_eat_temp
         dots_temp, dots_eat_temp = Tara.__dots__(self, white, black, red, grey)
         dots += dots_temp
-        dots_eat += dots_eat
+        dots_eat += dots_eat_temp
         return dots, dots_eat

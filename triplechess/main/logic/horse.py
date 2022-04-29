@@ -1,18 +1,16 @@
 from .consts import *
+from .figure import Figure
 
 
-class Horse:
+class Horse(Figure):
     def __init__(self, cell, color):
-        self.letter = cell[0]
-        self.number = cell[1:len(cell)]
-        self.cell = cell
-        self.color = color
+        super(Horse, self).__init__(cell, color)
         self.type = "Horse"
 
     def __transform_position(self, cell):
         self.letter = cell[0]
         self.number = cell[1::len(cell)]
-        self.cell = cell
+        self.cell_str = cell
 
     def __dots__(self, white, black, red, grey):
 
@@ -28,14 +26,14 @@ class Horse:
 
         dots = []
         dots_eat = []
-        cells = [check(self.cell, "top", "top", "right"),
-                 check(self.cell, "top", "top", "left"),
-                 check(self.cell, "right", "right", "top"),
-                 check(self.cell, "right", "right", "bottom"),
-                 check(self.cell, "bottom", "bottom", "right"),
-                 check(self.cell, "bottom", "bottom", "left"),
-                 check(self.cell, "left", "left", "top"),
-                 check(self.cell, "left", "left", "bottom")]
+        cells = [check(self.cell_str, "top", "top", "right"),
+                 check(self.cell_str, "top", "top", "left"),
+                 check(self.cell_str, "right", "right", "top"),
+                 check(self.cell_str, "right", "right", "bottom"),
+                 check(self.cell_str, "bottom", "bottom", "right"),
+                 check(self.cell_str, "bottom", "bottom", "left"),
+                 check(self.cell_str, "left", "left", "top"),
+                 check(self.cell_str, "left", "left", "bottom")]
 
         for cell in cells:
             if cell in white:
