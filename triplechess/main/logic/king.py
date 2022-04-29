@@ -8,10 +8,7 @@ class King(Figure):
         self.is_walked = False
         self.type = "King"
 
-    def __transform_position(self, cell):
-        self.letter = cell[0]
-        self.number = cell[1::len(cell)]
-        self.cell_str = cell
+
 
     def __dots__(self, white, black, red, grey):
         cells = []

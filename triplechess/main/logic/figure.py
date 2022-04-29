@@ -9,6 +9,8 @@ class Figure:
         self.number = cell[1:len(cell)]
         self.cell = f(self.letter + self.number)
 
+
+
     def __check__(self, cell, white, black, red, grey):
         dots_save_temp = []
         dots_eat_temp = []
