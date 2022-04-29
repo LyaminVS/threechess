@@ -29,3 +29,9 @@ def get_dots(request):
 @csrf_exempt
 def get_board(request):
     return JsonResponse({"figures": game.__transform_to_array__()})
+
+
+@csrf_exempt
+def reset(request):
+    game.reset()
+    return JsonResponse({})

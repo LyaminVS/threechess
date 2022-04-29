@@ -1,10 +1,14 @@
-function set_cell_picture(board, path, letter, number, add_class = false){
+function set_cell_picture(board, path, letter, number, add_class = false, id = true){
     let img_class = " cell_item cell_item"
     if (add_class){
         img_class = add_class + img_class
     }
+    new_id = ''
+    if (id){
+        new_id = "id='" + letter + number + "'"
+    }
     img_class = img_class.trim()
-    board.after("<img src = '" + path + "' id='" + letter + number + "' class='" + img_class + letter + number + "'>");
+    board.after("<img src = '" + path + "'" + new_id + "class='" + img_class + letter + number + "'>");
 }
 function remove_cell_picture(letter, number) {
     $("#" + letter + number).remove()
@@ -56,6 +60,7 @@ function clear_board(){
 }
 
 window.onload = function() {
+    reset()
     let grey_circle = '/static/main/img/peshka_white.png';
     let letters_1 = ['A', 'B', 'C', 'D'];
     let letters_2 = ['E', 'F', 'G', 'H'];
@@ -78,7 +83,15 @@ $(document).on("click", ".cell_item", function() {
     }
 });
 
-
+function reset(){
+    $.ajax({
+        type: "POST",
+        url: "reset/",
+        headers: {
+            "X-CSRFTOKEN": "{{ csrf_token }}"
+        },
+    });
+}
 
 function get_dots(letter, number){
     $.ajax({
@@ -92,6 +105,7 @@ function get_dots(letter, number){
             'number': number,
         },
         success: function(data){
+            let red_circle = '/static/main/img/red_circle.png'
             let grey_circle = '/static/main/img/grey_circle.png';
             $(".point").remove()
             dots = data.dots
@@ -101,13 +115,50 @@ function get_dots(letter, number){
                 let board = $(".board");
                 set_cell_picture(board, grey_circle, letter, number, "point")
             });
+            dots[1].forEach(dot => {
+                let letter = dot.slice(0, 1)
+                let number = dot.slice(1)
+                let board = $(".board");
+                set_cell_picture(board, red_circle, letter, number, "eat_point point", false)
+            });
             
         }
     });
  }
 
 $(document).on("click", ".point", function() {
-    cell = $(this).attr("id")
+    if (!$(this).attr("class").split(" ").includes("eat_point")){
+        cell = $(this).attr("id")
+        $(".point").remove()
+        $.ajax({
+            type: "POST",
+            url: "change_position/",
+            headers: {
+                "X-CSRFTOKEN": "{{ csrf_token }}"
+            },
+            data: {
+                "cell": cell,
+            },
+            success: function(data){
+                let old_letter = data["old_cell"].slice(0, 1)
+                let old_number = data["old_cell"].slice(1)
+                let letter = data["cell"].slice(0, 1)
+                let number = data["cell"].slice(1)
+                remove_cell_picture(old_letter, old_number)
+                path = img_from_type(data["type"], data["color"])
+                set_cell_picture($(".board"), path, letter, number)
+            }
+        });
+    }
+});
+
+$(document).on("click", ".eat_point", function(){
+    let cell_classes = $(this).attr("class")
+    cell_classes = cell_classes.split(" ")
+    let cell = cell_classes[cell_classes.length - 1].split("cell_item")[1]
+    let letter = cell.slice(0, 1)
+    let number = cell.slice(1)
+    remove_cell_picture(letter, number)
     $(".point").remove()
     $.ajax({
         type: "POST",
@@ -128,4 +179,4 @@ $(document).on("click", ".point", function() {
             set_cell_picture($(".board"), path, letter, number)
         }
     });
-});
+})

@@ -6,3 +6,9 @@
     width: 600px;
     height: 600px;
 }
+
+.eat_point{
+    height: 30px;
+    width: 30px;
+    z-index: 6;
+}

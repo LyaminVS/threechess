@@ -20,6 +20,25 @@ class Game:
         return array
 
     def change_position(self, cell):
+        if cell in self.board.red_cells:
+            self.board.red_cells.remove(cell)
+            for figure in self.board.red:
+                if figure.letter + figure.number == cell:
+                    self.board.red.remove(figure)
+                    self.board.all_figures.remove(figure)
+        if cell in self.board.white_cells:
+            self.board.white_cells.remove(cell)
+            for figure in self.board.white:
+                if figure.letter + figure.number == cell:
+                    self.board.white.remove(figure)
+                    self.board.all_figures.remove(figure)
+        if cell in self.board.black_cells:
+            self.board.black_cells.remove(cell)
+            for figure in self.board.black:
+                if figure.letter + figure.number == cell:
+                    self.board.black.remove(figure)
+                    self.board.all_figures.remove(figure)
+
         old_cell = self.selected_figure.letter + self.selected_figure.number
         self.selected_figure.change_cell(cell)
         figure = self.selected_figure.type
@@ -36,3 +55,5 @@ class Game:
             self.board.red_cells.append(cell)
         return old_cell, figure, color
 
+    def reset(self):
+        self.board = Board()

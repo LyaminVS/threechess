@@ -1,8 +1,8 @@
 .cell_item{
-    height: 30px;
-    width: 30px;
+    height: 27px;
+    width: 27px;
     position: absolute;
-
+    z-index: 5;
 }
 
 .cell_itemA1{
