@@ -66,7 +66,7 @@ class Peshka(Figure):
             dots_temp, dots_eat_temp = self.__check_3_cells__("top", "left_top", "right_top", white, black, red, grey)
             dots += dots_temp
             dots_eat += dots_eat_temp
-            if self.cell.cell[0] in self.first_white:
+            if self.cell.cell[0] in self.first_white and not(self.cell.top[0] in white or self.cell.top[0] in black or self.cell.top[0] in red or self.cell.top[0] in grey):
                 dots_eat_temp, dots_temp, dots_save_temp = self.__check__(f(self.cell.top[0]).top[0], white, black, red,
                                                                           grey)
                 dots += dots_temp
@@ -89,7 +89,7 @@ class Peshka(Figure):
                                                                   red, grey)
                 dots += dots_temp
                 dots_eat += dots_eat_temp
-                if self.cell.cell[0] in self.first_black:
+                if self.cell.cell[0] in self.first_black and not(self.cell.bottom[0] in white or self.cell.bottom[0] in black or self.cell.bottom[0] in red or self.cell.bottom[0] in grey):
                     dots_eat_temp, dots_temp, dots_save_temp = self.__check__(f(self.cell.bottom[0]).bottom[0], white,
                                                                               black,
                                                                               red, grey)
@@ -108,7 +108,7 @@ class Peshka(Figure):
                                                                   red, grey)
                 dots += dots_temp
                 dots_eat += dots_eat_temp
-                if self.cell.cell[0] in self.first_red:
+                if self.cell.cell[0] in self.first_red and not(self.cell.bottom[0] in white or self.cell.bottom[0] in black or self.cell.bottom[0] in red or self.cell.bottom[0] in grey):
                     dots_eat_temp, dots_temp, dots_save_temp = self.__check__(f(self.cell.bottom[0]).bottom[0], white,
                                                                               black,
                                                                               red, grey)
