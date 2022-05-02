@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'main',
 ]
 
@@ -68,7 +69,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'triplechess.wsgi.application'
+# WSGI_APPLICATION = 'triplechess.wsgi.application'
+ASGI_APPLICATION = "triplechess.asgi.application"
 
 
 # Database
@@ -122,3 +124,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CHANNEL_LAYERS = {
+    'default': {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    },
+}

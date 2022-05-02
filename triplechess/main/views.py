@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from .logic import game
 
 
-def index(request):
+def index(request, room_code):
     return render(request, 'main/main.html')
 
 
@@ -14,7 +14,7 @@ def change_position(request):
     data = request.POST
     cell = data['cell']
     old_cell, figure, color = game.change_position(cell)
-    return JsonResponse({"old_cell": old_cell, "cell": cell, "type": figure, "color": color})
+    return JsonResponse({"old_cell": old_cell, "cell": cell, "figure": figure, "color": color})
 
 
 @csrf_exempt

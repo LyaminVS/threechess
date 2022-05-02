@@ -8,4 +8,5 @@ urlpatterns = [
     path("board/get_board/", views.get_board),
     path("board/reset/", views.reset),
     path("board/reset_dots/", views.reset_dots),
+    path('board/<room_code>/', views.index),
 ]
