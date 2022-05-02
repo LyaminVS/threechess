@@ -5,7 +5,6 @@ from .figure import Figure
 class King(Figure):
     def __init__(self, cell, color):
         super(King, self).__init__(cell, color)
-        self.is_walked = False
         self.type = "King"
 
 

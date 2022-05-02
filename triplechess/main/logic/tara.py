@@ -5,7 +5,6 @@ from .figure import Figure
 class Tara(Figure):
     def __init__(self, cell, color):
         super(Tara, self).__init__(cell, color)
-        self.is_walked = False
         self.type = "Tara"
 
     def __transform_position(self, cell):

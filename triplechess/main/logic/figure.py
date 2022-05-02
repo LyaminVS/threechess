@@ -7,6 +7,7 @@ class Figure:
         self.color = color
         self.letter = cell[0]
         self.number = cell[1:len(cell)]
+        self.is_walked = False
         self.cell = f(self.letter + self.number)
 
 
@@ -39,6 +40,13 @@ class Figure:
         return TURN_DIR[d]
 
     def change_cell(self, cell):
+        self.is_walked = True
+        self.letter = cell[0]
+        self.number = cell[1:len(cell)]
+        self.cell_str = cell
+        self.cell = f(self.letter + self.number)
+
+    def change_cell_temp(self, cell):
         self.letter = cell[0]
         self.number = cell[1:len(cell)]
         self.cell_str = cell
