@@ -44,14 +44,18 @@ function connect() {
                 break;
             case "GET_BOARD":
                 $(".cell_item").addClass("old_cell")
-                console.log(123)
                 player_turn = data["turn"]
                 let figures = data["figures"]
                 figures.forEach(figure => {
                     path = img_from_type(figure[0], figure[1])
                     let letter = figure[2].slice(0, 1)
                     let number = figure[2].slice(1)
-                    set_cell_picture($(".board"), path, letter, number, figure[1])
+                    if ($("#" + letter + number).attr("src") != path){
+                        set_cell_picture($(".board"), path, letter, number, figure[1])
+                    }else{
+                        $("#" + letter + number).removeClass("old_cell")
+                    }
+                    
                 });
                 $(".old_cell").remove()
                 break;
@@ -72,6 +76,7 @@ function connect() {
                 // path = img_from_type(data["figure"], data["color"])
                 // set_cell_picture($(".board"), path, letter, number, data["color"])
                 // break;
+                break;
             case "RESET":
                 clear_board()
                 get_board($(".board"))

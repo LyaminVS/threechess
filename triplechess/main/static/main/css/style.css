@@ -12,3 +12,7 @@
     width: 30px;
     z-index: 6;
 }
+
+.old_cell{
+    z-index: 100;
+}
