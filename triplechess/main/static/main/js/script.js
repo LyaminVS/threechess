@@ -5,7 +5,7 @@ var gameSocket = new WebSocket(connectionString);
 connect();
 
 let player_color = ''
-let player_turn = ''
+let player_turn = 'white'
 
 function connect() {
     gameSocket.onopen = function open() {
@@ -58,6 +58,7 @@ function connect() {
                 paint_dots(dots)
                 break;
             case "CHANGE_POSITION":
+                player_turn = data["turn"]
                 var old_letter = data["old_cell"].slice(0, 1)
                 var old_number = data["old_cell"].slice(1)
                 var letter = data["cell"].slice(0, 1)
@@ -200,6 +201,7 @@ function get_dots(letter, number){
  }
 
 $(document).on("click", ".point", function() {
+    console.log(player_turn)
     if (player_turn == player_color){
         if (!$(this).attr("class").split(" ").includes("eat_point")){
             cell = $(this).attr("id")

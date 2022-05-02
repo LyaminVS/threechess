@@ -94,13 +94,15 @@ class Chess(AsyncJsonWebsocketConsumer):
             }))
         if type == "CHANGE_POSITION":
             cell = response.get('cell')
+            turn = game.change_turn()
             old_cell, figure, color = game.change_position(cell)
             res = {
                 "old_cell": old_cell,
                 "figure": figure,
                 "color": color,
                 "cell": cell,
-                "type": "CHANGE_POSITION"
+                "type": "CHANGE_POSITION",
+                "turn": turn
             }
             await self.channel_layer.group_send(self.room_group_name, {
                 "payload": res,
