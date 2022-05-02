@@ -9,7 +9,6 @@ let player_turn = 'white'
 
 function connect() {
     gameSocket.onopen = function open() {
-        console.log(2345)
         gameSocket.send(JSON.stringify({
             "type": "START",
         }));
@@ -200,7 +199,6 @@ function get_dots(letter, number){
  }
 
 $(document).on("click", ".point", function() {
-    console.log(player_turn)
     if (player_turn == player_color){
         if (!$(this).attr("class").split(" ").includes("eat_point")){
             cell = $(this).attr("id")
