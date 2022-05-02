@@ -1,5 +1,9 @@
 from .board import Board
 from .consts import TURN_CHANGE
+from .tara import Tara as Tara
+from .officer import Officer as Officer
+from .queen import Queen as Queen
+from .horse import Horse as Horse
 
 class Game:
     def __init__(self):
@@ -24,10 +28,10 @@ class Game:
         return array
 
     def change_position(self, cell):
-        if cell in getattr(self.board, self.selected_figure.color+"_cells"):
-            if self.selected_figure.color=="white":
+        if cell in getattr(self.board, self.selected_figure.color + "_cells"):
+            if self.selected_figure.color == "white":
                 old_cell = "E1"
-                if cell=="H1":
+                if cell == "H1":
                     self.selected_figure.change_cell("G1")
                     self.board.tara_white_2.change_cell("F1")
                     self.board.white_cells.remove("E1")
@@ -41,9 +45,9 @@ class Game:
                     self.board.white_cells.remove("A1")
                     self.board.white_cells.append("C1")
                     self.board.white_cells.append("D1")
-            if self.selected_figure.color=="black":
+            if self.selected_figure.color == "black":
                 old_cell = "K8"
-                if cell=="N8":
+                if cell == "N8":
                     self.selected_figure.change_cell("M8")
                     self.board.tara_black_2.change_cell("L8")
                     self.board.black_cells.remove("K8")
@@ -57,9 +61,9 @@ class Game:
                     self.board.black_cells.remove("K8")
                     self.board.black_cells.append("F8")
                     self.board.black_cells.append("E8")
-            if self.selected_figure.color=="red":
+            if self.selected_figure.color == "red":
                 old_cell = "D12"
-                if cell=="A12":
+                if cell == "A12":
                     self.selected_figure.change_cell("B12")
                     self.board.tara_red_2.change_cell("C12")
                     self.board.red_cells.remove("D12")
@@ -122,3 +126,32 @@ class Game:
     def change_turn(self):
         self.turn = TURN_CHANGE[self.turn]
         return self.turn
+
+    def __is_peshka_go_through__(self):
+        colors = ["white", "black", "red"]
+        cells = [["12", "8"], ["1", "12"], ["1", "8"]]
+        for i in range(3):
+            for j in range(1, 9):
+                peshka = getattr(self.board, "peshka_" + colors[i] + "_" + str(j))
+                if peshka.number in cells[i]:
+                    return peshka.cell_str
+
+        return ""
+
+    # def __transform_peshka__(self, cell, type):
+    #     for i in range(len(self.board.all_figures)):
+    #         if self.board.all_figures[i].cell_str == cell:
+    #             if type=="Queen":
+    #                 queen = Queen(cell,"white")
+    #                 self.board.all_figures[i] = queen
+    #                 self.board.peshka_white_1 = queen
+    #                 self.board.white.append(queen)
+    #             if type=="Tara":
+    #                 self.board.all_figures[i] = Tara(cell,self.board.all_figures[i].color)
+    #             if type=="Horse":
+    #                 self.board.all_figures[i] = Horse(cell,self.board.all_figures[i].color)
+    #             if type=="Officer":
+    #                 self.board.all_figures[i] = Officer(cell,self.board.all_figures[i].color)
+    #             self.board.all_figures[i].is_walked = True
+    #             break
+    #
