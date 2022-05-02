@@ -48,6 +48,7 @@ class Chess(AsyncJsonWebsocketConsumer):
                 "type": "MOVE",
                 "turn": turn
             }
+
             await self.channel_layer.group_send(self.room_group_name, {
                 "payload": res,
                 "type": "send_message"
