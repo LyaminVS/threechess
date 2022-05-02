@@ -55,7 +55,6 @@ class Chess(AsyncJsonWebsocketConsumer):
         if type == "GET_BOARD":
             if not (hasattr(self, "game")):
                 self.game = game
-            print(game.turn)
             res = {
                 "turn": game.turn,
                 "figures": self.game.__transform_to_array__(),

@@ -7,6 +7,62 @@ connect();
 let player_color = ''
 let player_turn = 'white'
 
+RED_TURN = {
+    "A": "H",
+    "B": "G",
+    "C": "F",
+    "D": "E",
+    "E": "K",
+    "F": "L",
+    "G": "M",
+    "H": "N",
+    "K": "D",
+    "L": "C",
+    "M": "B",
+    "N": "A",
+
+    "1": "8",
+    "2": "7",
+    "3": "6",
+    "4": "5",
+    "5": "9",
+    "6": "10",
+    "7": "11",
+    "8": "12",
+    "9": "4",
+    "10": "3",
+    "11": "2",
+    "12": "1"
+}
+
+BLACK_TURN = {
+    "H": "A",
+    "G": "B",
+    "F": "C",
+    "E": "D",
+    "K": "E",
+    "L": "F",
+    "M": "G",
+    "N": "H",
+    "D": "K",
+    "C": "L",
+    "B": "M",
+    "A": "N",
+
+    "8": "1",
+    "7": "2",
+    "6": "3",
+    "5": "4",
+    "9": "5",
+    "10": "6",
+    "11": "7",
+    "12": "8",
+    "4": "9",
+    "3": "10",
+    "2": "11",
+    "1": "12"
+}
+
 function connect() {
     gameSocket.onopen = function open() {
         gameSocket.send(JSON.stringify({
@@ -33,14 +89,6 @@ function connect() {
                 break;
             case "MOVE":
                 get_board($(".board"))
-                // player_turn = data["turn"]
-                // var old_letter = data["old_cell"].slice(0, 1)
-                // var old_number = data["old_cell"].slice(1)
-                // var letter = data["cell"].slice(0, 1)
-                // var number = data["cell"].slice(1)
-                // path = img_from_type(data["figure"], data["color"])
-                // set_cell_picture($(".board"), path, letter, number, data["color"])
-                // remove_cell_picture(old_letter, old_number)
                 break;
             case "GET_BOARD":
                 $(".cell_item").addClass("old_cell")
@@ -50,6 +98,15 @@ function connect() {
                     path = img_from_type(figure[0], figure[1])
                     let letter = figure[2].slice(0, 1)
                     let number = figure[2].slice(1)
+                    if (player_color == "black"){
+                        letter = BLACK_TURN[letter]
+                        number = BLACK_TURN[number]
+                    }
+                    if (player_color == "red"){
+                        letter = RED_TURN[letter]
+                        number = RED_TURN[number]
+                    }
+                    
                     if ($("#" + letter + number).attr("src") != path){
                         set_cell_picture($(".board"), path, letter, number, figure[1])
                     }else{
@@ -66,22 +123,13 @@ function connect() {
                 break;
             case "CHANGE_POSITION":
                 get_board($(".board"))
-                // player_turn = data["turn"]
-                // var old_letter = data["old_cell"].slice(0, 1)
-                // var old_number = data["old_cell"].slice(1)
-                // var letter = data["cell"].slice(0, 1)
-                // var number = data["cell"].slice(1)
-                // remove_cell_picture(old_letter, old_number)
-                // remove_cell_picture(letter, number)
-                // path = img_from_type(data["figure"], data["color"])
-                // set_cell_picture($(".board"), path, letter, number, data["color"])
-                // break;
                 break;
             case "RESET":
                 clear_board()
                 get_board($(".board"))
                 break;
             case "CHANGE_COLOR":
+                get_board($(".board"))
                 // $("#btn_" + data["color"]).remove()
                 break;
             default:
@@ -170,6 +218,8 @@ $(document).on("click", ".cell_item", function() {
         let id = $(this).attr('id')
         let letter = id.slice(0, 1)
         let number = id.slice(1)
+        
+        
         get_dots(letter, number)
     }
 });
@@ -187,12 +237,28 @@ function paint_dots(dots){
     dots[0].forEach(dot => {
         let letter = dot.slice(0, 1)
         let number = dot.slice(1)
+        if (player_color == "black"){
+            letter = BLACK_TURN[letter]
+            number = BLACK_TURN[number]
+        }
+        if (player_color == "red"){
+            letter = RED_TURN[letter]
+            number = RED_TURN[number]
+        }
         let board = $(".board");
         set_cell_picture(board, grey_circle, letter, number, false,  "point")
     });
     dots[1].forEach(dot => {
         let letter = dot.slice(0, 1)
         let number = dot.slice(1)
+        if (player_color == "black"){
+            letter = BLACK_TURN[letter]
+            number = BLACK_TURN[number]
+        }
+        if (player_color == "red"){
+            letter = RED_TURN[letter]
+            number = RED_TURN[number]
+        }
         let board = $(".board");
         set_cell_picture(board, red_circle, letter, number, false, "eat_point point", false)
     });
@@ -200,6 +266,15 @@ function paint_dots(dots){
 
 function get_dots(letter, number){
     if ($("#" + letter + number).hasClass(player_color)){
+        if (player_color == "black"){
+            letter = RED_TURN[letter]
+            number = RED_TURN[number]
+        }
+        if (player_color == "red"){
+            letter = BLACK_TURN[letter]
+            number = BLACK_TURN[number]
+        }
+        
         gameSocket.send(JSON.stringify({
             "type": "GET_DOTS",
             'letter': letter,
@@ -209,9 +284,22 @@ function get_dots(letter, number){
  }
 
 $(document).on("click", ".point", function() {
+    console.log(123)
     if (player_turn == player_color){
+        
         if (!$(this).attr("class").split(" ").includes("eat_point")){
             cell = $(this).attr("id")
+            var letter = cell.slice(0, 1)
+            var number = cell.slice(1)
+            if (player_color == "black"){
+                letter = RED_TURN[letter]
+                number = RED_TURN[number]
+            }
+            if (player_color == "red"){
+                letter = BLACK_TURN[letter]
+                number = BLACK_TURN[number]
+            }
+            cell = letter + number
             $(".point").remove()
             gameSocket.send(JSON.stringify({
                 "type": "MOVE",
@@ -226,8 +314,17 @@ $(document).on("click", ".eat_point", function(){
         let cell_classes = $(this).attr("class")
         cell_classes = cell_classes.split(" ")
         let cell = cell_classes[cell_classes.length - 1].split("cell_item")[1]
-        let letter = cell.slice(0, 1)
-        let number = cell.slice(1)
+        var letter = cell.slice(0, 1)
+        var number = cell.slice(1)
+            if (player_color == "black"){
+                letter = RED_TURN[letter]
+                number = RED_TURN[number]
+            }
+            if (player_color == "red"){
+                letter = BLACK_TURN[letter]
+                number = BLACK_TURN[number]
+            }
+            cell = letter + number
         $(".point").remove()
         gameSocket.send(JSON.stringify({
             "type": "CHANGE_POSITION",
