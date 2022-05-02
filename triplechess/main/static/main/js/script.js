@@ -151,7 +151,6 @@ window.onload = function() {
     let board = $(".board");
     gameSocket.onopen = function(board){
         reset()
-        get_board(board) 
     }    
  };
 

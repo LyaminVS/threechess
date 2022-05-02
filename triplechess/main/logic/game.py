@@ -61,6 +61,8 @@ class Game:
 
     def reset(self):
         self.board = Board()
+        self.turn = "white"
+        self.selected_figure = None
 
     def change_turn(self):
         self.turn = TURN_CHANGE[self.turn]
