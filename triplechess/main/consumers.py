@@ -2,11 +2,12 @@ import json
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from .logic import game
 
+
 class Chess(AsyncJsonWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_code']
         self.room_group_name = 'room_%s' % self.room_name
-        self.game = game
+
         # Join room group
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -27,23 +28,37 @@ class Chess(AsyncJsonWebsocketConsumer):
         """
         response = json.loads(text_data)
         type = response.get('type')
+        if type == "START":
+            res = {
+                "type": "START",
+                "turn": game.turn
+            }
+            await self.send(text_data=json.dumps({
+                "payload": res,
+            }))
         if type == "MOVE":
             cell = response.get('cell')
+            turn = game.change_turn()
             old_cell, figure, color = game.change_position(cell)
             res = {
                 "old_cell": old_cell,
                 "figure": figure,
                 "color": color,
                 "cell": cell,
-                "type": "MOVE"
+                "type": "MOVE",
+                "turn": turn
             }
             await self.channel_layer.group_send(self.room_group_name, {
                 "payload": res,
                 "type": "send_message"
             })
         if type == "GET_BOARD":
+            if not (hasattr(self, "game")):
+                self.game = game
+
             res = {
-                "figures": game.__transform_to_array__(),
+                "turn": game.turn,
+                "figures": self.game.__transform_to_array__(),
                 "type": "GET_BOARD"
             }
             await self.send(text_data=json.dumps({
@@ -65,9 +80,10 @@ class Chess(AsyncJsonWebsocketConsumer):
             res = {
                 "type": "RESET",
             }
-            await self.send(text_data=json.dumps({
+            await self.channel_layer.group_send(self.room_group_name, {
                 "payload": res,
-            }))
+                "type": "send_message"
+            })
         if type == "RESET_DOTS":
             game.selected_figure = None
             res = {
@@ -76,6 +92,30 @@ class Chess(AsyncJsonWebsocketConsumer):
             await self.send(text_data=json.dumps({
                 "payload": res,
             }))
+        if type == "CHANGE_POSITION":
+            cell = response.get('cell')
+            old_cell, figure, color = game.change_position(cell)
+            res = {
+                "old_cell": old_cell,
+                "figure": figure,
+                "color": color,
+                "cell": cell,
+                "type": "CHANGE_POSITION"
+            }
+            await self.channel_layer.group_send(self.room_group_name, {
+                "payload": res,
+                "type": "send_message"
+            })
+        if type == "CHANGE_COLOR":
+            color = response.get('color')
+            res = {
+                "type": "CHANGE_COLOR",
+                "color": color
+            }
+            await self.channel_layer.group_send(self.room_group_name, {
+                "payload": res,
+                "type": "send_message"
+            })
 
     async def send_message(self, res):
         """ Receive message from room group """

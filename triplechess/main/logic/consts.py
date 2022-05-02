@@ -23,6 +23,12 @@ TURN_DIR = {
 
 BOARD_RULES = BoardRules()
 
+TURN_CHANGE = {
+    "white": "black",
+    "black": "red",
+    "red": "white"
+}
+
 
 def f(string):
     return getattr(BOARD_RULES, string)

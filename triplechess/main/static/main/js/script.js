@@ -4,11 +4,14 @@ var connectionString = 'ws://' + window.location.host + '/ws/board/' + roomCode 
 var gameSocket = new WebSocket(connectionString);
 connect();
 
+let player_color = ''
+let player_turn = ''
+
 function connect() {
     gameSocket.onopen = function open() {
+        console.log(2345)
         gameSocket.send(JSON.stringify({
-            "event": "START",
-            "message": ""
+            "type": "START",
         }));
     };
 
@@ -25,32 +28,51 @@ function connect() {
         let type = data["type"];
         switch (type) {
             case "START":
+                player_turn = data["turn"]
                 break;
             case "END":
                 break;
             case "MOVE":
-                let old_letter = data["old_cell"].slice(0, 1)
-                let old_number = data["old_cell"].slice(1)
-                let letter = data["cell"].slice(0, 1)
-                let number = data["cell"].slice(1)
-                
+                player_turn = data["turn"]
+                var old_letter = data["old_cell"].slice(0, 1)
+                var old_number = data["old_cell"].slice(1)
+                var letter = data["cell"].slice(0, 1)
+                var number = data["cell"].slice(1)
                 path = img_from_type(data["figure"], data["color"])
-                set_cell_picture($(".board"), path, letter, number)
+                set_cell_picture($(".board"), path, letter, number, data["color"])
                 remove_cell_picture(old_letter, old_number)
                 break;
             case "GET_BOARD":
+                player_turn = data["turn"]
                 let figures = data["figures"]
                 figures.forEach(figure => {
                     path = img_from_type(figure[0], figure[1])
                     let letter = figure[2].slice(0, 1)
                     let number = figure[2].slice(1)
-                    set_cell_picture($(".board"), path, letter, number)
+                    set_cell_picture($(".board"), path, letter, number, figure[1])
                 });
                 break;
             case "GET_DOTS":
                 $(".point").remove()
                 dots = data["dots"]
                 paint_dots(dots)
+                break;
+            case "CHANGE_POSITION":
+                var old_letter = data["old_cell"].slice(0, 1)
+                var old_number = data["old_cell"].slice(1)
+                var letter = data["cell"].slice(0, 1)
+                var number = data["cell"].slice(1)
+                remove_cell_picture(old_letter, old_number)
+                remove_cell_picture(letter, number)
+                path = img_from_type(data["figure"], data["color"])
+                set_cell_picture($(".board"), path, letter, number, data["color"])
+                break;
+            case "RESET":
+                clear_board()
+                get_board($(".board"))
+                break;
+            case "CHANGE_COLOR":
+                // $("#btn_" + data["color"]).remove()
                 break;
             default:
                 break;
@@ -64,8 +86,12 @@ function connect() {
 }
 
 
-function set_cell_picture(board, path, letter, number, add_class = false, id = true){
+function set_cell_picture(board, path, letter, number, color = false, add_class = false, id = true){
     let img_class = " cell_item cell_item"
+    
+    if (color){
+        img_class = color + " cell_item cell_item "
+    }
     if (add_class){
         img_class = add_class + img_class
     }
@@ -106,22 +132,6 @@ function get_board(board){
     gameSocket.send(JSON.stringify({
         "type": "GET_BOARD",
     }));
-    // $.ajax({
-    //     type: "POST",
-    //     url: "get_board/",
-    //     headers: {
-    //         "X-CSRFTOKEN": "{{ csrf_token }}"
-    //     },
-    //     success: function(data){
-    //         figures = data.figures
-    //         figures.forEach(figure => {
-    //             path = img_from_type(figure[0], figure[1])
-    //             let letter = figure[2].slice(0, 1)
-    //             let number = figure[2].slice(1)
-    //             set_cell_picture(board, path, letter, number)
-    //         });
-    //     }
-    // });
 }
 
 function clear_board(){
@@ -159,13 +169,6 @@ function reset(){
     gameSocket.send(JSON.stringify({
         "type": "RESET",
     }));
-    // $.ajax({
-    //     type: "POST",
-    //     url: "reset/",
-    //     headers: {
-    //         "X-CSRFTOKEN": "{{ csrf_token }}"
-    //     },
-    // });
 }
 
 function paint_dots(dots){
@@ -176,97 +179,52 @@ function paint_dots(dots){
         let letter = dot.slice(0, 1)
         let number = dot.slice(1)
         let board = $(".board");
-        set_cell_picture(board, grey_circle, letter, number, "point")
+        set_cell_picture(board, grey_circle, letter, number, false,  "point")
     });
     dots[1].forEach(dot => {
         let letter = dot.slice(0, 1)
         let number = dot.slice(1)
         let board = $(".board");
-        set_cell_picture(board, red_circle, letter, number, "eat_point point", false)
+        set_cell_picture(board, red_circle, letter, number, false, "eat_point point", false)
     });
 }
 
 function get_dots(letter, number){
-    gameSocket.send(JSON.stringify({
-        "type": "GET_DOTS",
-        'letter': letter,
-        'number': number,
-    }));
-    // $.ajax({
-    //     type: "POST",
-    //     url: "get_dots/",
-    //     headers: {
-    //         "X-CSRFTOKEN": "{{ csrf_token }}"
-    //     },
-    //     data: {
-    //         'letter': letter,
-    //         'number': number,
-    //     },
-    //     success: function(data){
-    //         $(".point").remove()
-    //         dots = data.dots
-    //         paint_dots(dots)
-    //     }
-    // });
+    if ($("#" + letter + number).hasClass(player_color)){
+        gameSocket.send(JSON.stringify({
+            "type": "GET_DOTS",
+            'letter': letter,
+            'number': number,
+        }));
+    }
  }
 
 $(document).on("click", ".point", function() {
-    if (!$(this).attr("class").split(" ").includes("eat_point")){
-        cell = $(this).attr("id")
-        $(".point").remove()
-        gameSocket.send(JSON.stringify({
-            "type": "MOVE",
-            "cell": cell
-        }));
-        // $.ajax({
-        //     type: "POST",
-        //     url: "change_position/",
-        //     headers: {
-        //         "X-CSRFTOKEN": "{{ csrf_token }}"
-        //     },
-        //     data: {
-        //         "cell": cell,
-        //     },
-        //     success: function(data){
-        //         let old_letter = data["old_cell"].slice(0, 1)
-        //         let old_number = data["old_cell"].slice(1)
-        //         let letter = data["cell"].slice(0, 1)
-        //         let number = data["cell"].slice(1)
-        //         remove_cell_picture(old_letter, old_number)
-        //         path = img_from_type(data["figure"], data["color"])
-        //         set_cell_picture($(".board"), path, letter, number)
-        //     }
-        // });
+    if (player_turn == player_color){
+        if (!$(this).attr("class").split(" ").includes("eat_point")){
+            cell = $(this).attr("id")
+            $(".point").remove()
+            gameSocket.send(JSON.stringify({
+                "type": "MOVE",
+                "cell": cell
+            }));
+        }
     }
 });
 
 $(document).on("click", ".eat_point", function(){
-    let cell_classes = $(this).attr("class")
-    cell_classes = cell_classes.split(" ")
-    let cell = cell_classes[cell_classes.length - 1].split("cell_item")[1]
-    let letter = cell.slice(0, 1)
-    let number = cell.slice(1)
-    remove_cell_picture(letter, number)
-    $(".point").remove()
-    $.ajax({
-        type: "POST",
-        url: "change_position/",
-        headers: {
-            "X-CSRFTOKEN": "{{ csrf_token }}"
-        },
-        data: {
-            "cell": cell,
-        },
-        success: function(data){
-            let old_letter = data["old_cell"].slice(0, 1)
-            let old_number = data["old_cell"].slice(1)
-            let letter = data["cell"].slice(0, 1)
-            let number = data["cell"].slice(1)
-            remove_cell_picture(old_letter, old_number)
-            path = img_from_type(data["type"], data["color"])
-            set_cell_picture($(".board"), path, letter, number)
-        }
-    });
+    if (player_turn == player_color){
+        let cell_classes = $(this).attr("class")
+        cell_classes = cell_classes.split(" ")
+        let cell = cell_classes[cell_classes.length - 1].split("cell_item")[1]
+        let letter = cell.slice(0, 1)
+        let number = cell.slice(1)
+        $(".point").remove()
+        gameSocket.send(JSON.stringify({
+            "type": "CHANGE_POSITION",
+            "cell": cell
+        }));
+    }
 })
 
 $(document).on("click", ".board", function(){
@@ -274,15 +232,33 @@ $(document).on("click", ".board", function(){
     gameSocket.send(JSON.stringify({
         "type": "RESET_DOTS",
     }));
-    // $.ajax({
-    //     type: "POST",
-    //     url: "reset_dots/",
-    //     headers: {
-    //         "X-CSRFTOKEN": "{{ csrf_token }}"
-    //     },
-    // });
-
 })
+
+$(document).on("click", "#btn_reset", function(){
+    reset()
+})
+
+$(document).on("click", "#btn_white", function(){
+    player_color = "white"
+    change_color(player_color)
+})
+
+$(document).on("click", "#btn_black", function(){
+    player_color = "black"
+    change_color(player_color)
+})
+
+$(document).on("click", "#btn_red", function(){
+    player_color = "red"
+    change_color(player_color)
+})
+
+function change_color(color){
+    gameSocket.send(JSON.stringify({
+        "type": "CHANGE_COLOR",
+        "color": color
+    }));
+}
 
 
 //call the connect function at the start.

@@ -1,10 +1,11 @@
 from .board import Board
-
+from .consts import TURN_CHANGE
 
 class Game:
     def __init__(self):
         self.board = Board()
         self.selected_figure = None
+        self.turn = "white"
 
     def get_dots(self, cell):
         if self.selected_figure and self.selected_figure.letter + self.selected_figure.number == cell:
@@ -60,3 +61,7 @@ class Game:
 
     def reset(self):
         self.board = Board()
+
+    def change_turn(self):
+        self.turn = TURN_CHANGE[self.turn]
+        return self.turn
