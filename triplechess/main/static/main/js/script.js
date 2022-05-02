@@ -284,7 +284,6 @@ function get_dots(letter, number){
  }
 
 $(document).on("click", ".point", function() {
-    console.log(123)
     if (player_turn == player_color){
         
         if (!$(this).attr("class").split(" ").includes("eat_point")){
