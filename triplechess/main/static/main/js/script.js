@@ -32,7 +32,6 @@ function connect() {
             case "END":
                 break;
             case "MOVE":
-                clear_board()
                 get_board($(".board"))
                 // player_turn = data["turn"]
                 // var old_letter = data["old_cell"].slice(0, 1)
@@ -62,7 +61,6 @@ function connect() {
                 paint_dots(dots)
                 break;
             case "CHANGE_POSITION":
-                clear_board()
                 get_board($(".board"))
                 // player_turn = data["turn"]
                 // var old_letter = data["old_cell"].slice(0, 1)
