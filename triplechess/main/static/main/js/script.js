@@ -32,16 +32,20 @@ function connect() {
             case "END":
                 break;
             case "MOVE":
-                player_turn = data["turn"]
-                var old_letter = data["old_cell"].slice(0, 1)
-                var old_number = data["old_cell"].slice(1)
-                var letter = data["cell"].slice(0, 1)
-                var number = data["cell"].slice(1)
-                path = img_from_type(data["figure"], data["color"])
-                set_cell_picture($(".board"), path, letter, number, data["color"])
-                remove_cell_picture(old_letter, old_number)
+                clear_board()
+                get_board($(".board"))
+                // player_turn = data["turn"]
+                // var old_letter = data["old_cell"].slice(0, 1)
+                // var old_number = data["old_cell"].slice(1)
+                // var letter = data["cell"].slice(0, 1)
+                // var number = data["cell"].slice(1)
+                // path = img_from_type(data["figure"], data["color"])
+                // set_cell_picture($(".board"), path, letter, number, data["color"])
+                // remove_cell_picture(old_letter, old_number)
                 break;
             case "GET_BOARD":
+                $(".cell_item").addClass("old_cell")
+                console.log(123)
                 player_turn = data["turn"]
                 let figures = data["figures"]
                 figures.forEach(figure => {
@@ -50,6 +54,7 @@ function connect() {
                     let number = figure[2].slice(1)
                     set_cell_picture($(".board"), path, letter, number, figure[1])
                 });
+                $(".old_cell").remove()
                 break;
             case "GET_DOTS":
                 $(".point").remove()
@@ -57,16 +62,18 @@ function connect() {
                 paint_dots(dots)
                 break;
             case "CHANGE_POSITION":
-                player_turn = data["turn"]
-                var old_letter = data["old_cell"].slice(0, 1)
-                var old_number = data["old_cell"].slice(1)
-                var letter = data["cell"].slice(0, 1)
-                var number = data["cell"].slice(1)
-                remove_cell_picture(old_letter, old_number)
-                remove_cell_picture(letter, number)
-                path = img_from_type(data["figure"], data["color"])
-                set_cell_picture($(".board"), path, letter, number, data["color"])
-                break;
+                clear_board()
+                get_board($(".board"))
+                // player_turn = data["turn"]
+                // var old_letter = data["old_cell"].slice(0, 1)
+                // var old_number = data["old_cell"].slice(1)
+                // var letter = data["cell"].slice(0, 1)
+                // var number = data["cell"].slice(1)
+                // remove_cell_picture(old_letter, old_number)
+                // remove_cell_picture(letter, number)
+                // path = img_from_type(data["figure"], data["color"])
+                // set_cell_picture($(".board"), path, letter, number, data["color"])
+                // break;
             case "RESET":
                 clear_board()
                 get_board($(".board"))
