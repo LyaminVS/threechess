@@ -156,7 +156,7 @@ class Board:
                     del dots[0][i]
                     i -= 1
             i += 1
-        figure.change_cell(cell)
+        figure.change_cell_temp(cell)
         if figure.color == "white":
             self.white_cells.remove(cell_temp)
             self.white_cells.append(cell)
@@ -245,7 +245,7 @@ class Board:
                     i -= 1
 
             i += 1
-        figure.change_cell(cell)
+        figure.change_cell_temp(cell)
         if figure.color == "white":
             self.white_cells.remove(cell_temp)
             self.white_cells.append(cell)
@@ -255,6 +255,16 @@ class Board:
         if figure.color == "red":
             self.red_cells.remove(cell_temp)
             self.red_cells.append(cell)
+
+        return dots
+
+    def __update_dots_2__(self, figure):
+        dots = self.__update_dots__(figure)
+        if figure.type == "King":
+            if self.__short_castling__(figure.color):
+                dots[1].append(getattr(self, "tara_" + figure.color + "_2").cell_str)
+            if self.__long_castling__(figure.color):
+                dots[1].append(getattr(self, "tara_" + figure.color + "_1").cell_str)
 
         return dots
 
@@ -300,6 +310,8 @@ class Board:
     def __long_castling__(self, color):
         king = getattr(self, "king_" + color)
         tara = getattr(self, "tara_" + color + "_1")
+        if tara not in self.all_figures:
+            return False
         if king.is_walked or tara.is_walked:
             return False
         if color == "white":
@@ -307,7 +319,8 @@ class Board:
             for elem in cells:
                 if elem in self.white_cells or elem in self.black_cells or elem in self.red_cells:
                     return False
-            if self.__king_is_checked__(color, "C1") or self.__king_is_checked__(color, "D1"):
+            if self.__king_is_checked__(color) or self.__king_is_checked__(color, "C1") or self.__king_is_checked__(
+                    color, "D1"):
                 return False
 
         if color == "black":
@@ -315,7 +328,8 @@ class Board:
             for elem in cells:
                 if elem in self.white_cells or elem in self.black_cells or elem in self.red_cells:
                     return False
-            if self.__king_is_checked__(color, "F8") or self.__king_is_checked__(color, "E1"):
+            if self.__king_is_checked__(color) or self.__king_is_checked__(color, "F8") or self.__king_is_checked__(
+                    color, "E8"):
                 return False
 
         if color == "red":
@@ -323,7 +337,8 @@ class Board:
             for elem in cells:
                 if elem in self.white_cells or elem in self.black_cells or elem in self.red_cells:
                     return False
-            if self.__king_is_checked__(color, "L12") or self.__king_is_checked__(color, "K12"):
+            if self.__king_is_checked__(color) or self.__king_is_checked__(color, "L12") or self.__king_is_checked__(
+                    color, "K12"):
                 return False
 
         return True
@@ -331,6 +346,8 @@ class Board:
     def __short_castling__(self, color):
         king = getattr(self, "king_" + color)
         tara = getattr(self, "tara_" + color + "_2")
+        if tara not in self.all_figures:
+            return False
         if king.is_walked or tara.is_walked:
             return False
         if color == "white":
@@ -338,7 +355,8 @@ class Board:
             for elem in cells:
                 if elem in self.white_cells or elem in self.black_cells or elem in self.red_cells:
                     return False
-            if self.__king_is_checked__(color, "F1") or self.__king_is_checked__(color, "G1"):
+            if self.__king_is_checked__(color) or self.__king_is_checked__(color, "F1") or self.__king_is_checked__(
+                    color, "G1"):
                 return False
 
         if color == "black":
@@ -346,7 +364,8 @@ class Board:
             for elem in cells:
                 if elem in self.white_cells or elem in self.black_cells or elem in self.red_cells:
                     return False
-            if self.__king_is_checked__(color, "L8") or self.__king_is_checked__(color, "M1"):
+            if self.__king_is_checked__(color) or self.__king_is_checked__(color, "L8") or self.__king_is_checked__(
+                    color, "M8"):
                 return False
 
         if color == "red":
@@ -354,7 +373,8 @@ class Board:
             for elem in cells:
                 if elem in self.white_cells or elem in self.black_cells or elem in self.red_cells:
                     return False
-            if self.__king_is_checked__(color, "B12") or self.__king_is_checked__(color, "C12"):
+            if self.__king_is_checked__(color) or self.__king_is_checked__(color, "B12") or self.__king_is_checked__(
+                    color, "C12"):
                 return False
 
         return True
