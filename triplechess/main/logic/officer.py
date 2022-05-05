@@ -27,5 +27,6 @@ class Officer(Figure):
         dots_save = []
         dirs = ["right_bottom", "left_top", "right_top", "left_bottom"]
         for d in dirs:
-            self.__iteration__(getattr(self.cell, d)[0], white, black, red, grey, dots_eat, dots, dots_save, d)
+            for cell in getattr(self.cell, d):
+                self.__iteration__(cell, white, black, red, grey, dots_eat, dots, dots_save, d)
         return dots, dots_eat
