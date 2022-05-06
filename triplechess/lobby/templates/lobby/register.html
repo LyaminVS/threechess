@@ -6,7 +6,12 @@
     <h1>Create an account</h1>
     <p>Please, sign up using the following form:</p>
     <form action="." method="post">
-        {{ user_form.as_p }}
+        <input type="text" name="username" id="id_username" class='class_name'>
+        <input type="text" name="first_name" id="id_first_name" class='class_name'>
+        <input type="email" name="email" id="id_email" class='class_name'>
+        <input type="text" name="password" id="id_password" class='class_name'>
+        <input type="text" name="password2" id="id_password2" class='class_name'>
+<!--        {{ user_form.as_p }}-->
         {% csrf_token %}
         <p><input type="submit" value="Create my account"></p>
     </form>
