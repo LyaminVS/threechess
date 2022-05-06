@@ -1,0 +1,71 @@
+h1{
+    position: absolute;
+    width: 140px;
+    height: 55px;
+    left: 881px;
+    top: 226px;
+
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 46px;
+    line-height: 56px;
+    z-index: 3;
+    color: #ffffff;
+}
+.ramka{
+    position: absolute;
+    width: 500px;
+    height: 700px;
+    left: 702px;
+    top: 119px;
+
+    background: #414141;
+    border-radius: 40px;
+    z-index: 2;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+.back_image_login{
+    box-sizing: border-box;
+
+    position: absolute;
+    width: 1663px;
+    height: 937px;
+    left: 120px;
+    top: 0px;
+
+    border: 1px solid #000000;
+    z-index: 1;
+}
+p{
+    position: absolute;
+    width: 220px;
+    height: 70px;
+    left: 841px;
+    top: 638px;
+    background: #5C5C5C;
+    border-radius: 18px;
+    z-index: 3;
+
+}
+.input_{
+    box-sizing: border-box;
+    width: 280px;
+    height: 40px; 
+    background: rgba(112, 112, 112, 0.37);
+    border: 1px solid #02C67F;
+    border-radius: 8px;
+    z-index: 3;
+}
+.user_input{
+    position: absolute;
+    left: 812px;
+    top: 365px;
+    z-index: 3;
+}
+.password_input{
+    position: absolute;
+    left: 812px;
+    top: 530px;;
+    z-index: 3;
+}
