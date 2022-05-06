@@ -73,6 +73,7 @@ function connect() {
     gameSocket.onclose = function (e) {
         console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
         setTimeout(function () {
+            console.log("1234")
             connect();
         }, 1000);
     };

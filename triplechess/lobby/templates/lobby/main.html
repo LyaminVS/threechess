@@ -1,7 +1,7 @@
-{% extends 'main/base.html' %}
+{% extends 'lobby/base.html' %}
 
 {% block title %}
-главная
+лобби
 {% endblock %}
 
 {% block header %}
@@ -20,7 +20,6 @@
 
 {% block body %}
 {% load static %}
-
     <div class="w-50 container-fluid d-flex justify-content-center align-items-center p-0">
         <div class="board-wrapper">
             <img src="{% static 'main/img/chess.svg' %}" class="rounded mx-auto d-block board">
@@ -31,7 +30,4 @@
     <button type="button" id="btn_black" class="btn btn-secondary">Вторичный</button>
     <button type="button" id="btn_red" class="btn btn-danger">Опасность</button>
     <button type="button" id="btn_reset" class="btn btn-success">Успех</button>
-
-
-
 {% endblock %}
