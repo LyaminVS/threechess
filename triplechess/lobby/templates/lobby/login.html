@@ -4,7 +4,9 @@
     <h1>Log-in</h1>
     <p>Please, use the following form to log-in:</p>
     <form action="." method="post">
-        {{ form.as_p }}
+        <input type="text" name="username" id="id_username" class='class_name'>
+        <input type="text" name="password" id="id_password" class='class_name'>
+<!--        {{ form.as_p }}-->
         {% csrf_token %}
         <p><input type="submit" value="Log-in"></p>
     </form>
