@@ -1,14 +1,18 @@
 {% extends "lobby/base.html" %}
 {% block title %}Log-in{% endblock %}
 {% block body %}
-    <h1>Log-in</h1>
+{% load static %}
+<img src="{% static 'lobby/img/back_im.jpg' %}" alt="bruh" class="back_image_login">
+<div class="ramka">  </div>
+    <h1>Войти</h1>
     <p>Please, use the following form to log-in:</p>
     <form action="." method="post">
-        <input type="text" name="username" id="id_username" class='class_name'>
-        <input type="text" name="password" id="id_password" class='class_name'>
+        <input type="text" name="username" id="id_username" class='user_input input_'>
+        <input type="text" name="password" id="id_password" class='password_input input_'>
 <!--        {{ form.as_p }}-->
         {% csrf_token %}
-        <p><input type="submit" value="Log-in"></p>
+        <p><input type="submit" value="ВОЙТИ"></p>
     </form>
     <a href="/register">регистрация</a>
-{% endblock %}s
+
+{% endblock %} 
