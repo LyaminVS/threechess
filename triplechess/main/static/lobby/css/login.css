@@ -2,7 +2,7 @@
     position: absolute;
     width: 7.3%;
     height: 5%;
-    left: 46%;
+    left: 47.4%;
     top: 24.1%;
     background: #414141;
     font-family: 'Inter';
@@ -75,7 +75,7 @@ a{
     position: absolute;
     width: 5.31%;
     height: 1.66%;
-    left: 47.1%;
+    left: 48.3%;
     top: 72%;
     z-index: 4;
     font-family: 'Inter';
@@ -99,10 +99,10 @@ p{
 }
 .button1{
     position: absolute;
-    width: 130px;
-    height: 40px;
-    left: 12%;
-    top: 20%;
+    width: 60%;
+    height: 40%;
+    left: 18%;
+    top: 27%;
     font-family: 'Inter';
     font-style: normal;
     font-weight: 400;
@@ -117,14 +117,6 @@ p{
     border-right: 0in;
     text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
-/* 
-.invisible{
-    position: absolute;
-    width: 220px;
-    height: 70px;
-    left: 46.5%;
-    top: 67%;
-} */
 .username_label{
     position: absolute;
     width: 2%;
@@ -135,8 +127,8 @@ p{
     font-family: 'Inter';
     font-style: normal;
     font-weight: 400;
-    font-size: 12px;
-    line-height: 15px;
+    font-size: 100%;
+    line-height: 60%;
     color: #FFFFFF;
 }
 .password_label{
@@ -149,7 +141,7 @@ p{
     font-family: 'Inter';
     font-style: normal;
     font-weight: 400;
-    font-size: 12px;
-    line-height: 15px;
+    font-size: 100%;
+    line-height: 60%;
     color: #FFFFFF;
 }
