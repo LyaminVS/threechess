@@ -1,5 +1,8 @@
-roomCode = 1
+url = document.location.href
 
+
+roomCode = url.slice(url.length - 2, url.length - 1)
+console.log(roomCode)
 var connectionString = 'ws://' + window.location.host + '/ws/board/' + roomCode + '/';
 var gameSocket = new WebSocket(connectionString);
 connect();
@@ -73,7 +76,6 @@ function connect() {
     gameSocket.onclose = function (e) {
         console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
         setTimeout(function () {
-            console.log("1234")
             connect();
         }, 1000);
     };
@@ -366,6 +368,4 @@ function change_color(color){
     }));
 }
 
-
-//call the connect function at the start.
 

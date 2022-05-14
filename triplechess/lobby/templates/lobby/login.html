@@ -2,14 +2,14 @@
 {% block title %}Log-in{% endblock %}
 {% block body %}
 {% load static %}
-<img src="{% static 'lobby/img/back_im.jpg' %}" alt="bruh" class="back_image_login">
+<!--<img src="{% static 'lobby/img/back_im.jpg' %}" alt="bruh" class="back_image_login">-->
 <div class="ramka">  </div>
     <p class="login"> Войти </p>
     <form action="." method="post">
-        <label for="username" class="username_label">username</label><input type="text" name="username" id="id_username" class='user_input input_'>
-        <label for="password" class="password_label">password</label><input type="text" name="password" id="id_password" class='password_input input_'>
-<!--        {{ form.as_p }}-->
+        <label for="username" class="username_label">username</label><input type="text" name="username" id="id_username" class='user_input input_' style= 'border-color: {{ borders_login }};'>
+        <label for="password" class="password_label">password</label><input type="text" name="password" id="id_password" class='password_input input_' style= 'border-color: {{ borders_password }};'>
         {% csrf_token %}
+        {{ errors }}
         <p><input type="submit" value="ВОЙТИ" class="button1"></p>
     </form>
     <a href="/register">регистрация</a>

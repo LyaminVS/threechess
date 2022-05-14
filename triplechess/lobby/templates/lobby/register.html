@@ -11,7 +11,9 @@
         <input type="email" name="email" id="id_email" class='class_name'>
         <input type="text" name="password" id="id_password" class='class_name'>
         <input type="text" name="password2" id="id_password2" class='class_name'>
-<!--        {{ user_form.as_p }}-->
+        {% for error in errors %}
+            {{ error }}
+        {% endfor %}
         {% csrf_token %}
         <p><input type="submit" value="Create my account"></p>
     </form>

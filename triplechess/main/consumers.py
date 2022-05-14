@@ -5,6 +5,7 @@ from .logic import game
 
 class Chess(AsyncJsonWebsocketConsumer):
     async def connect(self):
+        self.game = game.Game()
         self.room_name = self.scope['url_route']['kwargs']['room_code']
         self.room_group_name = 'room_%s' % self.room_name
 
@@ -31,15 +32,15 @@ class Chess(AsyncJsonWebsocketConsumer):
         if type == "START":
             res = {
                 "type": "START",
-                "turn": game.turn
+                "turn": self.game.turn
             }
             await self.send(text_data=json.dumps({
                 "payload": res,
             }))
         if type == "MOVE":
             cell = response.get('cell')
-            turn = game.change_turn()
-            old_cell, figure, color = game.change_position(cell)
+            turn = self.game.change_turn()
+            old_cell, figure, color = self.game.change_position(cell)
             res = {
                 "old_cell": old_cell,
                 "figure": figure,
@@ -55,9 +56,9 @@ class Chess(AsyncJsonWebsocketConsumer):
             })
         if type == "GET_BOARD":
             if not (hasattr(self, "game")):
-                self.game = game
+                self.game = game.Game()
             res = {
-                "turn": game.turn,
+                "turn": self.game.turn,
                 "figures": self.game.__transform_to_array__(),
                 "type": "GET_BOARD"
             }
@@ -67,7 +68,7 @@ class Chess(AsyncJsonWebsocketConsumer):
         if type == "GET_DOTS":
             letter = response.get("letter")
             number = response.get("number")
-            dots = game.get_dots(letter + number)
+            dots = self.game.get_dots(letter + number)
             res = {
                 "type": "GET_DOTS",
                 "dots": dots
@@ -76,7 +77,7 @@ class Chess(AsyncJsonWebsocketConsumer):
                 "payload": res,
             }))
         if type == "RESET":
-            game.reset()
+            self.game.reset()
             res = {
                 "type": "RESET",
             }
@@ -85,7 +86,7 @@ class Chess(AsyncJsonWebsocketConsumer):
                 "type": "send_message"
             })
         if type == "RESET_DOTS":
-            game.selected_figure = None
+            self.game.selected_figure = None
             res = {
                 "type": "RESET_DOTS",
             }
@@ -94,8 +95,8 @@ class Chess(AsyncJsonWebsocketConsumer):
             }))
         if type == "CHANGE_POSITION":
             cell = response.get('cell')
-            turn = game.change_turn()
-            old_cell, figure, color = game.change_position(cell)
+            turn = self.game.change_turn()
+            old_cell, figure, color = self.game.change_position(cell)
             res = {
                 "old_cell": old_cell,
                 "figure": figure,
