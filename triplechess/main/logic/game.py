@@ -1,9 +1,6 @@
 from .board import Board
 from .consts import TURN_CHANGE
-from .tara import Tara as Tara
-from .officer import Officer as Officer
-from .queen import Queen as Queen
-from .horse import Horse as Horse
+
 
 class Game:
     def __init__(self):
@@ -80,7 +77,6 @@ class Game:
             color = self.selected_figure.color
             self.selected_figure = None
             figure = "King"
-
         else:
             if cell in self.board.red_cells:
                 self.board.red_cells.remove(cell)
@@ -115,7 +111,6 @@ class Game:
             if old_cell in self.board.red_cells:
                 self.board.red_cells.remove(old_cell)
                 self.board.red_cells.append(cell)
-
         return old_cell, figure, color
 
     def reset(self):
@@ -155,3 +150,7 @@ class Game:
     #             self.board.all_figures[i].is_walked = True
     #             break
     #
+
+    # FIXME написать __str__ и написать метод класс для создания объекта из строки
+    def __str__(self):
+        pass

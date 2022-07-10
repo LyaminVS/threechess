@@ -1,5 +1,9 @@
 url = document.location.href
 
+var firstRule = document.styleSheets[0].cssRules[0];
+console.log(34567545)
+console.log(firstRule)
+
 
 roomCode = url.slice(url.length - 2, url.length - 1)
 console.log(roomCode)

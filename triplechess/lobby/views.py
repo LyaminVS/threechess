@@ -1,10 +1,15 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+
 from .forms import UserRegistrationForm, LoginForm
 from django.contrib.auth import authenticate, login
+from main.models import Game
+import main.logic.game
 # Create your views here.
 
 def index(request):
-    return render(request, 'lobby/main.html')
+    return render(request, 'lobby/lobby.html')
 
 
 def register(request):
@@ -17,7 +22,7 @@ def register(request):
             new_user.set_password(user_form.cleaned_data['password'])
             # Save the User object
             new_user.save()
-            return render(request, 'lobby/main.html', {'new_user': new_user})
+            return render(request, 'lobby/lobby.html', {'new_user': new_user})
         else:
             errors = user_form.errors
             return render(request, 'lobby/register.html', {'errors': errors, 'user_form': UserRegistrationForm()})
@@ -48,10 +53,23 @@ def user_login(request):
     return render(request, 'lobby/login.html', {'form': form})
 
 
-
-
 def on_open(request):
     if request.user.is_authenticated:
         return redirect("login/")
     if not request.user.is_authenticated:
         return redirect("register/")
+
+
+@csrf_exempt
+def get_list(request):
+    return JsonResponse({})
+
+
+@csrf_exempt
+def new_game(request):
+    if request.method == 'POST':
+        user = request.user
+        print(main.logic.game.Game())
+        game = Game.create(user, None, None, main.logic.game.Game())
+        game.save()
+    return JsonResponse({})

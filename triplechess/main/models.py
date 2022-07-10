@@ -12,4 +12,9 @@ class Game(models.Model):
 
     board = models.TextField()
 
-    status = models.CharField(max_length=50)
+    status = models.CharField(max_length=50, default="")
+
+    @classmethod
+    def create(cls, player_1, player_2, player_3, board):
+        game = cls(status="in_lobby", player_1=player_1, player_2=player_2, player_3=player_3, board=board)
+        return game

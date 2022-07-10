@@ -8,6 +8,7 @@ from .horse import Horse as Horse
 
 class Board:
     def __init__(self):
+
         self.king_white = King("E1", "white")
         self.queen_white = Queen("D1", "white")
         self.horse_white_1 = Horse("B1", "white")
@@ -110,15 +111,15 @@ class Board:
             if (elem.cell_str in self.red_cells) and (elem.color == "red") \
                     or (elem.cell_str in self.black_cells) and (elem.color == "black") \
                     or (elem.cell_str in self.white_cells) and (elem.color == "white"):
-                if king_position in elem.__dots__(self.white_cells, self.black_cells, self.red_cells, self.grey_cells)[
-                    1]:
+                if king_position in elem.__dots__(self.white_cells, self.black_cells,
+                                                  self.red_cells, self.grey_cells)[1]:
                     is_checked = True
         for elem in figures_2:
             if (elem.cell_str in self.red_cells) and (elem.color == "red") \
                     or (elem.cell_str in self.black_cells) and (elem.color == "black") \
                     or (elem.cell_str in self.white_cells) and (elem.color == "white"):
-                if king_position in elem.__dots__(self.white_cells, self.black_cells, self.red_cells, self.grey_cells)[
-                    1]:
+                if king_position in elem.__dots__(self.white_cells, self.black_cells,
+                                                  self.red_cells, self.grey_cells)[1]:
                     is_checked = True
         getattr(self, color + "_cells").remove(cell)
         getattr(self, color + "_cells").append(cell_first)
@@ -378,5 +379,3 @@ class Board:
                 return False
 
         return True
-
-

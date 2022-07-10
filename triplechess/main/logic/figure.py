@@ -51,3 +51,6 @@ class Figure:
         self.number = cell[1:len(cell)]
         self.cell_str = cell
         self.cell = f(self.letter + self.number)
+    #
+    # def __str__(self):
+    #
