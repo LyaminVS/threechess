@@ -71,7 +71,7 @@
     border-radius: 5px;
     z-index: 3;
 }
-a{
+/* a{
     position: absolute;
     width: 5.31%;
     height: 1.66%;
@@ -96,7 +96,7 @@ p{
     border-radius: 12px;
     z-index: 3;
 
-}
+} */
 .button1{
     position: absolute;
     width: 60%;
@@ -144,4 +144,39 @@ p{
     font-size: 100%;
     line-height: 60%;
     color: #FFFFFF;
+}
+.list_games_wrapper{
+    position: absolute;
+    transform: translate(50%, 0%);
+    right: 50%;
+    width: 80%;
+    height: fit-content;
+    border: 2px solid black;
+}
+
+.one_game_wrapper{
+    position: relative;
+    margin: 20px;
+    height: 100px;
+    border: 2px solid black;
+}
+
+.player_in_wrapper{
+    width:250px;
+    margin: 5px 15px;
+}
+
+.btn_join_game{
+    position: absolute;
+    left: 70%;
+    top: 50%;
+    transform: translate(0%, -50%);
+}
+
+.zamochek{
+    position: absolute;
+    height: 20px;
+    left: 90%;
+    top: 50%;
+    transform: translate(0%, -50%);
 }

@@ -6,9 +6,9 @@ from django.conf import settings
 
 
 class Game(models.Model):
-    player_1 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="player_1", on_delete=models.CASCADE)
-    player_2 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="player_2", on_delete=models.CASCADE)
-    player_3 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="player_3", on_delete=models.CASCADE)
+    player_1 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="player_1", on_delete=models.PROTECT, null=True)
+    player_2 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="player_2", on_delete=models.PROTECT, null=True)
+    player_3 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="player_3", on_delete=models.PROTECT, null=True)
 
     board = models.TextField()
 

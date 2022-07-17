@@ -1,3 +1,5 @@
+import json
+
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -62,14 +64,53 @@ def on_open(request):
 
 @csrf_exempt
 def get_list(request):
-    return JsonResponse({})
+    res = []
+    game_list = list(Game.objects.filter(status="in_lobby"))
+
+    for game in game_list:
+        p_1 = game.player_1.username if game.player_1 else game.player_1
+        p_2 = game.player_2.username if game.player_2 else game.player_2
+        p_3 = game.player_3.username if game.player_3 else game.player_3
+        res.append({
+            "player_1": p_1,
+            "player_2": p_2,
+            "player_3": p_3,
+            "board": game.board,
+            "id": game.id
+        })
+    res = json.dumps(res)
+    return JsonResponse({"games": res})
 
 
 @csrf_exempt
 def new_game(request):
     if request.method == 'POST':
         user = request.user
-        print(main.logic.game.Game())
-        game = Game.create(user, None, None, main.logic.game.Game())
+        game = Game.create(user, None, None, "boardtest")
         game.save()
     return JsonResponse({})
+
+@csrf_exempt
+def join_game(request, room_id):
+    if request.method == 'GET':
+        user = request.user
+        game = Game.objects.get(id=room_id)
+        success = False
+        if not game.player_1:
+            success = True
+            game.player_1 = user
+        elif not game.player_2:
+            success = True
+            game.player_2 = user
+        elif not game.player_3:
+            success = True
+            game.player_3 = user
+        game.save()
+
+        if success:
+            return redirect("/room/" + room_id + "/")
+        else:
+            return redirect("/lobby/")
+
+def join_room(request, room_id):
+    return render(request, 'lobby/room.html')
