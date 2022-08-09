@@ -9,5 +9,6 @@ urlpatterns = [
     path('lobby/new_game/', views.new_game),
     path('', views.on_open),
     path('lobby/room/<room_id>/', views.join_game),
-    path('room/<room_id>/', views.join_room)
+    # path('room/<room_id>/', views.join_room),
+    # path('room/<room_id>/button_pressed_check/', views.button_pressed_check)
 ]

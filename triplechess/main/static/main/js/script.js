@@ -1,12 +1,5 @@
 url = document.location.href
-
-var firstRule = document.styleSheets[0].cssRules[0];
-console.log(34567545)
-console.log(firstRule)
-
-
-roomCode = url.slice(url.length - 2, url.length - 1)
-console.log(roomCode)
+roomCode = url.split("/")[url.split("/").length - 2]
 var connectionString = 'ws://' + window.location.host + '/ws/board/' + roomCode + '/';
 var gameSocket = new WebSocket(connectionString);
 connect();
@@ -74,6 +67,7 @@ function connect() {
     gameSocket.onopen = function open() {
         gameSocket.send(JSON.stringify({
             "type": "START",
+            "room_id": roomCode,
         }));
     };
 
@@ -196,6 +190,7 @@ function img_from_type(type, color){
 function get_board(board){
     gameSocket.send(JSON.stringify({
         "type": "GET_BOARD",
+        "room_id": roomCode,
     }));
 }
 
@@ -292,7 +287,6 @@ function get_dots(letter, number){
 
 $(document).on("click", ".point", function() {
     if (player_turn == player_color){
-        
         if (!$(this).attr("class").split(" ").includes("eat_point")){
             cell = $(this).attr("id")
             var letter = cell.slice(0, 1)
@@ -309,7 +303,8 @@ $(document).on("click", ".point", function() {
             $(".point").remove()
             gameSocket.send(JSON.stringify({
                 "type": "MOVE",
-                "cell": cell
+                "cell": cell,
+                "room_id": roomCode,
             }));
         }
     }
@@ -334,7 +329,8 @@ $(document).on("click", ".eat_point", function(){
         $(".point").remove()
         gameSocket.send(JSON.stringify({
             "type": "CHANGE_POSITION",
-            "cell": cell
+            "cell": cell,
+            "room_id": roomCode,
         }));
     }
 })

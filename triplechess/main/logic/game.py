@@ -1,3 +1,4 @@
+import jsonpickle
 from .board import Board
 from .consts import TURN_CHANGE
 
@@ -151,6 +152,11 @@ class Game:
     #             break
     #
 
-    # FIXME написать __str__ и написать метод класс для создания объекта из строки
-    def __str__(self):
-        pass
+    def game_to_json(self):
+        return jsonpickle.encode(self)
+
+    @classmethod
+    def json_to_game(cls, json):
+        return jsonpickle.decode(json)
+
+

@@ -7,7 +7,9 @@ from django.views.decorators.csrf import csrf_exempt
 from .forms import UserRegistrationForm, LoginForm
 from django.contrib.auth import authenticate, login
 from main.models import Game
-import main.logic.game
+from main.logic.game import Game as GameClass
+
+
 # Create your views here.
 
 def index(request):
@@ -47,9 +49,11 @@ def user_login(request):
                     login(request, user)
                     return redirect("/lobby/")
             else:
-                return render(request, 'lobby/login.html', {'form': form, 'borders_login': "red", 'borders_password': "red"})
+                return render(request, 'lobby/login.html',
+                              {'form': form, 'borders_login': "red", 'borders_password': "red"})
         else:
-            return render(request, 'lobby/login.html', {'form': form, 'borders_login': "red", 'borders_password': "red"})
+            return render(request, 'lobby/login.html',
+                          {'form': form, 'borders_login': "red", 'borders_password': "red"})
     else:
         form = LoginForm()
     return render(request, 'lobby/login.html', {'form': form})
@@ -86,31 +90,81 @@ def get_list(request):
 def new_game(request):
     if request.method == 'POST':
         user = request.user
-        game = Game.create(user, None, None, "boardtest")
+        new_g = GameClass().game_to_json()
+        game = Game.create(user, None, None, new_g)
         game.save()
     return JsonResponse({})
 
+
 @csrf_exempt
 def join_game(request, room_id):
-    if request.method == 'GET':
+    if request.method == 'GET' and request.user.is_authenticated:
         user = request.user
         game = Game.objects.get(id=room_id)
         success = False
-        if not game.player_1:
-            success = True
-            game.player_1 = user
-        elif not game.player_2:
-            success = True
-            game.player_2 = user
-        elif not game.player_3:
-            success = True
-            game.player_3 = user
-        game.save()
-
+        if not (game.player_1 == user or game.player_2 == user or game.player_3 == user):
+            if not game.player_1:
+                success = True
+                game.player_1 = user
+            elif not game.player_2:
+                success = True
+                game.player_2 = user
+            elif not game.player_3:
+                success = True
+                game.player_3 = user
+            game.save()
+        else:
+            return redirect("/room/" + room_id + "/")
         if success:
             return redirect("/room/" + room_id + "/")
         else:
             return redirect("/lobby/")
+    else:
+        return redirect("/login/")
 
-def join_room(request, room_id):
-    return render(request, 'lobby/room.html')
+
+# def join_room(request, room_id):
+#     if request.method == 'GET' and request.user.is_authenticated:
+#         user = request.user
+#         res = {}
+#         game = Game.objects.get(id=room_id)
+#         if game.player_1 == user or game.player_2 == user or game.player_3 == user:
+#             res["player_1_name"] = game.player_1.username if game.player_1 else None
+#             res["player_2_name"] = game.player_2.username if game.player_2 else None
+#             res["player_3_name"] = game.player_3.username if game.player_3 else None
+#             if game.player_1 == user:
+#                 res["player_num"] = 1
+#             if game.player_2 == user:
+#                 res["player_num"] = 2
+#             if game.player_3 == user:
+#                 res["player_num"] = 3
+#             return render(request, 'lobby/room.html', res)
+#     return redirect("../../login/")
+#
+#
+# @csrf_exempt
+# def button_pressed_check(request, room_id):
+#     if request.method == 'POST' and request.user.is_authenticated:
+#         user = request.user
+#         game = Game.objects.get(id=room_id)
+#         data = request.POST.dict()
+#         if int(data["player"]) == 1 and game.player_1 == user:
+#             if game.ready_1 == 0:
+#                 game.ready_1 = 1
+#                 game.color_1 = data["radio"]
+#             else:
+#                 game.ready_1 = 0
+#         if int(data["player"]) == 2 and game.player_2 == user:
+#             if game.ready_2 == 0:
+#                 game.ready_2 = 1
+#                 game.color_2 = data["radio"]
+#             else:
+#                 game.ready_2 = 0
+#         if int(data["player"]) == 3 and game.player_3 == user:
+#             if game.ready_3 == 0:
+#                 game.ready_3 = 1
+#                 game.color_3 = data["radio"]
+#             else:
+#                 game.ready_3 = 0
+#         game.save()
+#         return JsonResponse({})

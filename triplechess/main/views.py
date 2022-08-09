@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 # Create your views here.
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -6,7 +6,10 @@ from .logic import game
 
 
 def index(request, room_code):
-    return render(request, 'main/main.html')
+    if request.user.is_authenticated:
+        return render(request, 'main/main.html')
+    else:
+        return redirect("../login/")
 
 
 @csrf_exempt

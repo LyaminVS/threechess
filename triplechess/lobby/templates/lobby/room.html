@@ -2,5 +2,137 @@
 {% block title %}Log-in{% endblock %}
 {% block body %}
 {% load static %}
+<div class="room_wrapper">
+    <div class="player_wrapper">
+        <p class="player_text" id="player_name_1">
+            {% if player_1_name %}
+                {{ player_1_name }}
+            {% else %}
+                Игрок 1
+            {% endif %}
+        </p>
+        <div class="radio_wrapper" id="radio_wrapper_1">
+        {% ifequal player_num 1 %}
+        <div class="form-check">
+          <input class="form-check-input" name="radio_1" type="radio" id="radio_base_1" value="random">
+          <label class="form-check-label" for="radio_base_1">
+            нот селектед
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" name="radio_1" type="radio" id="radio_white_1" value="white">
+          <label class="form-check-label" for="radio_white_1">
+            Вайт
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" name="radio_1" type="radio" id="radio_black_1" value="black">
+          <label class="form-check-label" for="radio_black_1">
+            Блэк
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" name="radio_1" type="radio" id="radio_red_1" value="red">
+          <label class="form-check-label" for="radio_red_1">
+            Рэд
+          </label>
+        </div>
+        {% endifequal %}
+        </div>
 
+    <button type="button" class="btn btn-dark" id="btn_ready_1"
+                {% ifnotequal player_num 1 %}
+                    disabled
+                {% endifnotequal %}
+    >Темный</button>
+    </div>
+    <div class="player_wrapper">
+        <p class="player_text" id="player_name_2">
+            {% if player_2_name %}
+                {{ player_2_name }}
+            {% else %}
+                Игрок 2
+            {% endif %}
+        </p>
+        <div class="radio_wrapper" id="radio_wrapper_2">
+        {% ifequal player_num 2 %}
+        <div class="form-check">
+          <input class="form-check-input" name="radio_2" type="radio" id="radio_base_2" value="random">
+          <label class="form-check-label" for="radio_base_2">
+            нот селектед
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" name="radio_2" type="radio" id="radio_white_2" value="white">
+          <label class="form-check-label" for="radio_white_2">
+            Вайт
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" name="radio_2" type="radio" id="radio_black_2" value="black">
+          <label class="form-check-label" for="radio_black_2">
+            Блэк
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" name="radio_2" type="radio" id="radio_red_2" value="red">
+          <label class="form-check-label" for="radio_red_2">
+            Рэд
+          </label>
+        </div>
+        {% endifequal %}
+        </div>
+        <button type="button" class="btn btn-dark" id="btn_ready_2"
+            {% ifnotequal player_num 2 %}
+                 disabled
+            {% endifnotequal %}
+        >Темный</button>
+    </div>
+    <div class="player_wrapper">
+        <p class="player_text" id="player_name_3">
+            {% if player_3_name %}
+                {{ player_3_name }}
+            {% else %}
+                Игрок 3
+            {% endif %}
+        </p>
+        <div class="radio_wrapper" id="radio_wrapper_3">
+        {% ifequal player_num 3 %}
+        <div class="form-check">
+          <input class="form-check-input" name="radio_3" type="radio" id="radio_base_3" value="random">
+          <label class="form-check-label" for="radio_base_3">
+            нот селектед
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" name="radio_3" type="radio" id="radio_white_3" value="white">
+          <label class="form-check-label" for="radio_white_3">
+            Вайт
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" name="radio_3" type="radio" id="radio_black_3" value="black">
+          <label class="form-check-label" for="radio_black_3">
+            Блэк
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" name="radio_3" type="radio" id="radio_red_3" value="red">
+          <label class="form-check-label" for="radio_red_3">
+            Рэд
+          </label>
+        </div>
+        {% endifequal %}
+        </div>
+        <button type="button" class="btn btn-dark" id="btn_ready_3"
+            {% ifnotequal player_num 3 %}
+                 disabled
+            {% endifnotequal %}
+        >Темный</button>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+{% load static %}
+    <script src="{% static 'lobby/js/cons.js' %}"></script>
 {% endblock %}

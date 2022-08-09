@@ -10,7 +10,7 @@
         <label for="password" class="password_label">password</label><input type="text" name="password" id="id_password" class='password_input input_' style= 'border-color: {{ borders_password }};'>
         {% csrf_token %}
         {{ errors }}
-        <p><input type="submit" value="ВОЙТИ" class="button1"></p>
+        <p id="enter_btn"><input type="submit" value="ВОЙТИ" class="button1"></p>
     </form>
     <a href="/register">регистрация</a>
     <div class="reg_button"> </div>

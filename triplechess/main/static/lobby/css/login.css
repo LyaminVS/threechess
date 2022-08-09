@@ -85,8 +85,8 @@
     line-height: 60%;
     color: #25E7A1;
 
-}
-p{
+} */
+#enter_btn{
     position: absolute;
     width: 11.46%;
     height: 6.48%;
@@ -96,7 +96,7 @@ p{
     border-radius: 12px;
     z-index: 3;
 
-} */
+}
 .button1{
     position: absolute;
     width: 60%;
@@ -179,4 +179,21 @@ p{
     left: 90%;
     top: 50%;
     transform: translate(0%, -50%);
+}
+
+.room_wrapper{
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    border: 2px solid black;
+    height: 400px;
+    width: 90%;
+    display: flex;
+}
+
+.player_wrapper{
+    border: 2px solid black;
+    width: 30%;
+    margin: 20px;
+    padding: 30px;
 }

@@ -10,6 +10,14 @@ class Game(models.Model):
     player_2 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="player_2", on_delete=models.PROTECT, null=True)
     player_3 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="player_3", on_delete=models.PROTECT, null=True)
 
+    color_1 = models.CharField(max_length=10, default="random")
+    color_2 = models.CharField(max_length=10, default="random")
+    color_3 = models.CharField(max_length=10, default="random")
+
+    ready_1 = models.IntegerField(default=0)
+    ready_2 = models.IntegerField(default=0)
+    ready_3 = models.IntegerField(default=0)
+
     board = models.TextField()
 
     status = models.CharField(max_length=50, default="")
