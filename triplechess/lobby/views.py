@@ -88,12 +88,18 @@ def get_list(request):
 
 @csrf_exempt
 def new_game(request):
-    if request.method == 'POST':
+    if request.method == 'GET' and request.user.is_authenticated:
         user = request.user
         new_g = GameClass().game_to_json()
         game = Game.create(user, None, None, new_g)
         game.save()
-    return JsonResponse({})
+        return JsonResponse({
+            "success": True,
+            "room_id": str(game.id),
+        })
+    return JsonResponse({
+        "success": False,
+    })
 
 
 @csrf_exempt
@@ -114,9 +120,9 @@ def join_game(request, room_id):
                 game.player_3 = user
             game.save()
         else:
-            return redirect("/room/" + room_id + "/")
+            return redirect("../../../board/" + room_id + "/")
         if success:
-            return redirect("/room/" + room_id + "/")
+            return redirect("../../../board/" + room_id + "/")
         else:
             return redirect("/lobby/")
     else:
