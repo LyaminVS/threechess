@@ -2,9 +2,10 @@ url = document.location.href
 roomCode = url.split("/")[url.split("/").length - 2]
 var connectionString = 'ws://' + window.location.host + '/ws/board/' + roomCode + '/';
 var gameSocket = new WebSocket(connectionString);
-connect();
 
-let player_color = ''
+var player_color = undefined
+
+connect();
 let player_turn = 'white'
 
 RED_TURN = {
@@ -64,7 +65,8 @@ BLACK_TURN = {
 }
 
 function connect() {
-    gameSocket.onopen = function open() {
+    gameSocket.onopen = function() {
+        console.log(2313123)
         gameSocket.send(JSON.stringify({
             "type": "START",
             "room_id": roomCode,
@@ -85,6 +87,9 @@ function connect() {
         switch (type) {
             case "START":
                 player_turn = data["turn"]
+                alert(player_color)
+                change_color(player_color)
+
                 break;
             case "END":
                 break;
@@ -199,7 +204,6 @@ function clear_board(){
 }
 
 window.onload = function() {
-    
     let grey_circle = '/static/main/img/peshka_white.png';
     let letters_1 = ['A', 'B', 'C', 'D'];
     let letters_2 = ['E', 'F', 'G', 'H'];
@@ -208,8 +212,21 @@ window.onload = function() {
     let numbers_2 = ['5', '6', '7', '8']
     let numbers_3 = ['9', '10', '11', '12']
     let board = $(".board");
-    gameSocket.onopen = function(board){
-        reset()
+    gameSocket.onopen = function(){
+        $.ajax({
+            type: "POST",
+            url: "get_color/",
+            headers: {
+                "X-CSRFTOKEN": "{{ csrf_token }}",
+            },
+        }).done(function(response){
+            if (response["success"]){
+                player_color = response["color"]
+                change_color(player_color)
+                $(".your_color").text($(".your_color").text() + ' ' + player_color)
+            }
+        })
+
     }    
  };
 
@@ -220,17 +237,9 @@ $(document).on("click", ".cell_item", function() {
         let id = $(this).attr('id')
         let letter = id.slice(0, 1)
         let number = id.slice(1)
-        
-        
         get_dots(letter, number)
     }
 });
-
-function reset(){
-    gameSocket.send(JSON.stringify({
-        "type": "RESET",
-    }));
-}
 
 function paint_dots(dots){
     let red_circle = '/static/main/img/red_circle.png'
@@ -285,7 +294,7 @@ function get_dots(letter, number){
     }
  }
 
-$(document).on("click", ".point", function() {
+$(document).on("click", ".point", async function() {
     if (player_turn == player_color){
         if (!$(this).attr("class").split(" ").includes("eat_point")){
             cell = $(this).attr("id")
@@ -301,39 +310,62 @@ $(document).on("click", ".point", function() {
             }
             cell = letter + number
             $(".point").remove()
-            gameSocket.send(JSON.stringify({
-                "type": "MOVE",
-                "cell": cell,
-                "room_id": roomCode,
-            }));
+            if (await check_user()) {
+                gameSocket.send(JSON.stringify({
+                    "type": "MOVE",
+                    "cell": cell,
+                    "room_id": roomCode,
+                    "color": player_color,
+                }));
+            }
         }
     }
 });
 
-$(document).on("click", ".eat_point", function(){
+$(document).on("click", ".eat_point", async function(){
     if (player_turn == player_color){
         let cell_classes = $(this).attr("class")
         cell_classes = cell_classes.split(" ")
         let cell = cell_classes[cell_classes.length - 1].split("cell_item")[1]
         var letter = cell.slice(0, 1)
         var number = cell.slice(1)
-            if (player_color == "black"){
-                letter = RED_TURN[letter]
-                number = RED_TURN[number]
-            }
-            if (player_color == "red"){
-                letter = BLACK_TURN[letter]
-                number = BLACK_TURN[number]
-            }
-            cell = letter + number
+        if (player_color == "black"){
+            letter = RED_TURN[letter]
+            number = RED_TURN[number]
+        }
+        if (player_color == "red"){
+            letter = BLACK_TURN[letter]
+            number = BLACK_TURN[number]
+        }
+        cell = letter + number
         $(".point").remove()
-        gameSocket.send(JSON.stringify({
-            "type": "CHANGE_POSITION",
-            "cell": cell,
-            "room_id": roomCode,
-        }));
+        if (await check_user()){
+            gameSocket.send(JSON.stringify({
+                "type": "CHANGE_POSITION",
+                "cell": cell,
+                "room_id": roomCode,
+                "color": player_color,
+            }));
+        }
     }
 })
+function check_user() {
+    return new Promise(res => {
+        $.ajax({
+            type: "POST",
+            url: "check_user/",
+            headers: {
+                "X-CSRFTOKEN": "{{ csrf_token }}",
+            },
+            data:{
+                "color": player_color,
+            },
+        }).done(function(response){
+            return res(response["success"])
+        });
+    })
+}
+
 
 $(document).on("click", ".board", function(){
     $(".point").remove()
@@ -343,7 +375,8 @@ $(document).on("click", ".board", function(){
 })
 
 $(document).on("click", "#btn_reset", function(){
-    reset()
+    // reset()
+    alert(player_color)
 })
 
 $(document).on("click", "#btn_white", function(){

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 # Create your views here.
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from main.models import Game
 from .logic import game
 
 
@@ -13,34 +14,41 @@ def index(request, room_code):
 
 
 @csrf_exempt
-def change_position(request):
-    data = request.POST
-    cell = data['cell']
-    old_cell, figure, color = game.change_position(cell)
-    return JsonResponse({"old_cell": old_cell, "cell": cell, "figure": figure, "color": color})
+def check_user(request, room_code):
+    if request.user.is_authenticated:
+        data = request.POST.dict()
+        game_obj = Game.objects.get(id=room_code)
+        if (request.user == game_obj.player_1 and game_obj.color_1 == data["color"]) or \
+                (request.user == game_obj.player_2 and game_obj.color_2 == data["color"]) or \
+                (request.user == game_obj.player_3 and game_obj.color_3 == data["color"]):
+            return JsonResponse({
+                "success": True,
+            })
+    return JsonResponse({
+        "success": False,
+    })
 
 
 @csrf_exempt
-def get_dots(request):
-    data = request.POST
-    letter = data["letter"]
-    number = data["number"]
-    dots = game.get_dots(letter + number)
-    return JsonResponse({"dots": dots})
+def get_color(request, room_code):
+    if request.user.is_authenticated:
+        game_obj = Game.objects.get(id=room_code)
+        if request.user == game_obj.player_1:
+            return JsonResponse({
+                "success": True,
+                "color": game_obj.color_1,
+            })
+        if request.user == game_obj.player_2:
+            return JsonResponse({
+                "success": True,
+                "color": game_obj.color_2,
+            })
+        if request.user == game_obj.player_3:
+            return JsonResponse({
+                "success": True,
+                "color": game_obj.color_3,
+            })
 
-
-@csrf_exempt
-def get_board(request):
-    return JsonResponse({"figures": game.__transform_to_array__()})
-
-
-@csrf_exempt
-def reset(request):
-    game.reset()
-    return JsonResponse({})
-
-
-@csrf_exempt
-def reset_dots(request):
-    game.selected_figure = None
-    return JsonResponse({})
+    return JsonResponse({
+        "success": False,
+    })

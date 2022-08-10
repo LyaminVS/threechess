@@ -4,19 +4,6 @@
 главная
 {% endblock %}
 
-{% block header %}
-{% load static %}
-    <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
-      <h5 class="my-0 mr-md-auto font-weight-normal">Company name</h5>
-      <nav class="my-2 my-md-0 mr-md-3">
-        <a class="p-2 text-dark" href="#">Features</a>
-        <a class="p-2 text-dark" href="#">Enterprise</a>
-        <a class="p-2 text-dark" href="#">Support</a>
-        <a class="p-2 text-dark" href="#">Pricing</a>
-      </nav>
-      <a class="btn btn-outline-primary" href="#">Sign up</a>
-    </div>
-{% endblock %}
 
 {% block body %}
 {% load static %}
@@ -27,11 +14,9 @@
         </div>
     </div>
 
-    <button type="button" id="btn_white" class="btn btn-primary">Главный</button>
-    <button type="button" id="btn_black" class="btn btn-secondary">Вторичный</button>
-    <button type="button" id="btn_red" class="btn btn-danger">Опасность</button>
-    <button type="button" id="btn_reset" class="btn btn-success">Успех</button>
-
+    <div class="color_label_wrapper">
+        <h1 class="your_color">Ваш цвет:</h1>
+    </div>
 
 
 {% endblock %}
