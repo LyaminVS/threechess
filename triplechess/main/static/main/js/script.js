@@ -84,12 +84,9 @@ function connect() {
         let data = JSON.parse(e.data);
         data = data["payload"];
         let type = data["type"];
+        // alert(type)
         switch (type) {
             case "START":
-                player_turn = data["turn"]
-                alert(player_color)
-                change_color(player_color)
-
                 break;
             case "END":
                 break;
@@ -136,7 +133,6 @@ function connect() {
                 break;
             case "CHANGE_COLOR":
                 get_board($(".board"))
-                // $("#btn_" + data["color"]).remove()
                 break;
             default:
                 break;
@@ -310,7 +306,8 @@ $(document).on("click", ".point", async function() {
             }
             cell = letter + number
             $(".point").remove()
-            if (await check_user()) {
+            // cond = await check_user()
+            if (true) {
                 gameSocket.send(JSON.stringify({
                     "type": "MOVE",
                     "cell": cell,
@@ -346,7 +343,9 @@ $(document).on("click", ".eat_point", async function(){
                 "room_id": roomCode,
                 "color": player_color,
             }));
+            
         }
+        
     }
 })
 function check_user() {
