@@ -84,7 +84,6 @@ function connect() {
         let data = JSON.parse(e.data);
         data = data["payload"];
         let type = data["type"];
-        // alert(type)
         switch (type) {
             case "START":
                 break;
@@ -120,7 +119,6 @@ function connect() {
                 $(".old_cell").remove()
                 let selected_figure = data["selected_figure"]
                 if (selected_figure){
-                    alert(selected_figure)
                     let letter = selected_figure.slice(0, 1)
                     let number = selected_figure.slice(1)
                     if (player_color == "black"){
@@ -137,7 +135,6 @@ function connect() {
             case "GET_DOTS":
                 $(".point").remove()
                 dots = data["dots"]
-                alert(dots)
                 paint_dots(dots)
                 break;
             case "CHANGE_POSITION":
@@ -289,9 +286,7 @@ function paint_dots(dots){
 }
 
 function get_dots(letter, number, ignore_duplication = false){
-    alert("wwewewwewe")
     if ($("#" + letter + number).hasClass(player_color)){
-        alert("tetetete")
         if (player_color == "black"){
             letter = RED_TURN[letter]
             number = RED_TURN[number]
@@ -395,7 +390,6 @@ $(document).on("click", ".board", function(){
 })
 
 $(document).on("click", "#btn_reset", function(){
-    // reset()
     alert(player_color)
 })
 
