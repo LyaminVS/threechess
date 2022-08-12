@@ -118,10 +118,26 @@ function connect() {
                     
                 });
                 $(".old_cell").remove()
+                let selected_figure = data["selected_figure"]
+                if (selected_figure){
+                    alert(selected_figure)
+                    let letter = selected_figure.slice(0, 1)
+                    let number = selected_figure.slice(1)
+                    if (player_color == "black"){
+                        letter = BLACK_TURN[letter]
+                        number = BLACK_TURN[number]
+                    }
+                    if (player_color == "red"){
+                        letter = RED_TURN[letter]
+                        number = RED_TURN[number]
+                    }
+                    get_dots(letter, number, true)
+                }
                 break;
             case "GET_DOTS":
                 $(".point").remove()
                 dots = data["dots"]
+                alert(dots)
                 paint_dots(dots)
                 break;
             case "CHANGE_POSITION":
@@ -192,6 +208,7 @@ function get_board(board){
     gameSocket.send(JSON.stringify({
         "type": "GET_BOARD",
         "room_id": roomCode,
+        "color": player_color,
     }));
 }
 
@@ -271,8 +288,10 @@ function paint_dots(dots){
     });
 }
 
-function get_dots(letter, number){
+function get_dots(letter, number, ignore_duplication = false){
+    alert("wwewewwewe")
     if ($("#" + letter + number).hasClass(player_color)){
+        alert("tetetete")
         if (player_color == "black"){
             letter = RED_TURN[letter]
             number = RED_TURN[number]
@@ -286,6 +305,8 @@ function get_dots(letter, number){
             "type": "GET_DOTS",
             'letter': letter,
             'number': number,
+            'color': player_color,
+            'ignore_duplication': ignore_duplication,
         }));
     }
  }
@@ -306,8 +327,7 @@ $(document).on("click", ".point", async function() {
             }
             cell = letter + number
             $(".point").remove()
-            // cond = await check_user()
-            if (true) {
+            if (await check_user()) {
                 gameSocket.send(JSON.stringify({
                     "type": "MOVE",
                     "cell": cell,
@@ -370,6 +390,7 @@ $(document).on("click", ".board", function(){
     $(".point").remove()
     gameSocket.send(JSON.stringify({
         "type": "RESET_DOTS",
+        "color": player_color,
     }));
 })
 
