@@ -90,7 +90,11 @@ function connect() {
             case "END":
                 break;
             case "MOVE":
-                get_board($(".board"))
+                if (data["success"]){
+                    get_board($(".board"))
+                }else{
+                    alert("Логотип хакеры еееееееее")
+                }
                 break;
             case "GET_BOARD":
                 $(".cell_item").addClass("old_cell")
@@ -138,7 +142,11 @@ function connect() {
                 paint_dots(dots)
                 break;
             case "CHANGE_POSITION":
-                get_board($(".board"))
+                if (data["success"]){
+                    get_board($(".board"))
+                }else{
+                    alert("Логотип хакеры еееееееее")
+                }
                 break;
             case "RESET":
                 clear_board()
@@ -389,24 +397,6 @@ $(document).on("click", ".board", function(){
     }));
 })
 
-$(document).on("click", "#btn_reset", function(){
-    alert(player_color)
-})
-
-$(document).on("click", "#btn_white", function(){
-    player_color = "white"
-    change_color(player_color)
-})
-
-$(document).on("click", "#btn_black", function(){
-    player_color = "black"
-    change_color(player_color)
-})
-
-$(document).on("click", "#btn_red", function(){
-    player_color = "red"
-    change_color(player_color)
-})
 
 function change_color(color){
     gameSocket.send(JSON.stringify({

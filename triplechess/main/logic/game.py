@@ -160,3 +160,11 @@ class Game:
     @classmethod
     def json_to_game(cls, json):
         return jsonpickle.decode(json)
+
+    def is_color_right(self, color):
+        return self.turn == color
+
+    def is_turn_legal(self, cell, color):
+        selected_figure = self.selected_figures[color]
+        dots = self.board.__update_dots_2__(selected_figure)
+        return any(cell in dots[i] for i in range(len(dots)))

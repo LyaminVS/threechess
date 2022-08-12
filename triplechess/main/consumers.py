@@ -15,6 +15,7 @@ class Chess(AsyncJsonWebsocketConsumer):
 
     def get_board_res(self):
         return {
+            "success": True,
             "turn": self.game.turn,
             "figures": self.game.__transform_to_array__(),
             "type": "GET_BOARD"
@@ -56,15 +57,16 @@ class Chess(AsyncJsonWebsocketConsumer):
         if request_type == "MOVE":
             cell = response.get('cell')
             color = response.get('color')
-            self.game.change_turn()
-            self.game.change_position(cell, color)
-            res = self.get_board_res()
-            await self.set_game(response.get('room_id'), self.game)
-            res["type"] = "MOVE"
-            await self.channel_layer.group_send(self.room_group_name, {
-                "payload": res,
-                "type": "send_message"
-            })
+            if self.game.is_color_right(color) and self.game.is_turn_legal(cell, color):
+                self.game.change_turn()
+                self.game.change_position(cell, color)
+                res = self.get_board_res()
+                await self.set_game(response.get('room_id'), self.game)
+                res["type"] = "MOVE"
+                await self.channel_layer.group_send(self.room_group_name, {
+                    "payload": res,
+                    "type": "send_message"
+                })
 
         if request_type == "GET_BOARD":
             color = response.get("color")
@@ -81,6 +83,10 @@ class Chess(AsyncJsonWebsocketConsumer):
             await self.send(text_data=json.dumps({
                 "payload": res,
             }))
+        await self.channel_layer.group_send(self.room_group_name, {
+            "payload": {"success": False},
+            "type": "send_message"
+        })
 
         if request_type == "GET_DOTS":
             letter = response.get("letter")
@@ -109,13 +115,18 @@ class Chess(AsyncJsonWebsocketConsumer):
         if request_type == "CHANGE_POSITION":
             cell = response.get('cell')
             color = response.get('color')
-            self.game.change_turn()
-            self.game.change_position(cell, color)
-            res = self.get_board_res()
-            res["type"] = "CHANGE_POSITION"
-            await self.set_game(response.get('room_id'), self.game)
+            if self.game.is_color_right(color) and self.game.is_turn_legal(cell, color):
+                self.game.change_turn()
+                self.game.change_position(cell, color)
+                res = self.get_board_res()
+                res["type"] = "CHANGE_POSITION"
+                await self.set_game(response.get('room_id'), self.game)
+                await self.channel_layer.group_send(self.room_group_name, {
+                    "payload": res,
+                    "type": "send_message"
+                })
             await self.channel_layer.group_send(self.room_group_name, {
-                "payload": res,
+                "payload": {"success": False},
                 "type": "send_message"
             })
 
