@@ -10,8 +10,6 @@ class Figure:
         self.is_walked = False
         self.cell = f(self.letter + self.number)
 
-
-
     def __check__(self, cell, white, black, red, grey):
         dots_save_temp = []
         dots_eat_temp = []
@@ -51,6 +49,3 @@ class Figure:
         self.number = cell[1:len(cell)]
         self.cell_str = cell
         self.cell = f(self.letter + self.number)
-    #
-    # def __str__(self):
-    #

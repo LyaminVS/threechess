@@ -7,6 +7,11 @@ from main.models import Game
 
 
 class Chess(AsyncJsonWebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.game = None
+        self.room_name = None
+        self.room_group_name = None
 
     def get_board_res(self):
         return {
@@ -15,12 +20,10 @@ class Chess(AsyncJsonWebsocketConsumer):
             "type": "GET_BOARD"
         }
 
-
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_code']
         self.room_group_name = 'room_%s' % self.room_name
 
-        # Join room group
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
@@ -39,8 +42,8 @@ class Chess(AsyncJsonWebsocketConsumer):
         Get the event and send the appropriate event
         """
         response = json.loads(text_data)
-        type = response.get('type')
-        if type == "START":
+        request_type = response.get('type')
+        if request_type == "START":
             self.game = await self.get_game(response.get("room_id"))
             res = {
                 "type": "START",
@@ -49,10 +52,12 @@ class Chess(AsyncJsonWebsocketConsumer):
             await self.send(text_data=json.dumps({
                 "payload": res,
             }))
-        if type == "MOVE":
+
+        if request_type == "MOVE":
             cell = response.get('cell')
+            color = response.get('color')
             self.game.change_turn()
-            self.game.change_position(cell)
+            self.game.change_position(cell, color)
             res = self.get_board_res()
             await self.set_game(response.get('room_id'), self.game)
             res["type"] = "MOVE"
@@ -60,16 +65,29 @@ class Chess(AsyncJsonWebsocketConsumer):
                 "payload": res,
                 "type": "send_message"
             })
-        if type == "GET_BOARD":
+
+        if request_type == "GET_BOARD":
+            color = response.get("color")
+            selected_figure_temp = None
+            if self.game:
+                selected_figure_temp = self.game.selected_figures[color]
             self.game = await self.get_game(response.get("room_id"))
+            self.game.selected_figures[color] = selected_figure_temp
+            if selected_figure_temp:
+                selected_figure_temp = selected_figure_temp.cell_str
+            await self.set_game(response.get("room_id"), self.game)
             res = self.get_board_res()
+            res["selected_figure"] = selected_figure_temp
             await self.send(text_data=json.dumps({
                 "payload": res,
             }))
-        if type == "GET_DOTS":
+
+        if request_type == "GET_DOTS":
             letter = response.get("letter")
             number = response.get("number")
-            dots = self.game.get_dots(letter + number)
+            color = response.get("color")
+            ignore_duplication = response.get("ignore_duplication")
+            dots = self.game.get_dots(letter + number, color, ignore_duplication)
             res = {
                 "type": "GET_DOTS",
                 "dots": dots
@@ -77,18 +95,22 @@ class Chess(AsyncJsonWebsocketConsumer):
             await self.send(text_data=json.dumps({
                 "payload": res,
             }))
-        if type == "RESET_DOTS":
-            self.game.selected_figure = None
+
+        if request_type == "RESET_DOTS":
+            color = response.get('color')
+            self.game.selected_figures[color] = None
             res = {
                 "type": "RESET_DOTS",
             }
             await self.send(text_data=json.dumps({
                 "payload": res,
             }))
-        if type == "CHANGE_POSITION":
+
+        if request_type == "CHANGE_POSITION":
             cell = response.get('cell')
+            color = response.get('color')
             self.game.change_turn()
-            self.game.change_position(cell)
+            self.game.change_position(cell, color)
             res = self.get_board_res()
             res["type"] = "CHANGE_POSITION"
             await self.set_game(response.get('room_id'), self.game)
@@ -96,7 +118,8 @@ class Chess(AsyncJsonWebsocketConsumer):
                 "payload": res,
                 "type": "send_message"
             })
-        if type == "CHANGE_COLOR":
+
+        if request_type == "CHANGE_COLOR":
             color = response.get('color')
             res = {
                 "type": "CHANGE_COLOR",
@@ -123,88 +146,3 @@ class Chess(AsyncJsonWebsocketConsumer):
         game_obj = Game.objects.get(id=room_id)
         game_obj.board = new_game.game_to_json()
         game_obj.save()
-
-# (выбор цветов)
-# class Room(AsyncJsonWebsocketConsumer):
-#     async def connect(self):
-#         self.room_name = self.scope['url_route']['kwargs']['room_code']
-#         self.room_group_name = 'room_%s' % self.room_name
-#
-#         # Join room group
-#         await self.channel_layer.group_add(
-#             self.room_group_name,
-#             self.channel_name
-#         )
-#         await self.accept()
-#
-#     async def disconnect(self, close_code):
-#         await self.channel_layer.group_discard(
-#             self.room_group_name,
-#             self.channel_name
-#         )
-#
-#     async def receive(self, text_data):
-#         """
-#         Receive message from WebSocket.
-#         Get the event and send the appropriate event
-#         """
-#         response = json.loads(text_data)
-#         type = response.get('type')
-#         if type == "START":
-#             room_id = response.get("roomCode")
-#             player_1, player_2, player_3, color_1, color_2, color_3, ready_1, ready_2, ready_3 = await self.get_game_players(room_id)
-#             res = {
-#                 "type": "UPDATE_USER_NAMES",
-#                 "player_1_name": player_1.username if player_1 else None,
-#                 "player_2_name": player_2.username if player_2 else None,
-#                 "player_3_name": player_3.username if player_3 else None,
-#                 "player_1_color": color_1,
-#                 "player_2_color": color_2,
-#                 "player_3_color": color_3,
-#                 "player_1_ready": ready_1,
-#                 "player_2_ready": ready_2,
-#                 "player_3_ready": ready_3,
-#             }
-#             await self.channel_layer.group_send(self.room_group_name, {
-#                 "payload": res,
-#                 "type": "send_message"
-#             })
-#         if type == "UPDATE_RADIO":
-#             room_id = response.get("roomCode")
-#             color_1, color_2, color_3 = await self.get_game_colors(room_id)
-#             ready_1, ready_2, ready_3 = await self.get_game_readies(room_id)
-#             res = {
-#                 "type": "UPDATE_RADIO",
-#                 "player_1_color": color_1,
-#                 "player_2_color": color_2,
-#                 "player_3_color": color_3,
-#                 "player_1_ready": ready_1,
-#                 "player_2_ready": ready_2,
-#                 "player_3_ready": ready_3,
-#             }
-#             await self.channel_layer.group_send(self.room_group_name, {
-#                 "payload": res,
-#                 "type": "send_message"
-#             })
-#
-#     async def send_message(self, res):
-#         """ Receive message from room group """
-#         # Send message to WebSocket
-#         await self.send(text_data=json.dumps({
-#             "payload": res["payload"],
-#         }))
-#
-#     @database_sync_to_async
-#     def get_game_players(self, room_id):
-#         game_obj = Game.objects.get(id=room_id)
-#         return game_obj.player_1, game_obj.player_2, game_obj.player_3, game_obj.color_1, game_obj.color_2, game_obj.color_3, game_obj.ready_1, game_obj.ready_2, game_obj.ready_3
-#
-#     @database_sync_to_async
-#     def get_game_colors(self, room_id):
-#         game_obj = Game.objects.get(id=room_id)
-#         return game_obj.color_1, game_obj.color_2, game_obj.color_3
-#
-#     @database_sync_to_async
-#     def get_game_readies(self, room_id):
-#         game_obj = Game.objects.get(id=room_id)
-#         return game_obj.ready_1, game_obj.ready_2, game_obj.ready_3
