@@ -233,18 +233,23 @@ window.onload = function() {
     gameSocket.onopen = function(){
         $.ajax({
             type: "POST",
-            url: "get_color/",
+            url: "get_color_and_ready/",
             headers: {
                 "X-CSRFTOKEN": "{{ csrf_token }}",
             },
         }).done(function(response){
             if (response["success"]){
                 player_color = response["color"]
+                player_ready = response["ready"]
                 change_color(player_color)
+                update_ready(player_ready)
+                if (response["is_started"]){
+                    $(".btn_ready").remove()
+                }
                 $(".your_color").text($(".your_color").text() + ' ' + player_color)
             }
         })
-
+        
     }    
  };
 
@@ -371,7 +376,7 @@ $(document).on("click", ".eat_point", async function(){
         
     }
 })
-function check_user() {
+function check_user(check_game_start = true) {
     return new Promise(res => {
         $.ajax({
             type: "POST",
@@ -380,6 +385,7 @@ function check_user() {
                 "X-CSRFTOKEN": "{{ csrf_token }}",
             },
             data:{
+                "check_game_start": check_game_start ? 1 : 0,
                 "color": player_color,
             },
         }).done(function(response){
@@ -405,4 +411,33 @@ function change_color(color){
     }));
 }
 
+$(document).on("click", "#btn_ready_self", async function () {
+    if(await check_user(false)){
+        $.ajax({
+            type: "POST",
+            url: "toggle_ready/",
+            headers: {
+                "X-CSRFTOKEN": "{{ csrf_token }}",
+            },
+        }).done(function(response){
+            if (response["success"]){
+                player_ready = response["ready"]
+                update_ready(player_ready)
+                if (response["is_started"]){
+                    $(".btn_ready").remove()
+                }
+            }
+        })
+    }
+})
+    
 
+function update_ready(player_ready) {
+    if (player_ready == 0){
+        $("#btn_ready_self").addClass("btn-dark")
+        $("#btn_ready_self").removeClass("btn-light")
+    }else{
+        $("#btn_ready_self").addClass("btn-light")
+        $("#btn_ready_self").removeClass("btn-dark")
+    }
+}
