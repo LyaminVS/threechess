@@ -94,8 +94,10 @@ def new_game(request):
         new_g = GameClass().game_to_json()
         game = Game.create(user, None, None, new_g)
         colors = ["white", "black", "red"]
-
-        game.color_1 = colors[random.randint(0, 2)]
+        random.shuffle(colors)
+        game.color_1 = colors[0]
+        game.color_2 = colors[1]
+        game.color_3 = colors[2]
         game.save()
         return JsonResponse({
             "success": True,
@@ -110,33 +112,25 @@ def new_game(request):
 def join_game(request, room_id):
     if request.method == 'GET' and request.user.is_authenticated:
         user = request.user
-        game = Game.objects.get(id=room_id)
+        if Game.objects.filter(id=room_id).exists():
+            game = Game.objects.get(id=room_id)
+        else:
+            return redirect("/lobby/")
         success = False
         if not (game.player_1 == user or game.player_2 == user or game.player_3 == user):
-            colors = ["white", "black", "red"]
-            if game.color_1 != "random":
-                colors.remove(game.color_1)
-            if game.color_2 != "random":
-                colors.remove(game.color_2)
-            if game.color_3 != "random":
-                colors.remove(game.color_3)
             if not game.player_1:
                 success = True
                 game.player_1 = user
-                game.color_1 = colors[random.randint(0, len(colors) - 1)]
             elif not game.player_2:
                 success = True
                 game.player_2 = user
-                game.color_2 = colors[random.randint(0, len(colors) - 1)]
             elif not game.player_3:
                 success = True
                 game.player_3 = user
-                game.color_3 = colors[random.randint(0, len(colors) - 1)]
             game.save()
         else:
             return redirect("../../../board/" + room_id + "/")
         if success:
-
             return redirect("../../../board/" + room_id + "/")
         else:
             return redirect("/lobby/")

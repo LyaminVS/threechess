@@ -34,6 +34,11 @@ class Chess(AsyncJsonWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
+        game_obj, players, colors = await self.get_game(self.room_name)
+        disconnected_player = self.scope["user"]
+        if disconnected_player in players:
+            index = players.index(disconnected_player)
+            await self.delete_player(index)
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
@@ -66,6 +71,25 @@ class Chess(AsyncJsonWebsocketConsumer):
                     res = self.get_board_res()
                     await self.set_game(response.get('room_id'), self.game)
                     res["type"] = "MOVE"
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        "payload": res,
+                        "type": "send_message"
+                    })
+            await self.channel_layer.group_send(self.room_group_name, {
+                "payload": {"success": False},
+                "type": "send_message"
+            })
+
+        if request_type == "CHANGE_POSITION":
+            cell = response.get('cell')
+            color = response.get('color')
+            if self.check_user(color):
+                if self.game.is_color_right(color) and self.game.is_turn_legal(cell, color):
+                    self.game.change_turn()
+                    self.game.change_position(cell, color)
+                    res = self.get_board_res()
+                    res["type"] = "CHANGE_POSITION"
+                    await self.set_game(response.get('room_id'), self.game)
                     await self.channel_layer.group_send(self.room_group_name, {
                         "payload": res,
                         "type": "send_message"
@@ -119,25 +143,6 @@ class Chess(AsyncJsonWebsocketConsumer):
                 "payload": res,
             }))
 
-        if request_type == "CHANGE_POSITION":
-            cell = response.get('cell')
-            color = response.get('color')
-            if self.check_user(color):
-                if self.game.is_color_right(color) and self.game.is_turn_legal(cell, color):
-                    self.game.change_turn()
-                    self.game.change_position(cell, color)
-                    res = self.get_board_res()
-                    res["type"] = "CHANGE_POSITION"
-                    await self.set_game(response.get('room_id'), self.game)
-                    await self.channel_layer.group_send(self.room_group_name, {
-                        "payload": res,
-                        "type": "send_message"
-                    })
-            await self.channel_layer.group_send(self.room_group_name, {
-                "payload": {"success": False},
-                "type": "send_message"
-            })
-
         if request_type == "CHANGE_COLOR":
             color = response.get('color')
             res = {
@@ -176,3 +181,14 @@ class Chess(AsyncJsonWebsocketConsumer):
                     (user == self.players[2] and self.colors[2] == color):
                 return True
         return False
+
+    @database_sync_to_async
+    def delete_player(self, index):
+        index += 1
+        game_obj = Game.objects.get(id=self.room_name)
+        if game_obj.status == "in_lobby":
+            setattr(game_obj, f"player_{index}", None)
+            if any((game_obj.player_1, game_obj.player_2, game_obj.player_3)):
+                game_obj.save()
+            else:
+                game_obj.delete()

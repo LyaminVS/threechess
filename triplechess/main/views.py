@@ -11,7 +11,7 @@ def index(request, room_code):
     if request.user.is_authenticated:
         return render(request, 'main/main.html')
     else:
-        return redirect("../login/")
+        return redirect("../../login/")
 
 
 @csrf_exempt
