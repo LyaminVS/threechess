@@ -335,14 +335,12 @@ $(document).on("click", ".point", async function() {
             }
             cell = letter + number
             $(".point").remove()
-            if (await check_user()) {
-                gameSocket.send(JSON.stringify({
-                    "type": "MOVE",
-                    "cell": cell,
-                    "room_id": roomCode,
-                    "color": player_color,
-                }));
-            }
+            gameSocket.send(JSON.stringify({
+                "type": "MOVE",
+                "cell": cell,
+                "room_id": roomCode,
+                "color": player_color,
+            }));
         }
     }
 });
@@ -364,16 +362,12 @@ $(document).on("click", ".eat_point", async function(){
         }
         cell = letter + number
         $(".point").remove()
-        if (await check_user()){
-            gameSocket.send(JSON.stringify({
-                "type": "CHANGE_POSITION",
-                "cell": cell,
-                "room_id": roomCode,
-                "color": player_color,
-            }));
-            
-        }
-        
+        gameSocket.send(JSON.stringify({
+            "type": "CHANGE_POSITION",
+            "cell": cell,
+            "room_id": roomCode,
+            "color": player_color,
+        }));
     }
 })
 function check_user(check_game_start = true) {

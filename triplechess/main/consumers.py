@@ -12,6 +12,8 @@ class Chess(AsyncJsonWebsocketConsumer):
         self.game = None
         self.room_name = None
         self.room_group_name = None
+        self.players = [None, None, None]
+        self.colors = [None, None, None]
 
     def get_board_res(self):
         return {
@@ -57,23 +59,28 @@ class Chess(AsyncJsonWebsocketConsumer):
         if request_type == "MOVE":
             cell = response.get('cell')
             color = response.get('color')
-            if self.game.is_color_right(color) and self.game.is_turn_legal(cell, color):
-                self.game.change_turn()
-                self.game.change_position(cell, color)
-                res = self.get_board_res()
-                await self.set_game(response.get('room_id'), self.game)
-                res["type"] = "MOVE"
-                await self.channel_layer.group_send(self.room_group_name, {
-                    "payload": res,
-                    "type": "send_message"
-                })
+            if self.check_user(color):
+                if self.game.is_color_right(color) and self.game.is_turn_legal(cell, color):
+                    self.game.change_turn()
+                    self.game.change_position(cell, color)
+                    res = self.get_board_res()
+                    await self.set_game(response.get('room_id'), self.game)
+                    res["type"] = "MOVE"
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        "payload": res,
+                        "type": "send_message"
+                    })
+            await self.channel_layer.group_send(self.room_group_name, {
+                "payload": {"success": False},
+                "type": "send_message"
+            })
 
         if request_type == "GET_BOARD":
             color = response.get("color")
             selected_figure_temp = None
             if self.game:
                 selected_figure_temp = self.game.selected_figures[color]
-            self.game = await self.get_game(response.get("room_id"))
+            self.game, self.players, self.colors = await self.get_game(response.get("room_id"))
             self.game.selected_figures[color] = selected_figure_temp
             if selected_figure_temp:
                 selected_figure_temp = selected_figure_temp.cell_str
@@ -115,16 +122,17 @@ class Chess(AsyncJsonWebsocketConsumer):
         if request_type == "CHANGE_POSITION":
             cell = response.get('cell')
             color = response.get('color')
-            if self.game.is_color_right(color) and self.game.is_turn_legal(cell, color):
-                self.game.change_turn()
-                self.game.change_position(cell, color)
-                res = self.get_board_res()
-                res["type"] = "CHANGE_POSITION"
-                await self.set_game(response.get('room_id'), self.game)
-                await self.channel_layer.group_send(self.room_group_name, {
-                    "payload": res,
-                    "type": "send_message"
-                })
+            if self.check_user(color):
+                if self.game.is_color_right(color) and self.game.is_turn_legal(cell, color):
+                    self.game.change_turn()
+                    self.game.change_position(cell, color)
+                    res = self.get_board_res()
+                    res["type"] = "CHANGE_POSITION"
+                    await self.set_game(response.get('room_id'), self.game)
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        "payload": res,
+                        "type": "send_message"
+                    })
             await self.channel_layer.group_send(self.room_group_name, {
                 "payload": {"success": False},
                 "type": "send_message"
@@ -150,10 +158,21 @@ class Chess(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def get_game(self, room_id):
         game_obj = Game.objects.get(id=room_id)
-        return game.Game.json_to_game(game_obj.board)
+        players = (game_obj.player_1, game_obj.player_2, game_obj.player_3)
+        colors = (game_obj.color_1, game_obj.color_2, game_obj.color_3)
+        return game.Game.json_to_game(game_obj.board), players, colors
 
     @database_sync_to_async
     def set_game(self, room_id, new_game):
         game_obj = Game.objects.get(id=room_id)
         game_obj.board = new_game.game_to_json()
         game_obj.save()
+
+    def check_user(self, color):
+        user = self.scope["user"]
+        if user.is_authenticated:
+            if (user == self.players[0] and self.colors[0] == color) or \
+                    (user == self.players[1] and self.colors[1] == color) or \
+                    (user == self.players[2] and self.colors[2] == color):
+                return True
+        return False
