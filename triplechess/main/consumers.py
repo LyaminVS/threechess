@@ -1,4 +1,5 @@
 import json
+import asyncio
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
@@ -38,7 +39,11 @@ class Chess(AsyncJsonWebsocketConsumer):
         disconnected_player = self.scope["user"]
         if disconnected_player in players:
             index = players.index(disconnected_player)
+            await self.disconnect_player(index)
+            await asyncio.sleep(3)
             await self.delete_player(index)
+            await asyncio.sleep(3)
+            await self.delete_game()
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
@@ -52,10 +57,8 @@ class Chess(AsyncJsonWebsocketConsumer):
         response = json.loads(text_data)
         request_type = response.get('type')
         if request_type == "START":
-            self.game = await self.get_game(response.get("room_id"))
             res = {
                 "type": "START",
-                "turn": self.game.turn
             }
             await self.send(text_data=json.dumps({
                 "payload": res,
@@ -185,10 +188,27 @@ class Chess(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def delete_player(self, index):
         index += 1
-        game_obj = Game.objects.get(id=self.room_name)
-        if game_obj.status == "in_lobby":
-            setattr(game_obj, f"player_{index}", None)
-            if any((game_obj.player_1, game_obj.player_2, game_obj.player_3)):
+        if Game.objects.filter(id=self.room_name):
+            game_obj = Game.objects.get(id=self.room_name)
+            if game_obj.status == "in_lobby" and getattr(game_obj, f"disconnected_{index}") == "disconnected":
+                setattr(game_obj, f"player_{index}", None)
                 game_obj.save()
-            else:
+
+    @database_sync_to_async
+    def delete_game(self):
+        if Game.objects.filter(id=self.room_name):
+            game_obj = Game.objects.get(id=self.room_name)
+            if game_obj.status == "in_lobby" and not any((game_obj.player_1, game_obj.player_2, game_obj.player_3)):
                 game_obj.delete()
+
+    @database_sync_to_async
+    def disconnect_player(self, index):
+        index += 1
+        if Game.objects.filter(id=self.room_name):
+            game_obj = Game.objects.get(id=self.room_name)
+            if game_obj.status == "in_lobby":
+                if getattr(game_obj, f"disconnected_{index}") == "connected":
+                    setattr(game_obj, f"disconnected_{index}", "disconnected")
+                elif getattr(game_obj, f"disconnected_{index}") == "reconnected":
+                    setattr(game_obj, f"disconnected_{index}", "connected")
+                game_obj.save()

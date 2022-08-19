@@ -7,11 +7,41 @@ from main.models import Game
 from .logic import game
 
 
-def index(request, room_code):
-    if request.user.is_authenticated:
-        return render(request, 'main/main.html')
+@csrf_exempt
+def join_game(request, room_code):
+    if request.method == 'GET' and request.user.is_authenticated:
+        user = request.user
+        if Game.objects.filter(id=room_code).exists():
+            game_obj = Game.objects.get(id=room_code)
+        else:
+            return redirect("/lobby/")
+        success = False
+        if any(is_player_arr := [getattr(game_obj, f"player_{i}") == user for i in range(1, 4)]):
+            setattr(game_obj, f"disconnected_{is_player_arr.index(True) + 1}", "reconnected")
+            game_obj.save()
+            return render(request, 'main/main.html')
+        else:
+            if not game_obj.player_1:
+                success = True
+                game_obj.player_1 = user
+            elif not game_obj.player_2:
+                success = True
+                game_obj.player_2 = user
+            elif not game_obj.player_3:
+                success = True
+                game_obj.player_3 = user
+            game_obj.save()
+        # else:
+        #     game_obj.disconnected_
+        #     # return redirect("../../../board/" + room_code + "/")
+        #     return render(request, 'main/main.html')
+        if success:
+            # return redirect("../../../board/" + room_code + "/")
+            return render(request, 'main/main.html')
+        else:
+            return redirect("/lobby/")
     else:
-        return redirect("../../login/")
+        return redirect("/login/")
 
 
 @csrf_exempt

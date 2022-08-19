@@ -18,6 +18,10 @@ class Game(models.Model):
     ready_2 = models.IntegerField(default=0)
     ready_3 = models.IntegerField(default=0)
 
+    disconnected_1 = models.CharField(max_length=20, default="connected")
+    disconnected_2 = models.CharField(max_length=20, default="connected")
+    disconnected_3 = models.CharField(max_length=20, default="connected")
+
     board = models.TextField()
 
     status = models.CharField(max_length=50, default="")

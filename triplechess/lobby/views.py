@@ -108,34 +108,6 @@ def new_game(request):
     })
 
 
-@csrf_exempt
-def join_game(request, room_id):
-    if request.method == 'GET' and request.user.is_authenticated:
-        user = request.user
-        if Game.objects.filter(id=room_id).exists():
-            game = Game.objects.get(id=room_id)
-        else:
-            return redirect("/lobby/")
-        success = False
-        if not (game.player_1 == user or game.player_2 == user or game.player_3 == user):
-            if not game.player_1:
-                success = True
-                game.player_1 = user
-            elif not game.player_2:
-                success = True
-                game.player_2 = user
-            elif not game.player_3:
-                success = True
-                game.player_3 = user
-            game.save()
-        else:
-            return redirect("../../../board/" + room_id + "/")
-        if success:
-            return redirect("../../../board/" + room_id + "/")
-        else:
-            return redirect("/lobby/")
-    else:
-        return redirect("/login/")
 
 
 # def join_room(request, room_id):

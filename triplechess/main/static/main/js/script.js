@@ -66,7 +66,6 @@ BLACK_TURN = {
 
 function connect() {
     gameSocket.onopen = function() {
-        console.log(2313123)
         gameSocket.send(JSON.stringify({
             "type": "START",
             "room_id": roomCode,
@@ -222,22 +221,25 @@ function clear_board(){
 }
 
 window.onload = function() {
-    let grey_circle = '/static/main/img/peshka_white.png';
-    let letters_1 = ['A', 'B', 'C', 'D'];
-    let letters_2 = ['E', 'F', 'G', 'H'];
-    let letters_3 = ['K', 'L', 'M', 'N'];
-    let numbers_1 = ['1', '2', '3', '4']
-    let numbers_2 = ['5', '6', '7', '8']
-    let numbers_3 = ['9', '10', '11', '12']
-    let board = $(".board");
     gameSocket.onopen = function(){
-        $.ajax({
-            type: "POST",
-            url: "get_color_and_ready/",
-            headers: {
-                "X-CSRFTOKEN": "{{ csrf_token }}",
-            },
-        }).done(function(response){
+        start_options()
+    }    
+ };
+
+gameSocket.onopen = function() {
+    window.onload = function(){
+        start_options()
+    }    
+ };
+
+function start_options(){
+    $.ajax({
+        type: "POST",
+        url: "get_color_and_ready/",
+        headers: {
+            "X-CSRFTOKEN": "{{ csrf_token }}",
+        },
+        success: function(response){
             if (response["success"]){
                 player_color = response["color"]
                 player_ready = response["ready"]
@@ -248,12 +250,9 @@ window.onload = function() {
                 }
                 $(".your_color").text($(".your_color").text() + ' ' + player_color)
             }
-        })
-        
-    }    
- };
-
-
+        }
+    })
+}
 
 $(document).on("click", ".cell_item", function() {
     if (!($(this).attr("class").split(" ").includes("point"))){

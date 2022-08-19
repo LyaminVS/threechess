@@ -17,5 +17,5 @@ $(document).on("click", "#btn_new_game", function(){
 
 $(document).on("click", ".btn_join_game", function(){
     id = this.id.split("_")[3]
-    document.location = "/lobby/room/" + id + "/"
+    document.location = "/board/" + id + "/"
 })
