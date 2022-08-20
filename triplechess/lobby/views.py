@@ -90,9 +90,8 @@ def get_list(request):
 @csrf_exempt
 def new_game(request):
     if request.method == 'GET' and request.user.is_authenticated:
-        user = request.user
         new_g = GameClass().game_to_json()
-        game = Game.create(user, None, None, new_g)
+        game = Game.create(None, None, None, new_g)
         colors = ["white", "black", "red"]
         random.shuffle(colors)
         game.color_1 = colors[0]
