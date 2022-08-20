@@ -24,19 +24,17 @@ def join_game(request, room_code):
             if not game_obj.player_1:
                 success = True
                 game_obj.player_1 = user
+                game_obj.disconnected_1 = "connected"
             elif not game_obj.player_2:
                 success = True
                 game_obj.player_2 = user
+                game_obj.disconnected_2 = "connected"
             elif not game_obj.player_3:
                 success = True
                 game_obj.player_3 = user
+                game_obj.disconnected_3 = "connected"
             game_obj.save()
-        # else:
-        #     game_obj.disconnected_
-        #     # return redirect("../../../board/" + room_code + "/")
-        #     return render(request, 'main/main.html')
         if success:
-            # return redirect("../../../board/" + room_code + "/")
             return render(request, 'main/main.html')
         else:
             return redirect("/lobby/")
