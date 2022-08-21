@@ -66,7 +66,7 @@ def check_user(request, room_code):
 def get_color_and_ready(request, room_code):
     if request.user.is_authenticated:
         game_obj = Game.objects.get(id=room_code)
-        if request.POST.get("is_spectator"):
+        if request.POST.get("is_spectator") == "1":
             return JsonResponse({
                 "success": True,
                 "is_started": True if game_obj.status == "started" else False,
@@ -146,6 +146,7 @@ def check_start(game_obj):
     else:
         game_obj.status = "in_lobby"
         return False
+
 
 @csrf_exempt
 def first_connect(request, room_code):

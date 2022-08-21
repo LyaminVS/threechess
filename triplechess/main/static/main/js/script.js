@@ -98,6 +98,7 @@ function connect() {
             case "GET_BOARD":
                 $(".cell_item").addClass("old_cell")
                 player_turn = data["turn"]
+                update_turn(player_turn)
                 let figures = data["figures"]
                 figures.forEach(figure => {
                     path = img_from_type(figure[0], figure[1])
@@ -278,6 +279,7 @@ function start_spectator_options(){
                     $(".btn_ready").remove()
                 }
                 $(".your_color").text($(".your_color").text() + ' ' + player_color)
+                $(".is_spectator").text($(".is_spectator").text() + " Yes")
             }
         }
     })
@@ -302,7 +304,9 @@ function start_player_options(){
                 if (response["is_started"]){
                     $(".btn_ready").remove()
                 }
+                console.log(response["color"])
                 $(".your_color").text($(".your_color").text() + ' ' + player_color)
+                $(".is_spectator").text($(".is_spectator").text() + " No")
             }
         }
     })
@@ -457,4 +461,8 @@ function update_ready(player_ready) {
         $("#btn_ready_self").addClass("btn-light")
         $("#btn_ready_self").removeClass("btn-dark")
     }
+}
+
+function update_turn(player_turn) {
+    $(".color_turn").text("Сейчас ход: " + player_turn)
 }
