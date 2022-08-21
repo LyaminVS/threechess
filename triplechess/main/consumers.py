@@ -67,7 +67,7 @@ class Chess(AsyncJsonWebsocketConsumer):
         if request_type == "MOVE":
             cell = response.get('cell')
             color = response.get('color')
-            if self.check_user(color):
+            if self.check_user(color) and await self.status_legal():
                 if self.game.is_color_right(color) and self.game.is_turn_legal(cell, color):
                     self.game.change_turn()
                     self.game.change_position(cell, color)
@@ -86,7 +86,7 @@ class Chess(AsyncJsonWebsocketConsumer):
         if request_type == "CHANGE_POSITION":
             cell = response.get('cell')
             color = response.get('color')
-            if self.check_user(color):
+            if self.check_user(color) and await self.status_legal():
                 if self.game.is_color_right(color) and self.game.is_turn_legal(cell, color):
                     self.game.change_turn()
                     self.game.change_position(cell, color)
@@ -156,6 +156,25 @@ class Chess(AsyncJsonWebsocketConsumer):
                 "payload": res,
             }))
 
+        if request_type == "TOGGLE_READY":
+            color = response.get('color')
+            res = {
+                "type": "TOGGLE_READY",
+            }
+            if self.check_user(color):
+                res.update(await self.toggle_ready())
+                await self.send(text_data=json.dumps({
+                    "payload": res,
+                }))
+                if await self.check_readies():
+                    await self.start_game()
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        "payload": {
+                            "type": "START_GAME"
+                        },
+                        "type": "send_message"
+                    })
+
     async def send_message(self, res):
         """ Receive message from room group """
         # Send message to WebSocket
@@ -212,3 +231,63 @@ class Chess(AsyncJsonWebsocketConsumer):
                 elif getattr(game_obj, f"disconnected_{index}") == "reconnected":
                     setattr(game_obj, f"disconnected_{index}", "connected")
                 game_obj.save()
+
+    @database_sync_to_async
+    def toggle_ready(self):
+        if Game.objects.filter(id=self.room_name):
+            game_obj = Game.objects.get(id=self.room_name)
+        else:
+            return {"success": False}
+        if game_obj.status != "in_lobby":
+            return {"success": False}
+        if self.scope["user"] == game_obj.player_1:
+            game_obj.ready_1 += 1
+            game_obj.ready_1 %= 2
+            game_obj.save()
+            return {
+                "ready_status": game_obj.ready_1,
+                "success": True,
+            }
+        elif self.scope["user"] == game_obj.player_2:
+            game_obj.ready_2 += 1
+            game_obj.ready_2 %= 2
+            game_obj.save()
+            return {
+                "ready_status": game_obj.ready_2,
+                "success": True,
+            }
+        elif self.scope["user"] == game_obj.player_3:
+            game_obj.ready_3 += 1
+            game_obj.ready_3 %= 2
+            game_obj.save()
+            return {
+                "ready_status": game_obj.ready_3,
+                "success": True,
+            }
+        else:
+            return {"success": False}
+
+    @database_sync_to_async
+    def check_readies(self):
+        if Game.objects.filter(id=self.room_name):
+            game_obj = Game.objects.get(id=self.room_name)
+        else:
+            return False
+        if game_obj.ready_1 == game_obj.ready_2 == game_obj.ready_3 == 1:
+            return True
+        return False
+
+    @database_sync_to_async
+    def start_game(self):
+        if Game.objects.filter(id=self.room_name):
+            game_obj = Game.objects.get(id=self.room_name)
+            game_obj.status = "started"
+            game_obj.save()
+
+    @database_sync_to_async
+    def status_legal(self):
+        if Game.objects.filter(id=self.room_name):
+            game_obj = Game.objects.get(id=self.room_name)
+            if game_obj.status == "started":
+                return True
+        return False

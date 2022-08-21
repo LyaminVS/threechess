@@ -154,6 +154,14 @@ function connect() {
             case "CHANGE_COLOR":
                 get_board($(".board"))
                 break;
+            case "TOGGLE_READY":
+                if (data["success"]){
+                    update_ready(data["ready_status"])
+                }
+                break;
+            case "START_GAME":
+                $(".btn_ready").remove()
+                break;
             default:
                 break;
 
@@ -404,24 +412,11 @@ function change_color(color){
     }));
 }
 
-$(document).on("click", "#btn_ready_self", async function () {
-    if(await check_user(false)){
-        $.ajax({
-            type: "POST",
-            url: "toggle_ready/",
-            headers: {
-                "X-CSRFTOKEN": "{{ csrf_token }}",
-            },
-        }).done(function(response){
-            if (response["success"]){
-                player_ready = response["ready"]
-                update_ready(player_ready)
-                if (response["is_started"]){
-                    $(".btn_ready").remove()
-                }
-            }
-        })
-    }
+$(document).on("click", "#btn_ready_self", function () {
+    gameSocket.send(JSON.stringify({
+        "type": "TOGGLE_READY",
+        "color": player_color
+    }));
 })
     
 

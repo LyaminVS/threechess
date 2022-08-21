@@ -68,21 +68,21 @@ def get_color_and_ready(request, room_code):
                 "success": True,
                 "color": game_obj.color_1,
                 "ready": game_obj.ready_1,
-                "is_started": True,
+                "is_started": True if game_obj.status == "started" else False,
             })
         if request.user == game_obj.player_2:
             return JsonResponse({
                 "success": True,
                 "color": game_obj.color_2,
                 "ready": game_obj.ready_2,
-                "is_started": True,
+                "is_started": True if game_obj.status == "started" else False,
             })
         if request.user == game_obj.player_3:
             return JsonResponse({
                 "success": True,
                 "color": game_obj.color_3,
                 "ready": game_obj.ready_3,
-                "is_started": True,
+                "is_started": True if game_obj.status == "started" else False,
             })
 
     return JsonResponse({
