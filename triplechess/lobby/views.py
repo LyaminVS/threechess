@@ -70,8 +70,8 @@ def on_open(request):
 @csrf_exempt
 def get_list(request):
     res = []
-    game_list = list(Game.objects.filter(status="in_lobby"))
-
+    filter_status = request.POST.get("filter_status")
+    game_list = list(Game.objects.filter(status=filter_status))
     for game in game_list:
         p_1 = game.player_1.username if game.player_1 else game.player_1
         p_2 = game.player_2.username if game.player_2 else game.player_2

@@ -1,10 +1,15 @@
-function get_list() {
+let filter_status = "in_lobby"
+
+function get_list(filter_status) {
     $(".point").remove()
     $.ajax({
         type: "POST",
         url: "get_list/",
         headers: {
             "X-CSRFTOKEN": "{{ csrf_token }}"
+        },
+        data:{
+            "filter_status": filter_status,
         },
         success: function (response) {
             wrapper = $(".list_games_wrapper")
@@ -31,8 +36,25 @@ function get_list() {
                 wrapper_2.append('<button class="btn btn-info btn_join_game" id="btn_join_game_' + game.id + '">Инфо</button>')
             });
         }
-
     });
 }
-get_list()
-setInterval(get_list, 5000);
+get_list(filter_status)
+let interval = setInterval(get_list, 5000, filter_status);
+
+$(document).on("click", "#btn_in_lobby_games", function(){
+    $("#btn_started_games").attr("disabled", false)
+    $("#btn_in_lobby_games").attr("disabled", true)
+    filter_status = "in_lobby"
+    get_list(filter_status)
+    clearInterval(interval)
+    interval = setInterval(get_list, 5000, filter_status);
+})
+
+$(document).on("click", "#btn_started_games", function(){
+    $("#btn_started_games").attr("disabled", true)
+    $("#btn_in_lobby_games").attr("disabled", false)
+    filter_status = "started"
+    get_list(filter_status)
+    clearInterval(interval)
+    interval = setInterval(get_list, 5000, filter_status);
+})
