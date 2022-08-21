@@ -34,6 +34,7 @@ function get_list(filter_status) {
                 wrapper_2.append('<div class="player_in_wrapper">Игрок 2: ' + game.player_2 + '</div>')
                 wrapper_2.append('<div class="player_in_wrapper">Игрок 3: ' + game.player_3 + '</div>')
                 wrapper_2.append('<button class="btn btn-info btn_join_game" id="btn_join_game_' + game.id + '">Инфо</button>')
+                wrapper_2.append('<button class="btn btn-warning btn_join_spectator" id="btn_join_spectator_' + game.id + '">Предупреждение</button>')
             });
         }
     });

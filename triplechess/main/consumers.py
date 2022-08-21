@@ -117,10 +117,10 @@ class Chess(AsyncJsonWebsocketConsumer):
             await self.send(text_data=json.dumps({
                 "payload": res,
             }))
-        await self.channel_layer.group_send(self.room_group_name, {
-            "payload": {"success": False},
-            "type": "send_message"
-        })
+        # await self.channel_layer.group_send(self.room_group_name, {
+        #     "payload": {"success": False},
+        #     "type": "send_message"
+        # })
 
         if request_type == "GET_DOTS":
             letter = response.get("letter")

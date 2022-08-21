@@ -230,22 +230,68 @@ function clear_board(){
 
 window.onload = function() {
     gameSocket.onopen = function(){
-        start_options()
+        first_connect()
     }    
  };
 
 gameSocket.onopen = function() {
     window.onload = function(){
-        start_options()
+        first_connect()
     }    
  };
 
-function start_options(){
+function first_connect(){
+    $.ajax({
+        type: "POST",
+        url: "first_connect/",
+        headers: {
+            "X-CSRFTOKEN": "{{ csrf_token }}",
+        },
+        success: function(response){
+            if (response["success"]){
+                if (response["is_spectator"]){
+                    start_spectator_options()
+                }
+                else{
+                    start_player_options()
+                }
+            }
+        }
+    })
+}
+
+function start_spectator_options(){
     $.ajax({
         type: "POST",
         url: "get_color_and_ready/",
         headers: {
             "X-CSRFTOKEN": "{{ csrf_token }}",
+        },
+        data: {
+            "is_spectator": 1,
+        },
+        success: function(response){
+            if (response["success"]){
+                player_color = "white"
+                change_color(player_color)
+                if (response["is_started"]){
+                    $(".btn_ready").remove()
+                }
+                $(".your_color").text($(".your_color").text() + ' ' + player_color)
+            }
+        }
+    })
+}
+
+function start_player_options(){
+    $.ajax({
+        type: "POST",
+        url: "get_color_and_ready/",
+        headers: {
+            "X-CSRFTOKEN": "{{ csrf_token }}",
+        },
+        data: {
+            "is_spectator": 0,
         },
         success: function(response){
             if (response["success"]){
@@ -377,23 +423,6 @@ $(document).on("click", ".eat_point", async function(){
         }));
     }
 })
-function check_user(check_game_start = true) {
-    return new Promise(res => {
-        $.ajax({
-            type: "POST",
-            url: "check_user/",
-            headers: {
-                "X-CSRFTOKEN": "{{ csrf_token }}",
-            },
-            data:{
-                "check_game_start": check_game_start ? 1 : 0,
-                "color": player_color,
-            },
-        }).done(function(response){
-            return res(response["success"])
-        });
-    })
-}
 
 
 $(document).on("click", ".board", function(){

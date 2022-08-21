@@ -11,6 +11,9 @@ from .logic import game
 def join_game(request, room_code):
     if request.method == 'GET' and request.user.is_authenticated:
         user = request.user
+        is_spectator = request.GET.get("is_spectator")
+        if is_spectator == "1":
+            return render(request, 'main/main.html')
         if Game.objects.filter(id=room_code).exists():
             game_obj = Game.objects.get(id=room_code)
         else:
@@ -63,6 +66,11 @@ def check_user(request, room_code):
 def get_color_and_ready(request, room_code):
     if request.user.is_authenticated:
         game_obj = Game.objects.get(id=room_code)
+        if request.POST.get("is_spectator"):
+            return JsonResponse({
+                "success": True,
+                "is_started": True if game_obj.status == "started" else False,
+            })
         if request.user == game_obj.player_1:
             return JsonResponse({
                 "success": True,
@@ -138,3 +146,15 @@ def check_start(game_obj):
     else:
         game_obj.status = "in_lobby"
         return False
+
+@csrf_exempt
+def first_connect(request, room_code):
+    if Game.objects.filter(id=room_code).exists() and request.user.is_authenticated:
+        game_obj = Game.objects.get(id=room_code)
+        return JsonResponse({
+            "success": True,
+            "is_spectator": not any([getattr(game_obj, f"player_{i}") == request.user for i in range(1, 4)]),
+        })
+    return JsonResponse({
+        "success": False
+    })

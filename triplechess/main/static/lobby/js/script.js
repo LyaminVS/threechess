@@ -19,3 +19,8 @@ $(document).on("click", ".btn_join_game", function(){
     id = this.id.split("_")[3]
     document.location = "/board/" + id + "/"
 })
+
+$(document).on("click", ".btn_join_spectator", function(){
+    id = this.id.split("_")[3]
+    document.location = "/board/" + id + "?is_spectator=1"
+})
