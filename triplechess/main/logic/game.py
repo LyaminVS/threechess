@@ -169,7 +169,10 @@ class Game:
                 for j in range(1,9):
                     if getattr(self.board, "peshka_"+peshka_color+"_"+str(j)).cell_str == cell:
                         setattr(self.board, "peshka_"+peshka_color+"_"+str(j), new_figure)
-                        getattr(self.board, peshka_color)[j+7] = new_figure
+                        for k in range(16):
+                            if getattr(self.board, peshka_color)[k].cell_str == cell:
+                                getattr(self.board, peshka_color)[k] = new_figure
+                            break
                         break
 
                 break
