@@ -138,7 +138,6 @@ class Game:
         return self.turn
 
     def __is_peshka_go_through__(self):
-        print("проверка")
 
         colors = ["white", "black", "red"]
         cells = [["12", "8"], ["1", "12"], ["1", "8"]]
@@ -152,7 +151,6 @@ class Game:
         return ""
 
     def __transform_peshka__(self, cell, type):
-        print("запуск трансформации")
         for i in range(len(self.board.all_figures)):
             if self.board.all_figures[i].cell_str == cell:
                 peshka_color = self.board.all_figures[i].color
@@ -177,7 +175,6 @@ class Game:
                                 getattr(self.board, peshka_color)[k] = new_figure
                             break
                         break
-                print("трансформация заершена", peshka_color)
                 break
 
 
