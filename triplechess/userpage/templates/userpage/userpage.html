@@ -1,0 +1,33 @@
+{% extends 'userpage/base.html' %}
+
+{% block title %}
+главная
+{% endblock %}
+
+
+{% block body %}
+{% load static %}
+
+    <div class="userpage_wrapper">
+        <div class="first_line_wrapper">
+            <div class="picture_wrapper">
+                <img id="user_picture" src="{% static 'userpage/img/img.png' %}">
+            </div>
+            <div class="user_information_wrapper">
+                <p>email: {{ request.user.email }}</p>
+                <p>username: {{ request.user.username }}</p>
+                <p>first_name: {{ request.user.first_name }}</p>
+                <p>last_name: {{ request.user.last_name }}</p>
+
+            </div>
+        </div>
+
+        <div class="user_game_list_wrapper">
+
+        </div>
+        <div class="user_rating_wrapper">
+
+        </div>
+    </div>
+
+{% endblock %}
