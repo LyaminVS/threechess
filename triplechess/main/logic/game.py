@@ -138,18 +138,21 @@ class Game:
         return self.turn
 
     def __is_peshka_go_through__(self):
+        print("проверка")
+
         colors = ["white", "black", "red"]
         cells = [["12", "8"], ["1", "12"], ["1", "8"]]
         for i in range(3):
             for j in range(1, 9):
                 peshka = getattr(self.board, "peshka_" + colors[i] + "_" + str(j))
-                if peshka.number in cells[i]:
+                if peshka.number in cells[i] and peshka.type=="Peshka":
                     self.__transform_peshka__(peshka.cell_str, "Horse") #Пешки превращаются в лошадей
                     return peshka.cell_str
 
         return ""
 
     def __transform_peshka__(self, cell, type):
+        print("запуск трансформации")
         for i in range(len(self.board.all_figures)):
             if self.board.all_figures[i].cell_str == cell:
                 peshka_color = self.board.all_figures[i].color
@@ -174,7 +177,7 @@ class Game:
                                 getattr(self.board, peshka_color)[k] = new_figure
                             break
                         break
-
+                print("трансформация заершена", peshka_color)
                 break
 
 
