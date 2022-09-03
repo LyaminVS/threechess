@@ -7,7 +7,6 @@ class Peshka(Figure):
         super(Peshka, self).__init__(cell, color)
         self.__div_cells__()
         self.__first_n_zero_cells__()
-        self.on_road = on_road
         self.type = "Peshka"
 
     def __first_n_zero_cells__(self):

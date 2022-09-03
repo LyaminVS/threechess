@@ -1,7 +1,12 @@
 import jsonpickle
 from .board import Board
 from .consts import TURN_CHANGE
-
+from .tara import Tara as Tara
+from .officer import Officer as Officer
+from .peshka import Peshka as Peshka
+from .queen import Queen as Queen
+from .king import King as King
+from .horse import Horse as Horse
 
 class Game:
     def __init__(self):
@@ -21,6 +26,9 @@ class Game:
             if figure.letter + figure.number == cell:
                 dots = self.board.__update_dots_2__(figure)
                 self.selected_figures[color] = figure
+
+
+
                 return dots
 
     def __transform_to_array__(self):
@@ -114,6 +122,10 @@ class Game:
             if old_cell in self.board.red_cells:
                 self.board.red_cells.remove(old_cell)
                 self.board.red_cells.append(cell)
+
+            self.__is_peshka_go_through__()
+
+
         return old_cell, figure, color
 
     def reset(self):
@@ -132,27 +144,36 @@ class Game:
             for j in range(1, 9):
                 peshka = getattr(self.board, "peshka_" + colors[i] + "_" + str(j))
                 if peshka.number in cells[i]:
+                    self.__transform_peshka__(peshka.cell_str, "Horse") #Пешки превращаются в лошадей
                     return peshka.cell_str
 
         return ""
 
-    # def __transform_peshka__(self, cell, type):
-    #     for i in range(len(self.board.all_figures)):
-    #         if self.board.all_figures[i].cell_str == cell:
-    #             if type=="Queen":
-    #                 queen = Queen(cell,"white")
-    #                 self.board.all_figures[i] = queen
-    #                 self.board.peshka_white_1 = queen
-    #                 self.board.white.append(queen)
-    #             if type=="Tara":
-    #                 self.board.all_figures[i] = Tara(cell,self.board.all_figures[i].color)
-    #             if type=="Horse":
-    #                 self.board.all_figures[i] = Horse(cell,self.board.all_figures[i].color)
-    #             if type=="Officer":
-    #                 self.board.all_figures[i] = Officer(cell,self.board.all_figures[i].color)
-    #             self.board.all_figures[i].is_walked = True
-    #             break
-    #
+    def __transform_peshka__(self, cell, type):
+        for i in range(len(self.board.all_figures)):
+            if self.board.all_figures[i].cell_str == cell:
+                peshka_color = self.board.all_figures[i].color
+                new_figure = None
+
+                if type=="Queen":
+                    new_figure = Queen(cell, peshka_color)
+                if type=="Tara":
+                    new_figure = Tara(cell, peshka_color)
+                if type=="Horse":
+                    new_figure = Horse(cell, peshka_color)
+                if type=="Officer":
+                    new_figure = Officer(cell, peshka_color)
+
+                self.board.all_figures[i] = new_figure
+                self.board.all_figures[i].is_walked = True
+                for j in range(1,9):
+                    if getattr(self.board, "peshka_"+peshka_color+"_"+str(j)).cell_str == cell:
+                        setattr(self.board, "peshka_"+peshka_color+"_"+str(j), new_figure)
+                        getattr(self.board, peshka_color)[j+7] = new_figure
+                        break
+
+                break
+
 
     def game_to_json(self):
         return jsonpickle.encode(self)
