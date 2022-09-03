@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'channels',
     'main',
     'lobby',
+    'userpage'
 ]
 
 MIDDLEWARE = [
