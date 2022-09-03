@@ -457,9 +457,11 @@ function update_ready(player_ready) {
     if (player_ready == 0){
         $("#btn_ready_self").addClass("btn-dark")
         $("#btn_ready_self").removeClass("btn-light")
+        $("#btn_ready_self").text("Темный")
     }else{
         $("#btn_ready_self").addClass("btn-light")
         $("#btn_ready_self").removeClass("btn-dark")
+        $("#btn_ready_self").text("Светлый")
     }
 }
 
