@@ -17,11 +17,21 @@ class Chess(AsyncJsonWebsocketConsumer):
         self.colors = [None, None, None]
 
     def get_board_res(self):
+        g = self.game
+        def _sel_cell(fig):
+            if fig is None:
+                return None
+            return fig.cell_str
         return {
             "success": True,
-            "turn": self.game.turn,
-            "figures": self.game.__transform_to_array__(),
-            "type": "GET_BOARD"
+            "turn": g.turn,
+            "figures": g.__transform_to_array__(),
+            "type": "GET_BOARD",
+            "selected_figures": {
+                "white": _sel_cell(g.selected_figures.get("white")),
+                "black": _sel_cell(g.selected_figures.get("black")),
+                "red": _sel_cell(g.selected_figures.get("red")),
+            },
         }
 
     async def connect(self):

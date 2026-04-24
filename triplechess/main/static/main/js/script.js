@@ -173,6 +173,55 @@ BLACK_TURN = {
     "1": "12"
 }
 
+function applyBoardFromServer(data) {
+    if (!data || !data["figures"]) return
+    $(".board-wrapper > img.cell_item").addClass("old_cell")
+    player_turn = data["turn"]
+    update_turn(player_turn)
+    var figures = data["figures"]
+    figures.forEach(function (figure) {
+        path = img_from_type(figure[0], figure[1])
+        let letter = figure[2].slice(0, 1)
+        let number = figure[2].slice(1)
+        if (player_color == "black") {
+            letter = BLACK_TURN[letter]
+            number = BLACK_TURN[number]
+        }
+        if (player_color == "red") {
+            letter = RED_TURN[letter]
+            number = RED_TURN[number]
+        }
+        if ($("#" + letter + number).attr("src") != path) {
+            set_cell_picture($(".board"), path, letter, number, figure[1])
+        } else {
+            $("#" + letter + number).attr("data-piece-color", figure[1])
+            $("#" + letter + number).removeClass("white black red").addClass(figure[1])
+            $("#" + letter + number).removeClass("old_cell")
+        }
+    })
+    $(".board-wrapper > img.old_cell").remove()
+    var selected_figure = null
+    if (data["selected_figures"] && typeof data["selected_figures"] === "object") {
+        selected_figure = data["selected_figures"][player_color] || null
+    } else if (data["selected_figure"]) {
+        selected_figure = data["selected_figure"]
+    }
+    if (selected_figure && !playPointerDrag) {
+        var letter = selected_figure.slice(0, 1)
+        var number = selected_figure.slice(1)
+        if (player_color == "black") {
+            letter = BLACK_TURN[letter]
+            number = BLACK_TURN[number]
+        }
+        if (player_color == "red") {
+            letter = RED_TURN[letter]
+            number = RED_TURN[number]
+        }
+        get_dots(letter, number, true)
+    }
+    setTimeout(function () { buildSetupHitPolygons() }, 0)
+}
+
 function connect() {
     gameSocket.onopen = function() {
         gameSocket.send(JSON.stringify({
@@ -199,54 +248,13 @@ function connect() {
                 break;
             case "MOVE":
                 if (data["success"]){
-                    get_board($(".board"))
+                    applyBoardFromServer(data)
                 }else{
                     alert("Логотип хакеры еееееееее")
                 }
                 break;
             case "GET_BOARD":
-                $(".board-wrapper > img.cell_item").addClass("old_cell")
-                player_turn = data["turn"]
-                update_turn(player_turn)
-                let figures = data["figures"]
-                figures.forEach(figure => {
-                    path = img_from_type(figure[0], figure[1])
-                    let letter = figure[2].slice(0, 1)
-                    let number = figure[2].slice(1)
-                    if (player_color == "black"){
-                        letter = BLACK_TURN[letter]
-                        number = BLACK_TURN[number]
-                    }
-                    if (player_color == "red"){
-                        letter = RED_TURN[letter]
-                        number = RED_TURN[number]
-                    }
-                    
-                    if ($("#" + letter + number).attr("src") != path){
-                        set_cell_picture($(".board"), path, letter, number, figure[1])
-                    }else{
-                        $("#" + letter + number).attr("data-piece-color", figure[1])
-                        $("#" + letter + number).removeClass("white black red").addClass(figure[1])
-                        $("#" + letter + number).removeClass("old_cell")
-                    }
-                    
-                });
-                $(".board-wrapper > img.old_cell").remove()
-                let selected_figure = data["selected_figure"]
-                if (selected_figure && !playPointerDrag) {
-                    let letter = selected_figure.slice(0, 1)
-                    let number = selected_figure.slice(1)
-                    if (player_color == "black"){
-                        letter = BLACK_TURN[letter]
-                        number = BLACK_TURN[number]
-                    }
-                    if (player_color == "red"){
-                        letter = RED_TURN[letter]
-                        number = RED_TURN[number]
-                    }
-                    get_dots(letter, number, true)
-                }
-                setTimeout(function () { buildSetupHitPolygons() }, 0)
+                applyBoardFromServer(data)
                 break;
             case "GET_DOTS":
                 if (data["play_drag_id"] != null && data["play_drag_id"] !== undefined && abortedPlayDragIds[data["play_drag_id"]]) {
@@ -278,7 +286,7 @@ function connect() {
                 break;
             case "CHANGE_POSITION":
                 if (data["success"]){
-                    get_board($(".board"))
+                    applyBoardFromServer(data)
                 }else{
                     alert("Логотип хакеры еееееееее")
                 }
