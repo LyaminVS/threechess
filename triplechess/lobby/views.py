@@ -4,6 +4,7 @@ import random
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET
 
 from .forms import UserRegistrationForm, LoginForm
 from django.contrib.auth import authenticate, login
@@ -24,13 +25,10 @@ def register(request):
             new_user = user_form.save(commit=False)
             new_user.set_password(user_form.cleaned_data['password'])
             new_user.save()
-            return render(request, 'lobby/lobby.html', {'new_user': new_user})
-        else:
-            errors = user_form.errors
-            return render(request, 'lobby/register.html', {'errors': errors, 'user_form': UserRegistrationForm()})
-    else:
-        user_form = UserRegistrationForm()
-    return render(request, 'lobby/register.html', {'errors': '', 'user_form': user_form})
+            return render(request, 'lobby/register.html', {'new_user': new_user})
+        return render(request, 'lobby/register.html', {'user_form': user_form})
+    user_form = UserRegistrationForm()
+    return render(request, 'lobby/register.html', {'user_form': user_form})
 
 
 def user_login(request):
@@ -41,19 +39,21 @@ def user_login(request):
         form = LoginForm(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-            user = authenticate(username=cd['username'], password=cd['password'])
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return redirect("/lobby/")
-            else:
-                return render(request, 'lobby/login.html',
-                              {'form': form, 'borders_login': "red", 'borders_password': "red"})
-        else:
-            return render(request, 'lobby/login.html',
-                          {'form': form, 'borders_login': "red", 'borders_password': "red"})
-    else:
-        form = LoginForm()
+            user = authenticate(
+                request,
+                username=cd['username'],
+                password=cd['password'],
+            )
+            if user is not None and user.is_active:
+                login(request, user)
+                return redirect("/lobby/")
+            return render(
+                request,
+                'lobby/login.html',
+                {'form': form, 'login_error': True},
+            )
+        return render(request, 'lobby/login.html', {'form': form})
+    form = LoginForm()
     return render(request, 'lobby/login.html', {'form': form})
 
 
@@ -78,7 +78,9 @@ def get_list(request):
             "player_2": p_2,
             "player_3": p_3,
             "board": game.board,
-            "id": game.id
+            "id": game.id,
+            "is_sandbox": game.is_sandbox,
+            "can_delete": request.user.is_authenticated and request.user.is_superuser,
         })
     res = json.dumps(res)
     return JsonResponse({"games": res})
@@ -102,3 +104,45 @@ def new_game(request):
     return JsonResponse({
         "success": False,
     })
+
+
+@csrf_exempt
+@require_GET
+def new_sandbox_game(request):
+    """
+    Тестовая партия для суперпользователя: сразу started, один игрок на все три цвета,
+    без очереди хода (логика в consumer).
+    """
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "forbidden"}, status=403)
+    new_g = GameClass().game_to_json()
+    u = request.user
+    game = Game.create(u, u, u, new_g)
+    game.color_1 = "white"
+    game.color_2 = "black"
+    game.color_3 = "red"
+    game.is_sandbox = True
+    game.sandbox_ordered_turn = False
+    game.status = "started"
+    game.ready_1 = game.ready_2 = game.ready_3 = 1
+    game.save()
+    return JsonResponse({
+        "success": True,
+        "room_id": str(game.id),
+        "sandbox": True,
+    })
+
+
+@csrf_exempt
+def delete_game(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "method_not_allowed"}, status=405)
+    if not request.user.is_authenticated or not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "forbidden"}, status=403)
+    game_id = request.POST.get("game_id")
+    if not game_id:
+        return JsonResponse({"success": False, "error": "game_id_required"}, status=400)
+    if not Game.objects.filter(id=game_id).exists():
+        return JsonResponse({"success": False, "error": "not_found"}, status=404)
+    Game.objects.get(id=game_id).delete()
+    return JsonResponse({"success": True})

@@ -1,15 +1,35 @@
+function lobbyCsrfToken() {
+    const m = document.querySelector('meta[name="csrf-token"]');
+    return m ? m.getAttribute("content") : "";
+}
+
 $(document).on("click", "#btn_new_game", function(){
     $.ajax({
         type: "GET",
         url: "new_game/",
         headers: {
-            "X-CSRFTOKEN": "{{ csrf_token }}",
+            "X-CSRFToken": lobbyCsrfToken(),
         },
         success: function(data) {
             if (data["success"]) {
                 document.location = "/board/" + data["room_id"]
             }else{
                 document.location = "/login/"
+            }
+        }
+    });
+})
+
+$(document).on("click", "#btn_new_sandbox", function(){
+    $.ajax({
+        type: "GET",
+        url: "new_sandbox_game/",
+        headers: {
+            "X-CSRFToken": lobbyCsrfToken(),
+        },
+        success: function(data) {
+            if (data["success"]) {
+                document.location = "/board/" + data["room_id"]
             }
         }
     });

@@ -1,9 +1,98 @@
-url = document.location.href
-roomCode = url.split("/")[url.split("/").length - 2]
-var connectionString = 'ws://' + window.location.host + '/ws/board/' + roomCode + '/';
+var roomCode = ""
+if (typeof window.__BOARD_INIT__ !== "undefined" && window.__BOARD_INIT__.roomCode) {
+    roomCode = String(window.__BOARD_INIT__.roomCode)
+}
+if (!roomCode) {
+    var _m = window.location.pathname.match(/\/board\/([^/]+)\/?/)
+    roomCode = _m ? _m[1] : ""
+}
+window.roomCode = roomCode
+
+function boardApi(path) {
+    var p = String(path).replace(/^\//, "")
+    return "/board/" + encodeURIComponent(roomCode) + "/" + p
+}
+
+var wsScheme = window.location.protocol === "https:" ? "wss" : "ws"
+var connectionString = wsScheme + "://" + window.location.host + "/ws/board/" + encodeURIComponent(roomCode) + "/"
 var gameSocket = new WebSocket(connectionString);
 
-var player_color = undefined
+function readCsrfToken() {
+    var m = document.querySelector('meta[name="csrf-token"]')
+    return m ? m.getAttribute("content") : ""
+}
+
+function colorRu(c) {
+    var map = { white: "белые", black: "чёрные", red: "красные" }
+    return map[c] || c
+}
+
+function turnBadgeClasses(turn) {
+    var base = "badge rounded-pill game-turn-badge w-100 py-2 d-inline-block"
+    var tone = " bg-secondary"
+    if (turn === "white") tone = " bg-success bg-opacity-25 text-dark border border-success"
+    else if (turn === "black") tone = " bg-dark"
+    else if (turn === "red") tone = " bg-danger"
+    return base + tone
+}
+
+var player_color = "white"
+var sandboxMode = !!(typeof window.__BOARD_INIT__ !== "undefined" && window.__BOARD_INIT__.sandbox)
+var sandboxOrderedTurn = !!(typeof window.__BOARD_INIT__ !== "undefined" && window.__BOARD_INIT__.sandboxOrderedTurn)
+var activeMoveColor = null
+if ($("#sandbox-banner").length && !$("#sandbox-banner").hasClass("d-none")) {
+    sandboxMode = true
+}
+if (typeof window.__BOARD_INIT__ !== "undefined") {
+    if (window.__BOARD_INIT__.roomCode) $("#room-code-display").text(window.__BOARD_INIT__.roomCode)
+    if (window.__BOARD_INIT__.colorLabel) $("#player-color-display").text(window.__BOARD_INIT__.colorLabel)
+    if (window.__BOARD_INIT__.modeLabel) $("#spectator-display").text(window.__BOARD_INIT__.modeLabel)
+}
+
+function setPerspective(color) {
+    if (color !== "white" && color !== "black" && color !== "red") return
+    player_color = color
+    $(".perspective-btn").removeClass("active")
+    $(".perspective-btn[data-color='" + color + "']").addClass("active")
+    get_board($(".board"))
+}
+
+function updateSandboxTurnModeUI() {
+    $(".turn-mode-btn").removeClass("active")
+    var key = sandboxOrderedTurn ? "ordered" : "free"
+    $(".turn-mode-btn[data-mode='" + key + "']").addClass("active")
+}
+updateSandboxTurnModeUI()
+
+function pieceColorFromElement($el) {
+    if (!$el || !$el.length) return null
+    var d = $el.attr("data-piece-color")
+    if (d === "white" || d === "black" || d === "red") return d
+    if ($el.hasClass("white")) return "white"
+    if ($el.hasClass("black")) return "black"
+    if ($el.hasClass("red")) return "red"
+    var src = String($el.attr("src") || "")
+    if (src.indexOf("_white.") !== -1) return "white"
+    if (src.indexOf("_black.") !== -1) return "black"
+    if (src.indexOf("_red.") !== -1) return "red"
+    return null
+}
+
+function appendLegacySprite(board, path, letter, number, color, add_class, id) {
+    var classes = []
+    if (color) classes.push(color)
+    classes.push("cell_item")
+    classes.push("cell_item" + letter + number)
+    if (add_class) {
+        String(add_class).split(/\s+/).forEach(function (c) {
+            if (c) classes.push(c)
+        })
+    }
+    var classStr = classes.join(" ")
+    var idAttr = id ? " id='" + letter + number + "'" : ""
+    var dataAttr = color ? " data-piece-color='" + color + "'" : ""
+    board.after("<img src='" + path + "'" + idAttr + dataAttr + " class='" + classStr + "' />")
+}
 
 connect();
 let player_turn = 'white'
@@ -116,6 +205,8 @@ function connect() {
                     if ($("#" + letter + number).attr("src") != path){
                         set_cell_picture($(".board"), path, letter, number, figure[1])
                     }else{
+                        $("#" + letter + number).attr("data-piece-color", figure[1])
+                        $("#" + letter + number).removeClass("white black red").addClass(figure[1])
                         $("#" + letter + number).removeClass("old_cell")
                     }
                     
@@ -161,7 +252,14 @@ function connect() {
                 }
                 break;
             case "START_GAME":
-                $(".btn_ready").remove()
+                $("#ready-row").addClass("d-none")
+                break;
+            case "SANDBOX_TURN_MODE":
+                if (typeof data["ordered"] !== "undefined") {
+                    sandboxOrderedTurn = !!data["ordered"]
+                    updateSandboxTurnModeUI()
+                    update_turn(player_turn)
+                }
                 break;
             default:
                 break;
@@ -176,45 +274,33 @@ function connect() {
 
 
 function set_cell_picture(board, path, letter, number, color = false, add_class = false, id = true){
-    let img_class = " cell_item cell_item"
-    
-    if (color){
-        img_class = color + " cell_item cell_item "
-    }
-    if (add_class){
-        img_class = add_class + img_class
-    }
-    new_id = ''
-    if (id){
-        new_id = "id='" + letter + number + "'"
-    }
-    img_class = img_class.trim()
-    board.after("<img src = '" + path + "'" + new_id + "class='" + img_class + letter + number + "'>");
+    appendLegacySprite(board, path, letter, number, color, add_class, id)
 }
 function remove_cell_picture(letter, number) {
     $("#" + letter + number).remove()
 }
 
 function img_from_type(type, color){
-    if (type == "King"){
-        img = "king"
+    const pieceMap = {
+        "King": "k",
+        "Queen": "q",
+        "Tara": "r",
+        "Officer": "b",
+        "Horse": "n",
+        "Peshka": "p",
     }
-    if (type == "Peshka"){
-        img = "peshka"
+    const colorMap = {
+        "white": "lt",
+        "black": "dt",
+        "grey": "gt",
+        "red": "rt",
     }
-    if (type == "Queen"){
-        img = "queen"
+    const piece = pieceMap[type]
+    const c = colorMap[color]
+    if (piece && c) {
+        return "/static/main/img/Chess_" + piece + c + "45.svg"
     }
-    if (type == "Tara"){
-        img = "tara"
-    }
-    if (type == "Officer"){
-        img = "officer"
-    }
-    if (type == "Horse"){
-        img = "horse"
-    }
-    return "/static/main/img/" + img + "_" + color + ".png"
+    return "/static/main/img/chess.svg"
 }
 
 function get_board(board){
@@ -229,27 +315,25 @@ function clear_board(){
     $(".cell_item").remove()
 }
 
-window.onload = function() {
-    gameSocket.onopen = function(){
-        first_connect()
-    }    
- };
-
-gameSocket.onopen = function() {
-    window.onload = function(){
-        first_connect()
-    }    
- };
+$(function () {
+    first_connect()
+})
 
 function first_connect(){
     $.ajax({
         type: "POST",
-        url: "first_connect/",
+        url: boardApi("first_connect/"),
         headers: {
-            "X-CSRFTOKEN": "{{ csrf_token }}",
+            "X-CSRFToken": readCsrfToken(),
         },
         success: function(response){
             if (response["success"]){
+                if (response["sandbox"]) {
+                    sandboxMode = true
+                    $("#sandbox-banner").removeClass("d-none")
+                    sandboxOrderedTurn = !!response["sandbox_ordered_turn"]
+                    updateSandboxTurnModeUI()
+                }
                 if (response["is_spectator"]){
                     start_spectator_options()
                 }
@@ -264,9 +348,9 @@ function first_connect(){
 function start_spectator_options(){
     $.ajax({
         type: "POST",
-        url: "get_color_and_ready/",
+        url: boardApi("get_color_and_ready/"),
         headers: {
-            "X-CSRFTOKEN": "{{ csrf_token }}",
+            "X-CSRFToken": readCsrfToken(),
         },
         data: {
             "is_spectator": 1,
@@ -274,12 +358,14 @@ function start_spectator_options(){
         success: function(response){
             if (response["success"]){
                 player_color = "white"
-                change_color(player_color)
-                if (response["is_started"]){
-                    $(".btn_ready").remove()
-                }
-                $(".your_color").text($(".your_color").text() + ' ' + player_color)
-                $(".is_spectator").text($(".is_spectator").text() + " Yes")
+                sandboxOrderedTurn = !!response["sandbox_ordered_turn"]
+                updateSandboxTurnModeUI()
+                $("#player-color-display").text(colorRu(player_color))
+                $("#spectator-display").text("Наблюдатель")
+                $("#room-code-display").text(roomCode || "—")
+                $(".ready-hint").addClass("d-none")
+                $("#ready-row").addClass("d-none")
+                get_board($(".board"))
             }
         }
     })
@@ -288,9 +374,9 @@ function start_spectator_options(){
 function start_player_options(){
     $.ajax({
         type: "POST",
-        url: "get_color_and_ready/",
+        url: boardApi("get_color_and_ready/"),
         headers: {
-            "X-CSRFTOKEN": "{{ csrf_token }}",
+            "X-CSRFToken": readCsrfToken(),
         },
         data: {
             "is_spectator": 0,
@@ -299,14 +385,24 @@ function start_player_options(){
             if (response["success"]){
                 player_color = response["color"]
                 player_ready = response["ready"]
-                change_color(player_color)
+                if (response["sandbox"]) {
+                    sandboxMode = true
+                    $("#sandbox-banner").removeClass("d-none")
+                    $("#sandbox-perspective").removeClass("d-none")
+                    $("#sandbox-turn-mode").removeClass("d-none")
+                    sandboxOrderedTurn = !!response["sandbox_ordered_turn"]
+                    updateSandboxTurnModeUI()
+                    $("#player-color-display").text("Все цвета (песочница)")
+                } else {
+                    $("#player-color-display").text(colorRu(player_color))
+                }
+                $("#spectator-display").text("Игрок")
+                $("#room-code-display").text(roomCode || "—")
                 update_ready(player_ready)
                 if (response["is_started"]){
-                    $(".btn_ready").remove()
+                    $("#ready-row").addClass("d-none")
                 }
-                console.log(response["color"])
-                $(".your_color").text($(".your_color").text() + ' ' + player_color)
-                $(".is_spectator").text($(".is_spectator").text() + " No")
+                get_board($(".board"))
             }
         }
     })
@@ -321,10 +417,29 @@ $(document).on("click", ".cell_item", function() {
     }
 });
 
+$(document).on("click", ".perspective-btn", function () {
+    if (!sandboxMode) return
+    const color = $(this).data("color")
+    setPerspective(color)
+})
+
+$(document).on("click", ".turn-mode-btn", function () {
+    if (!sandboxMode) return
+    const ordered = $(this).data("mode") === "ordered"
+    sandboxOrderedTurn = ordered
+    updateSandboxTurnModeUI()
+    update_turn(player_turn)
+    gameSocket.send(JSON.stringify({
+        "type": "SET_SANDBOX_TURN_MODE",
+        "room_id": roomCode,
+        "ordered": ordered
+    }))
+})
+
 function paint_dots(dots){
-    let red_circle = '/static/main/img/red_circle.png'
-    let grey_circle = '/static/main/img/grey_circle.png';
-    let green_circle = '/static/main/img/green_circle.png'
+    let red_circle = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="%23d94b4b" fill-opacity="0.7" stroke="%238f1f1f" stroke-width="2"/></svg>'
+    let grey_circle = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="9" fill="%23c5c9cf" fill-opacity="0.85" stroke="%23868d96" stroke-width="2"/></svg>';
+    let green_circle = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="10" fill="%234ccf7a" fill-opacity="0.7" stroke="%231f8f49" stroke-width="2"/></svg>'
     dots[0].forEach(dot => {
         let letter = dot.slice(0, 1)
         let number = dot.slice(1)
@@ -351,82 +466,87 @@ function paint_dots(dots){
             number = RED_TURN[number]
         }
         let board = $(".board");
-        set_cell_picture(board, red_circle, letter, number, false, "eat_point point", false)
+        set_cell_picture(board, red_circle, letter, number, false, "eat_point point", true)
     });
 }
 
 function get_dots(letter, number, ignore_duplication = false){
-    if ($("#" + letter + number).hasClass(player_color)){
-        if (player_color == "black"){
-            letter = RED_TURN[letter]
-            number = RED_TURN[number]
-        }
-        if (player_color == "red"){
-            letter = BLACK_TURN[letter]
-            number = BLACK_TURN[number]
-        }
-        
-        gameSocket.send(JSON.stringify({
-            "type": "GET_DOTS",
-            'letter': letter,
-            'number': number,
-            'color': player_color,
-            'ignore_duplication': ignore_duplication,
-        }));
+    var $cell = $("#" + letter + number)
+    var pieceColor = pieceColorFromElement($cell)
+    var canSelect = sandboxMode
+        ? pieceColor !== null
+        : $cell.hasClass(player_color)
+    if (!canSelect) return
+    activeMoveColor = sandboxMode ? pieceColor : player_color
+    if (player_color == "black"){
+        letter = RED_TURN[letter]
+        number = RED_TURN[number]
     }
- }
+    if (player_color == "red"){
+        letter = BLACK_TURN[letter]
+        number = BLACK_TURN[number]
+    }
+
+    gameSocket.send(JSON.stringify({
+        "type": "GET_DOTS",
+        'letter': letter,
+        'number': number,
+        'color': activeMoveColor,
+        'ignore_duplication': ignore_duplication,
+    }));
+}
 
 $(document).on("click", ".point", async function() {
-    if (player_turn == player_color){
-        if (!$(this).attr("class").split(" ").includes("eat_point")){
-            cell = $(this).attr("id")
-            var letter = cell.slice(0, 1)
-            var number = cell.slice(1)
-            if (player_color == "black"){
-                letter = RED_TURN[letter]
-                number = RED_TURN[number]
-            }
-            if (player_color == "red"){
-                letter = BLACK_TURN[letter]
-                number = BLACK_TURN[number]
-            }
-            cell = letter + number
-            $(".point").remove()
-            gameSocket.send(JSON.stringify({
-                "type": "MOVE",
-                "cell": cell,
-                "room_id": roomCode,
-                "color": player_color,
-            }));
-        }
+    var moveColor = sandboxMode ? activeMoveColor : player_color
+    if (!sandboxMode && player_turn != player_color) return
+    if (sandboxMode && !moveColor) return
+    if ($(this).attr("class").split(" ").includes("eat_point")) return
+    cell = $(this).attr("id")
+    var letter = cell.slice(0, 1)
+    var number = cell.slice(1)
+    if (player_color == "black"){
+        letter = RED_TURN[letter]
+        number = RED_TURN[number]
     }
+    if (player_color == "red"){
+        letter = BLACK_TURN[letter]
+        number = BLACK_TURN[number]
+    }
+    cell = letter + number
+    $(".point").remove()
+    gameSocket.send(JSON.stringify({
+        "type": "MOVE",
+        "cell": cell,
+        "room_id": roomCode,
+        "color": moveColor,
+    }));
 });
 
 $(document).on("click", ".eat_point", async function(){
-    if (player_turn == player_color){
-        let cell_classes = $(this).attr("class")
-        cell_classes = cell_classes.split(" ")
-        let cell = cell_classes[cell_classes.length - 1].split("cell_item")[1]
-        var letter = cell.slice(0, 1)
-        var number = cell.slice(1)
-        if (player_color == "black"){
-            letter = RED_TURN[letter]
-            number = RED_TURN[number]
-        }
-        if (player_color == "red"){
-            letter = BLACK_TURN[letter]
-            number = BLACK_TURN[number]
-        }
-        cell = letter + number
-        $(".point").remove()
-        gameSocket.send(JSON.stringify({
-            "type": "CHANGE_POSITION",
-            "cell": cell,
-            "room_id": roomCode,
-            "color": player_color,
-        }));
+    var moveColor = sandboxMode ? activeMoveColor : player_color
+    if (!sandboxMode && player_turn != player_color) return
+    if (sandboxMode && !moveColor) return
+    var cell = $(this).attr("id")
+    if (!cell) return
+    var letter = cell.slice(0, 1)
+    var number = cell.slice(1)
+    if (player_color == "black"){
+        letter = RED_TURN[letter]
+        number = RED_TURN[number]
     }
-})
+    if (player_color == "red"){
+        letter = BLACK_TURN[letter]
+        number = BLACK_TURN[number]
+    }
+    cell = letter + number
+    $(".point").remove()
+    gameSocket.send(JSON.stringify({
+        "type": "CHANGE_POSITION",
+        "cell": cell,
+        "room_id": roomCode,
+        "color": moveColor,
+    }));
+});
 
 
 $(document).on("click", ".board", function(){
@@ -454,17 +574,24 @@ $(document).on("click", "#btn_ready_self", function () {
     
 
 function update_ready(player_ready) {
-    if (player_ready == 0){
-        $("#btn_ready_self").addClass("btn-dark")
-        $("#btn_ready_self").removeClass("btn-light")
-        $("#btn_ready_self").text("Темный")
-    }else{
-        $("#btn_ready_self").addClass("btn-light")
-        $("#btn_ready_self").removeClass("btn-dark")
-        $("#btn_ready_self").text("Светлый")
+    var btn = $("#btn_ready_self")
+    btn.removeClass("btn-outline-secondary btn-success btn-dark btn-light")
+    if (player_ready == 0) {
+        btn.addClass("btn-outline-secondary")
+        btn.text("Не готов")
+    } else {
+        btn.addClass("btn-success")
+        btn.text("Готов")
     }
 }
 
 function update_turn(player_turn) {
-    $(".color_turn").text("Сейчас ход: " + player_turn)
+    var el = $("#turn-display")
+    if (sandboxMode && !sandboxOrderedTurn) {
+        el.attr("class", "badge rounded-pill game-turn-badge w-100 py-2 d-inline-block bg-warning text-dark")
+        el.text("Песочница: ход без очереди")
+        return
+    }
+    el.attr("class", turnBadgeClasses(player_turn))
+    el.text("Сейчас ход: " + colorRu(player_turn))
 }

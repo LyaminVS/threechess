@@ -67,45 +67,91 @@ class Chess(AsyncJsonWebsocketConsumer):
         if request_type == "MOVE":
             cell = response.get('cell')
             color = response.get('color')
-            if self.check_user(color) and await self.status_legal():
-                if self.game.is_color_right(color) and self.game.is_turn_legal(cell, color):
-                    self.game.change_turn()
-                    self.game.change_position(cell, color)
-                    res = self.get_board_res()
-                    await self.set_game(response.get('room_id'), self.game)
-                    res["type"] = "MOVE"
-                    await self.channel_layer.group_send(self.room_group_name, {
-                        "payload": res,
-                        "type": "send_message"
-                    })
-            await self.channel_layer.group_send(self.room_group_name, {
-                "payload": {"success": False},
-                "type": "send_message"
-            })
+            room_id = response.get('room_id')
+            moved = False
+            if await self._can_apply_move(room_id, color):
+                sandbox = await self.game_is_sandbox(room_id)
+                if sandbox and await self.sandbox_member(room_id):
+                    ordered = await self.sandbox_ordered_turn(room_id)
+                    legal = self.game.is_turn_legal(cell, color)
+                    turn_ok = (not ordered) or self.game.is_color_right(color)
+                    if legal and turn_ok:
+                        if ordered:
+                            self.game.change_turn()
+                        self.game.change_position(cell, color)
+                        res = self.get_board_res()
+                        await self.set_game(room_id, self.game)
+                        res["type"] = "MOVE"
+                        await self.channel_layer.group_send(self.room_group_name, {
+                            "payload": res,
+                            "type": "send_message"
+                        })
+                        moved = True
+                elif self.check_user(color):
+                    if self.game.is_color_right(color) and self.game.is_turn_legal(cell, color):
+                        self.game.change_turn()
+                        self.game.change_position(cell, color)
+                        res = self.get_board_res()
+                        await self.set_game(room_id, self.game)
+                        res["type"] = "MOVE"
+                        await self.channel_layer.group_send(self.room_group_name, {
+                            "payload": res,
+                            "type": "send_message"
+                        })
+                        moved = True
+            if not moved:
+                await self.channel_layer.group_send(self.room_group_name, {
+                    "payload": {"success": False},
+                    "type": "send_message"
+                })
 
         if request_type == "CHANGE_POSITION":
             cell = response.get('cell')
             color = response.get('color')
-            if self.check_user(color) and await self.status_legal():
-                if self.game.is_color_right(color) and self.game.is_turn_legal(cell, color):
-                    self.game.change_turn()
-                    self.game.change_position(cell, color)
-                    res = self.get_board_res()
-                    res["type"] = "CHANGE_POSITION"
-                    await self.set_game(response.get('room_id'), self.game)
-                    await self.channel_layer.group_send(self.room_group_name, {
-                        "payload": res,
-                        "type": "send_message"
-                    })
-            await self.channel_layer.group_send(self.room_group_name, {
-                "payload": {"success": False},
-                "type": "send_message"
-            })
+            room_id = response.get('room_id')
+            changed = False
+            if await self._can_apply_move(room_id, color):
+                sandbox = await self.game_is_sandbox(room_id)
+                if sandbox and await self.sandbox_member(room_id):
+                    ordered = await self.sandbox_ordered_turn(room_id)
+                    legal = self.game.is_turn_legal(cell, color)
+                    turn_ok = (not ordered) or self.game.is_color_right(color)
+                    if legal and turn_ok:
+                        if ordered:
+                            self.game.change_turn()
+                        self.game.change_position(cell, color)
+                        res = self.get_board_res()
+                        res["type"] = "CHANGE_POSITION"
+                        await self.set_game(room_id, self.game)
+                        await self.channel_layer.group_send(self.room_group_name, {
+                            "payload": res,
+                            "type": "send_message"
+                        })
+                        changed = True
+                elif self.check_user(color):
+                    if self.game.is_color_right(color) and self.game.is_turn_legal(cell, color):
+                        self.game.change_turn()
+                        self.game.change_position(cell, color)
+                        res = self.get_board_res()
+                        res["type"] = "CHANGE_POSITION"
+                        await self.set_game(room_id, self.game)
+                        await self.channel_layer.group_send(self.room_group_name, {
+                            "payload": res,
+                            "type": "send_message"
+                        })
+                        changed = True
+            if not changed:
+                await self.channel_layer.group_send(self.room_group_name, {
+                    "payload": {"success": False},
+                    "type": "send_message"
+                })
 
         if request_type == "GET_BOARD":
-            color = response.get("color")
+            color = response.get("color") or "white"
+            if color not in ("white", "black", "red"):
+                color = "white"
             selected_figure_temp = None
-            if self.game:
+            if self.game and color in self.game.selected_figures:
                 selected_figure_temp = self.game.selected_figures[color]
             self.game, self.players, self.colors = await self.get_game(response.get("room_id"))
             self.game.selected_figures[color] = selected_figure_temp
@@ -123,9 +169,13 @@ class Chess(AsyncJsonWebsocketConsumer):
         # })
 
         if request_type == "GET_DOTS":
+            if self.game is None:
+                self.game, self.players, self.colors = await self.get_game(self.room_name)
             letter = response.get("letter")
             number = response.get("number")
-            color = response.get("color")
+            color = response.get("color") or "white"
+            if color not in ("white", "black", "red"):
+                color = "white"
             ignore_duplication = response.get("ignore_duplication")
             dots = self.game.get_dots(letter + number, color, ignore_duplication)
             res = {
@@ -137,8 +187,16 @@ class Chess(AsyncJsonWebsocketConsumer):
             }))
 
         if request_type == "RESET_DOTS":
+            if self.game is None:
+                self.game, self.players, self.colors = await self.get_game(self.room_name)
             color = response.get('color')
-            self.game.selected_figures[color] = None
+            if await self.game_is_sandbox(self.room_name) and await self.sandbox_member(self.room_name):
+                for c in ("white", "black", "red"):
+                    self.game.selected_figures[c] = None
+            else:
+                c = color or "white"
+                if c in self.game.selected_figures:
+                    self.game.selected_figures[c] = None
             res = {
                 "type": "RESET_DOTS",
             }
@@ -155,6 +213,19 @@ class Chess(AsyncJsonWebsocketConsumer):
             await self.send(text_data=json.dumps({
                 "payload": res,
             }))
+
+        if request_type == "SET_SANDBOX_TURN_MODE":
+            ordered = bool(response.get("ordered"))
+            room_id = response.get("room_id")
+            if await self.game_is_sandbox(room_id) and await self.sandbox_member(room_id):
+                await self.set_sandbox_ordered_turn(room_id, ordered)
+                await self.channel_layer.group_send(self.room_group_name, {
+                    "payload": {
+                        "type": "SANDBOX_TURN_MODE",
+                        "ordered": ordered,
+                    },
+                    "type": "send_message",
+                })
 
         if request_type == "TOGGLE_READY":
             color = response.get('color')
@@ -291,3 +362,56 @@ class Chess(AsyncJsonWebsocketConsumer):
             if game_obj.status == "started":
                 return True
         return False
+
+    @database_sync_to_async
+    def game_is_sandbox(self, room_id):
+        if not room_id:
+            return False
+        try:
+            return Game.objects.get(id=room_id).is_sandbox
+        except Game.DoesNotExist:
+            return False
+
+    @database_sync_to_async
+    def sandbox_ordered_turn(self, room_id):
+        if not room_id:
+            return False
+        try:
+            return Game.objects.get(id=room_id).sandbox_ordered_turn
+        except Game.DoesNotExist:
+            return False
+
+    @database_sync_to_async
+    def set_sandbox_ordered_turn(self, room_id, ordered):
+        if not room_id:
+            return
+        try:
+            go = Game.objects.get(id=room_id)
+        except Game.DoesNotExist:
+            return
+        go.sandbox_ordered_turn = bool(ordered)
+        go.save(update_fields=["sandbox_ordered_turn"])
+
+    @database_sync_to_async
+    def sandbox_member(self, room_id):
+        if not room_id:
+            return False
+        try:
+            go = Game.objects.get(id=room_id)
+        except Game.DoesNotExist:
+            return False
+        if not go.is_sandbox:
+            return False
+        user = self.scope["user"]
+        if not user.is_authenticated or not user.is_superuser:
+            return False
+        return user in (go.player_1, go.player_2, go.player_3)
+
+    async def _can_apply_move(self, room_id, color):
+        if not color:
+            return False
+        if not await self.status_legal():
+            return False
+        if str(room_id) != str(self.room_name):
+            return False
+        return True

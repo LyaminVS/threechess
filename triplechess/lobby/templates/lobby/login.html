@@ -1,18 +1,51 @@
 {% extends "lobby/base.html" %}
-{% block title %}Log-in{% endblock %}
-{% block body %}
-{% load static %}
-<!--<img src="{% static 'lobby/img/back_im.jpg' %}" alt="bruh" class="back_image_login">-->
-<div class="ramka">  </div>
-    <p class="login"> Войти </p>
-    <form action="." method="post">
-        <label for="username" class="username_label">username</label><input type="text" name="username" id="id_username" class='user_input input_' style= 'border-color: {{ borders_login }};'>
-        <label for="password" class="password_label">password</label><input type="text" name="password" id="id_password" class='password_input input_' style= 'border-color: {{ borders_password }};'>
-        {% csrf_token %}
-        {{ errors }}
-        <p id="enter_btn"><input type="submit" value="ВОЙТИ" class="button1"></p>
-    </form>
-    <a href="/register">регистрация</a>
-    <div class="reg_button"> </div>
 
-{% endblock %} 
+{% block title %}Вход — Triple Chess{% endblock %}
+
+{% block body_class %}auth-page{% endblock %}
+
+{% block body %}
+<div class="auth-shell">
+    <div class="auth-card card shadow-lg border-0">
+        <div class="card-body p-4 p-md-5">
+            <div class="text-center mb-4">
+                <h1 class="h3 mb-1 auth-title">Вход</h1>
+                <p class="text-muted small mb-0">Введите имя пользователя и пароль</p>
+            </div>
+
+            <form method="post" action="." novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="invalid-feedback d-block">{{ field.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                {% if login_error %}
+                    <div class="alert alert-warning" role="alert">
+                        Неверное имя пользователя или пароль. Попробуйте снова.
+                    </div>
+                {% endif %}
+
+                <button type="submit" class="btn btn-auth-primary w-100 py-2 mt-2">Войти</button>
+            </form>
+
+            <p class="text-center text-muted small mt-4 mb-0">
+                Нет аккаунта?
+                <a href="{% url 'register' %}" class="auth-link">Зарегистрироваться</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

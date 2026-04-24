@@ -1,27 +1,94 @@
 {% extends 'main/base.html' %}
-
-{% block title %}
-главная
-{% endblock %}
-
-
-{% block body %}
 {% load static %}
 
-    <div class="w-50 container-fluid d-flex justify-content-center align-items-center p-0">
-        <div class="board-wrapper">
-            <img src="{% static 'main/img/chess.svg' %}" class="rounded mx-auto d-block board">
+{% block title %}Партия — Triple Chess{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'main/css/circles.css'%}" type="text/css">
+    <link rel="stylesheet" href="{% static 'main/css/style.css'%}" type="text/css">
+{% endblock %}
+
+{% block body_class %}game-page{% endblock %}
+
+{% block body %}
+<script>
+window.__BOARD_INIT__ = {
+    roomCode: "{{ panel_room_id|default:''|escapejs }}",
+    sandbox: {{ panel_is_sandbox|default:False|yesno:"true,false" }},
+    sandboxOrderedTurn: {{ panel_sandbox_ordered_turn|default:False|yesno:"true,false" }},
+    colorLabel: "{{ panel_color_text|default:''|escapejs }}",
+    modeLabel: "{{ panel_mode_text|default:''|escapejs }}"
+};
+</script>
+
+<div class="container-fluid game-layout py-3 py-lg-4">
+    <div class="row g-4 justify-content-center align-items-start flex-column-reverse flex-lg-row">
+        <div class="col-12 col-lg-auto text-center">
+            <div class="board-area mx-auto">
+                <div class="board-wrapper">
+                    <img src="{% static 'main/img/chess.svg' %}" class="rounded mx-auto d-block board img-fluid" alt="Доска">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4 col-xl-3">
+            <aside class="card game-side-panel border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div id="sandbox-banner" class="alert alert-warning py-2 px-3 small mb-3{% if not panel_is_sandbox|default:False %} d-none{% endif %}" role="status">
+                        <strong>Песочница (админ):</strong> ходите фигурами любого цвета, очередь хода отключена.
+                    </div>
+                    <div id="sandbox-perspective" class="mb-3{% if not panel_is_sandbox|default:False %} d-none{% endif %}">
+                        <label class="form-label small text-muted mb-1">Ориентация доски</label>
+                        <div class="btn-group w-100" role="group" aria-label="Ориентация доски">
+                            <button type="button" class="btn btn-outline-secondary btn-sm perspective-btn active" data-color="white">Белые</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm perspective-btn" data-color="black">Чёрные</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm perspective-btn" data-color="red">Красные</button>
+                        </div>
+                    </div>
+                    <div id="sandbox-turn-mode" class="mb-3{% if not panel_is_sandbox|default:False %} d-none{% endif %}">
+                        <label class="form-label small text-muted mb-1">Режим хода</label>
+                        <div class="btn-group w-100" role="group" aria-label="Режим хода песочницы">
+                            <button type="button" class="btn btn-outline-secondary btn-sm turn-mode-btn{% if not panel_sandbox_ordered_turn|default:False %} active{% endif %}" data-mode="free">Без очереди</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm turn-mode-btn{% if panel_sandbox_ordered_turn|default:False %} active{% endif %}" data-mode="ordered">По очереди</button>
+                        </div>
+                    </div>
+                    <h2 class="h5 mb-3 game-side-title">Меню партии</h2>
+
+                    <dl class="game-meta mb-0">
+                        <div class="game-meta-row">
+                            <dt>Комната</dt>
+                            <dd id="room-code-display" class="text-end font-monospace">{{ panel_room_id|default:"—" }}</dd>
+                        </div>
+                        <div class="game-meta-row">
+                            <dt>Ваш цвет</dt>
+                            <dd id="player-color-display" class="text-end">{{ panel_color_text|default:"—" }}</dd>
+                        </div>
+                        <div class="game-meta-row">
+                            <dt>Режим</dt>
+                            <dd id="spectator-display" class="text-end">{{ panel_mode_text|default:"—" }}</dd>
+                        </div>
+                        <div class="game-meta-row game-meta-row--turn">
+                            <dt class="w-100 mb-2">Чей ход</dt>
+                            <dd class="w-100 m-0">
+                                <span id="turn-display" class="badge rounded-pill game-turn-badge w-100 py-2">—</span>
+                            </dd>
+                        </div>
+                    </dl>
+
+                    <div id="ready-row" class="mt-4">
+                        <button type="button" class="btn btn-outline-secondary btn_ready w-100 py-2" id="btn_ready_self">
+                            Не готов
+                        </button>
+                        <p class="small text-muted mt-2 mb-0 ready-hint">
+                            Нажмите «Готов», когда хотите начать партию (все три игрока должны быть готовы).
+                        </p>
+                    </div>
+
+                    <a href="/lobby/" class="btn btn-outline-secondary w-100 mt-3">Выйти в лобби</a>
+                </div>
+            </aside>
         </div>
     </div>
-
-    <div class="color_label_wrapper">
-        <h1 class="your_color">Ваш цвет:</h1><br>
-        <h1 class="color_turn"></h1><br>
-        <h1 class="is_spectator">Вы спестатор?:</h1>
-    </div>
-    <div class="ready_button_wrapper">
-        <button type="button" class="btn btn-dark btn_ready" id="btn_ready_self">Темный</button>
-    </div>
-
+</div>
 
 {% endblock %}

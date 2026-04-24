@@ -1,5 +1,7 @@
 .board-wrapper{
     position: relative;
+    width: min(100%, 600px);
+    margin: 0 auto;
 }
 
 .board{
@@ -15,4 +17,101 @@
 
 .old_cell{
     z-index: 100;
+}
+
+/* Страница партии: шапка/меню */
+body.game-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(180deg, #f4f8f6 0%, #eef3f1 100%);
+}
+
+body.game-page main {
+    flex: 1;
+}
+
+.game-brand-mark {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: linear-gradient(135deg, #1a5c4a 0%, #2d8a6e 100%);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.game-site-footer {
+    margin-top: auto;
+}
+
+.game-layout {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.board-area {
+    max-width: min(100vw - 2rem, 620px);
+}
+
+.board{
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    display: block;
+}
+
+.game-side-panel {
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(26, 92, 74, 0.1) !important;
+}
+
+.game-side-title {
+    color: #12201c;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.game-meta .game-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.game-meta .game-meta-row:last-child {
+    border-bottom: none;
+}
+
+.game-meta dt {
+    font-weight: 500;
+    color: #5c6d68;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.game-meta dd {
+    font-weight: 600;
+    color: #12201c;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.game-meta-row--turn {
+    flex-direction: column;
+    align-items: stretch !important;
+}
+
+.game-turn-badge {
+    font-weight: 600;
+    font-size: 0.95rem !important;
+}
+
+.ready-hint {
+    line-height: 1.35;
 }

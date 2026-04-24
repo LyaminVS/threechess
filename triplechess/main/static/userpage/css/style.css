@@ -1,3 +1,37 @@
+body {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+}
+
+body.profile-page {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f4f8f6 0%, #eef3f1 100%);
+}
+
+.profile-shell .profile-heading {
+    color: #12201c;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.profile-avatar-wrap {
+    max-width: 220px;
+}
+
+.profile-avatar {
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.userpage-brand-mark {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: linear-gradient(135deg, #1a5c4a 0%, #2d8a6e 100%);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
 .userpage_wrapper{
     position: absolute;
     transform: translate(50%, 0%);

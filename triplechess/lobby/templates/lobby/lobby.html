@@ -1,16 +1,61 @@
 {% extends "lobby/base.html" %}
-{% block title %}Log-in{% endblock %}
+{% block title %}Лобби — Triple Chess{% endblock %}
+
+{% block body_class %}lobby-page{% endblock %}
+
 {% block body %}
 {% load static %}
 
+<div class="container py-4 pb-5">
+    <section class="lobby-hero rounded-3 p-4 p-md-5 mb-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <h1 class="h2 mb-2 lobby-hero-title">Лобби</h1>
+                <p class="text-muted mb-0 lobby-hero-lead">
+                    Создайте комнату для троих или присоединитесь к открытой партии.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                {% if user.is_authenticated %}
+                    <button type="button" id="btn_new_game" class="btn btn-lobby-primary btn-lg px-4 shadow-sm">
+                        Создать игру
+                    </button>
+                    {% if user.is_superuser %}
+                    <button type="button" id="btn_new_sandbox" class="btn btn-outline-secondary btn-lg px-4 shadow-sm ms-lg-2 mt-2 mt-lg-0" title="Тест: ходить всеми цветами без очереди">
+                        Песочница (тест)
+                    </button>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'user_login' %}?next=/lobby/" class="btn btn-lobby-primary btn-lg px-4 shadow-sm">
+                        Войти, чтобы играть
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
 
-
-    <button type="button" id="btn_new_game" class="btn btn-primary">Главный</button>
-    <button type="button" id="btn_in_lobby_games" class="btn btn-secondary" disabled>Вторичный</button>
-    <button type="button" id="btn_started_games" class="btn btn-secondary">Вторичный</button>
-    <div class="list_games_wrapper">
-
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+        <h2 class="h5 mb-0 text-secondary">Список игр</h2>
+        <div class="btn-group lobby-filter-group" role="group" aria-label="Фильтр игр">
+            <button type="button" id="btn_in_lobby_games" class="btn btn-outline-secondary active">
+                В лобби
+            </button>
+            <button type="button" id="btn_started_games" class="btn btn-outline-secondary">
+                Идут сейчас
+            </button>
+        </div>
     </div>
+
+    <p class="small text-muted mb-3 lobby-hint">
+        Список обновляется каждые 5 секунд.
+    </p>
+
+    <div id="lobby-empty" class="lobby-empty d-none">
+        <p class="mb-0 text-muted">Пока нет игр с выбранным статусом.</p>
+    </div>
+
+    <div class="list_games_wrapper row g-3"></div>
+</div>
 {% endblock %}
 
 {% block script %}

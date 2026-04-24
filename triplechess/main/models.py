@@ -26,6 +26,11 @@ class Game(models.Model):
 
     status = models.CharField(max_length=50, default="")
 
+    # Режим песочницы: только суперпользователь, без очереди хода, все три цвета с одной учётки
+    is_sandbox = models.BooleanField(default=False)
+    # Для песочницы: False = без очереди, True = классический порядок хода
+    sandbox_ordered_turn = models.BooleanField(default=False)
+
     @classmethod
     def create(cls, player_1, player_2, player_3, board):
         game = cls(status="in_lobby", player_1=player_1, player_2=player_2, player_3=player_3, board=board)

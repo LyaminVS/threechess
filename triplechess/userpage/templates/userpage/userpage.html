@@ -1,33 +1,68 @@
 {% extends 'userpage/base.html' %}
 
-{% block title %}
-главная
-{% endblock %}
+{% block title %}Профиль — Triple Chess{% endblock %}
 
+{% block body_class %}profile-page{% endblock %}
 
 {% block body %}
 {% load static %}
 
-    <div class="userpage_wrapper">
-        <div class="first_line_wrapper">
-            <div class="picture_wrapper">
-                <img id="user_picture" src="{% static 'userpage/img/img.png' %}">
+<div class="container py-4 profile-shell">
+    <div class="row g-4 justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <h1 class="h3 mb-4 profile-heading">Профиль</h1>
+
+            <div class="row g-4">
+                <div class="col-md-4 text-center">
+                    <div class="profile-avatar-wrap mx-auto mb-3">
+                        <img id="user_picture" class="profile-avatar img-fluid rounded-3" src="{% static 'userpage/img/img.png' %}" alt="">
+                    </div>
+                    <p class="text-muted small mb-0">Логин</p>
+                    <p class="fw-semibold mb-3">{{ request.user.username }}</p>
+
+                    <form action="{% url 'logout' %}" method="post" class="d-grid gap-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger">Выйти из аккаунта</button>
+                    </form>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h2 class="h5 card-title mb-3">Электронная почта</h2>
+                            <form method="post" action="">
+                                {% csrf_token %}
+                                {% for field in form %}
+                                    <div class="mb-3">
+                                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                        {{ field }}
+                                        {% if field.errors %}
+                                            <div class="invalid-feedback d-block">{{ field.errors|striptags }}</div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                                <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+                            <div>
+                                <h2 class="h5 mb-1">Пароль</h2>
+                                <p class="text-muted small mb-0">Смените пароль для входа в аккаунт.</p>
+                            </div>
+                            <a href="{% url 'password_change' %}" class="btn btn-outline-primary">Изменить пароль</a>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <a href="/lobby/" class="btn btn-link ps-0">← В лобби</a>
+                    </div>
+                </div>
             </div>
-            <div class="user_information_wrapper">
-                <p>email: {{ request.user.email }}</p>
-                <p>username: {{ request.user.username }}</p>
-                <p>first_name: {{ request.user.first_name }}</p>
-                <p>last_name: {{ request.user.last_name }}</p>
-
-            </div>
-        </div>
-
-        <div class="user_game_list_wrapper">
-
-        </div>
-        <div class="user_rating_wrapper">
-
         </div>
     </div>
+</div>
 
 {% endblock %}

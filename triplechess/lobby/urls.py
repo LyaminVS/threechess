@@ -7,6 +7,8 @@ urlpatterns = [
     path('login/', views.user_login, name='user_login'),
     path('lobby/get_list/', views.get_list),
     path('lobby/new_game/', views.new_game),
+    path('lobby/new_sandbox_game/', views.new_sandbox_game),
+    path('lobby/delete_game/', views.delete_game),
     path('', views.on_open),
     # path('lobby/room/<room_id>/', views.join_game),
     # path('room/<room_id>/', views.join_room),

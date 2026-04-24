@@ -1,8 +1,12 @@
 .cell_item{
-    height: 27px;
-    width: 27px;
+    height: 32px;
+    width: 32px;
     position: absolute;
     z-index: 5;
+}
+
+.piece-grey-preview{
+    filter: grayscale(1) brightness(1.5) contrast(0.9);
 }
 
 .cell_itemA1{
