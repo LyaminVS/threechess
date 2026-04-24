@@ -137,6 +137,62 @@ class Game:
         self.turn = TURN_CHANGE[self.turn]
         return self.turn
 
+    def clear_board_for_setup(self):
+        self.board.white = []
+        self.board.black = []
+        self.board.red = []
+        self.board.white_cells = []
+        self.board.black_cells = []
+        self.board.red_cells = []
+        self.board.grey = []
+        self.board.grey_cells = []
+        self.board.all_figures = []
+        self.selected_figures["white"] = None
+        self.selected_figures["black"] = None
+        self.selected_figures["red"] = None
+        self.turn = "white"
+
+    def place_figure_for_setup(self, cell, figure_type, color):
+        cls_map = {
+            "King": King,
+            "Queen": Queen,
+            "Tara": Tara,
+            "Officer": Officer,
+            "Horse": Horse,
+            "Peshka": Peshka,
+        }
+        if color not in ("white", "black", "red"):
+            return False
+        figure_cls = cls_map.get(figure_type)
+        if figure_cls is None:
+            return False
+        self.remove_figure_for_setup(cell)
+        figure = figure_cls(cell, color)
+        getattr(self.board, color).append(figure)
+        getattr(self.board, color + "_cells").append(cell)
+        self.board.all_figures.append(figure)
+        return True
+
+    def remove_figure_for_setup(self, cell):
+        for color in ("white", "black", "red"):
+            cells = getattr(self.board, color + "_cells")
+            if cell in cells:
+                cells.remove(cell)
+            figures = getattr(self.board, color)
+            for idx, figure in enumerate(list(figures)):
+                if figure.cell_str == cell:
+                    del figures[idx]
+                    break
+        for idx, figure in enumerate(list(self.board.all_figures)):
+            if figure.cell_str == cell:
+                del self.board.all_figures[idx]
+                break
+        for c in ("white", "black", "red"):
+            sf = self.selected_figures.get(c)
+            if sf and sf.cell_str == cell:
+                self.selected_figures[c] = None
+        return True
+
     def __is_peshka_go_through__(self):
 
         colors = ["white", "black", "red"]

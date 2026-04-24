@@ -16,6 +16,8 @@ window.__BOARD_INIT__ = {
     roomCode: "{{ panel_room_id|default:''|escapejs }}",
     sandbox: {{ panel_is_sandbox|default:False|yesno:"true,false" }},
     sandboxOrderedTurn: {{ panel_sandbox_ordered_turn|default:False|yesno:"true,false" }},
+    isPrivate: {{ panel_is_private|default:False|yesno:"true,false" }},
+    isStarted: {{ panel_is_started|default:False|yesno:"true,false" }},
     colorLabel: "{{ panel_color_text|default:''|escapejs }}",
     modeLabel: "{{ panel_mode_text|default:''|escapejs }}"
 };
@@ -35,7 +37,7 @@ window.__BOARD_INIT__ = {
             <aside class="card game-side-panel border-0 shadow-sm">
                 <div class="card-body p-4">
                     <div id="sandbox-banner" class="alert alert-warning py-2 px-3 small mb-3{% if not panel_is_sandbox|default:False %} d-none{% endif %}" role="status">
-                        <strong>Песочница (админ):</strong> ходите фигурами любого цвета, очередь хода отключена.
+                        <strong>Песочница:</strong> ходите фигурами любого цвета, можно менять очередь и назначать текущий ход.
                     </div>
                     <div id="sandbox-perspective" class="mb-3{% if not panel_is_sandbox|default:False %} d-none{% endif %}">
                         <label class="form-label small text-muted mb-1">Ориентация доски</label>
@@ -45,11 +47,12 @@ window.__BOARD_INIT__ = {
                             <button type="button" class="btn btn-outline-secondary btn-sm perspective-btn" data-color="red">Красные</button>
                         </div>
                     </div>
-                    <div id="sandbox-turn-mode" class="mb-3{% if not panel_is_sandbox|default:False %} d-none{% endif %}">
-                        <label class="form-label small text-muted mb-1">Режим хода</label>
-                        <div class="btn-group w-100" role="group" aria-label="Режим хода песочницы">
-                            <button type="button" class="btn btn-outline-secondary btn-sm turn-mode-btn{% if not panel_sandbox_ordered_turn|default:False %} active{% endif %}" data-mode="free">Без очереди</button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm turn-mode-btn{% if panel_sandbox_ordered_turn|default:False %} active{% endif %}" data-mode="ordered">По очереди</button>
+                    <div id="sandbox-set-turn" class="mb-3{% if not panel_is_sandbox|default:False %} d-none{% endif %}">
+                        <label class="form-label small text-muted mb-1">Назначить текущий ход</label>
+                        <div class="btn-group w-100" role="group" aria-label="Назначить текущий ход">
+                            <button type="button" class="btn btn-outline-secondary btn-sm set-turn-btn" data-color="white">Белые</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm set-turn-btn" data-color="black">Чёрные</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm set-turn-btn" data-color="red">Красные</button>
                         </div>
                     </div>
                     <h2 class="h5 mb-3 game-side-title">Меню партии</h2>
@@ -83,10 +86,24 @@ window.__BOARD_INIT__ = {
                             Нажмите «Готов», когда хотите начать партию (все три игрока должны быть готовы).
                         </p>
                     </div>
+                    <div id="setup-controls" class="mt-4{% if panel_is_started|default:False or not panel_is_private|default:False %} d-none{% endif %}">
+                        <button type="button" class="btn btn-primary w-100 py-2" id="btn_start_private_game">
+                            Старт
+                        </button>
+                        <p class="small text-muted mt-2 mb-0">
+                            До старта перетаскивайте фигуры снизу на доску. После старта ходы идут по очереди.
+                        </p>
+                    </div>
 
                     <a href="/lobby/" class="btn btn-outline-secondary w-100 mt-3">Выйти в лобби</a>
                 </div>
             </aside>
+        </div>
+    </div>
+    <div id="setup-panel" class="card border-0 shadow-sm mt-4{% if panel_is_started|default:False or not panel_is_private|default:False %} d-none{% endif %}">
+        <div class="card-body">
+            <h3 class="h6 mb-3">Панель фигур</h3>
+            <div id="setup-pieces" class="d-flex flex-wrap gap-2 align-items-center"></div>
         </div>
     </div>
 </div>

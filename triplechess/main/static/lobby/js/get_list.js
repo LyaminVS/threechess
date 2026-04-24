@@ -57,6 +57,9 @@ function get_list(filter_status_arg) {
                 const sandboxBadge = game.is_sandbox
                     ? '<span class="badge bg-warning text-dark ms-1">Песочница</span>'
                     : "";
+                const privateBadge = game.is_private
+                    ? '<span class="badge bg-info text-dark ms-1">Приватная</span>'
+                    : "";
                 const card = $(
                     '<div class="col-12 col-md-6 col-xl-4">' +
                         '<article class="card game-card h-100 border-0 shadow-sm" id="game_' +
@@ -68,6 +71,7 @@ function get_list(filter_status_arg) {
                         escapeHtml(id) +
                         "</span>" +
                         sandboxBadge +
+                        privateBadge +
                         "</div>" +
                         '<ul class="list-unstyled small flex-grow-1 mb-3 lobby-players-list">' +
                         "<li><span class=\"text-muted\">Игрок 1</span> " +

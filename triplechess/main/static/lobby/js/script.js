@@ -35,6 +35,23 @@ $(document).on("click", "#btn_new_sandbox", function(){
     });
 })
 
+$(document).on("click", "#btn_new_private_game", function(){
+    $.ajax({
+        type: "GET",
+        url: "new_private_game/",
+        headers: {
+            "X-CSRFToken": lobbyCsrfToken(),
+        },
+        success: function(data) {
+            if (data["success"]) {
+                document.location = "/board/" + data["room_id"]
+            }else{
+                document.location = "/login/"
+            }
+        }
+    });
+})
+
 $(document).on("click", ".btn_join_game", function(){
     id = this.id.split("_")[3]
     document.location = "/board/" + id + "/"

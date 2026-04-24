@@ -115,3 +115,49 @@ body.game-page main {
 .ready-hint {
     line-height: 1.35;
 }
+
+.setup-dropzone {
+    width: 40px;
+    height: 40px;
+    border: 1px dashed rgba(17, 24, 39, 0.3);
+    border-radius: 999px;
+    z-index: 4;
+    opacity: 0.55;
+    transition: opacity 0.12s ease, transform 0.12s ease;
+    pointer-events: auto;
+}
+
+.setup-dropzone:hover,
+.setup-dropzone.drag-over {
+    opacity: 1;
+}
+
+.setup-piece {
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 0.5rem;
+    background: #fff;
+    padding: 4px;
+    cursor: grab;
+}
+
+.setup-piece.active {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+.setup-piece img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.setup-piece--eraser {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #374151;
+}

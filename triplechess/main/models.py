@@ -6,6 +6,13 @@ from django.conf import settings
 
 
 class Game(models.Model):
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="owned_games",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+    )
     player_1 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="player_1", on_delete=models.PROTECT, null=True)
     player_2 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="player_2", on_delete=models.PROTECT, null=True)
     player_3 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="player_3", on_delete=models.PROTECT, null=True)
@@ -28,6 +35,8 @@ class Game(models.Model):
 
     # Режим песочницы: только суперпользователь, без очереди хода, все три цвета с одной учётки
     is_sandbox = models.BooleanField(default=False)
+    # Приватная партия владельца, не показывается другим в лобби
+    is_private = models.BooleanField(default=False)
     # Для песочницы: False = без очереди, True = классический порядок хода
     sandbox_ordered_turn = models.BooleanField(default=False)
 

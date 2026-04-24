@@ -3,6 +3,7 @@ import random
 
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, HttpResponse
+from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
 
@@ -68,7 +69,15 @@ def on_open(request):
 def get_list(request):
     res = []
     filter_status = request.POST.get("filter_status")
-    game_list = list(Game.objects.filter(status=filter_status))
+    statuses = [filter_status]
+    if filter_status == "in_lobby":
+        statuses.append("setup")
+    game_list = Game.objects.filter(status__in=statuses)
+    if request.user.is_authenticated:
+        game_list = game_list.filter(Q(is_private=False) | Q(owner=request.user))
+    else:
+        game_list = game_list.filter(is_private=False)
+    game_list = list(game_list)
     for game in game_list:
         p_1 = game.player_1.username if game.player_1 else game.player_1
         p_2 = game.player_2.username if game.player_2 else game.player_2
@@ -80,6 +89,7 @@ def get_list(request):
             "board": game.board,
             "id": game.id,
             "is_sandbox": game.is_sandbox,
+            "is_private": game.is_private,
             "can_delete": request.user.is_authenticated and request.user.is_superuser,
         })
     res = json.dumps(res)
@@ -118,6 +128,7 @@ def new_sandbox_game(request):
     new_g = GameClass().game_to_json()
     u = request.user
     game = Game.create(u, u, u, new_g)
+    game.owner = u
     game.color_1 = "white"
     game.color_2 = "black"
     game.color_3 = "red"
@@ -130,6 +141,34 @@ def new_sandbox_game(request):
         "success": True,
         "room_id": str(game.id),
         "sandbox": True,
+    })
+
+
+@csrf_exempt
+@require_GET
+def new_private_game(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "error": "forbidden"}, status=403)
+    g = GameClass()
+    g.clear_board_for_setup()
+    new_g = g.game_to_json()
+    u = request.user
+    game = Game.create(u, u, u, new_g)
+    game.owner = u
+    game.color_1 = "white"
+    game.color_2 = "black"
+    game.color_3 = "red"
+    game.is_sandbox = True
+    game.is_private = True
+    game.sandbox_ordered_turn = True
+    game.status = "setup"
+    game.ready_1 = game.ready_2 = game.ready_3 = 0
+    game.save()
+    return JsonResponse({
+        "success": True,
+        "room_id": str(game.id),
+        "sandbox": True,
+        "private": True,
     })
 
 

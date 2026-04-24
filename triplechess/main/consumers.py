@@ -147,17 +147,21 @@ class Chess(AsyncJsonWebsocketConsumer):
                 })
 
         if request_type == "GET_BOARD":
+            room_id = response.get("room_id")
+            if not await self.room_access_allowed(room_id):
+                await self.send(text_data=json.dumps({"payload": {"success": False}}))
+                return
             color = response.get("color") or "white"
             if color not in ("white", "black", "red"):
                 color = "white"
             selected_figure_temp = None
             if self.game and color in self.game.selected_figures:
                 selected_figure_temp = self.game.selected_figures[color]
-            self.game, self.players, self.colors = await self.get_game(response.get("room_id"))
+            self.game, self.players, self.colors = await self.get_game(room_id)
             self.game.selected_figures[color] = selected_figure_temp
             if selected_figure_temp:
                 selected_figure_temp = selected_figure_temp.cell_str
-            await self.set_game(response.get("room_id"), self.game)
+            await self.set_game(room_id, self.game)
             res = self.get_board_res()
             res["selected_figure"] = selected_figure_temp
             await self.send(text_data=json.dumps({
@@ -169,6 +173,9 @@ class Chess(AsyncJsonWebsocketConsumer):
         # })
 
         if request_type == "GET_DOTS":
+            if not await self.room_access_allowed(self.room_name):
+                await self.send(text_data=json.dumps({"payload": {"success": False}}))
+                return
             if self.game is None:
                 self.game, self.players, self.colors = await self.get_game(self.room_name)
             letter = response.get("letter")
@@ -223,6 +230,50 @@ class Chess(AsyncJsonWebsocketConsumer):
                     "payload": {
                         "type": "SANDBOX_TURN_MODE",
                         "ordered": ordered,
+                    },
+                    "type": "send_message",
+                })
+
+        if request_type == "PLACE_FIGURE":
+            room_id = response.get("room_id")
+            cell = response.get("cell")
+            piece_type = response.get("piece_type")
+            piece_color = response.get("piece_color")
+            action = response.get("action") or "place"
+            if (
+                await self.game_is_private(room_id)
+                and await self.sandbox_member(room_id)
+                and await self.is_setup_status(room_id)
+            ):
+                ok = await self.place_figure_for_setup(room_id, cell, piece_type, piece_color, action)
+                if ok:
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        "payload": {"type": "SETUP_UPDATED"},
+                        "type": "send_message",
+                    })
+
+        if request_type == "START_PRIVATE_GAME":
+            room_id = response.get("room_id")
+            if (
+                await self.game_is_private(room_id)
+                and await self.sandbox_member(room_id)
+                and await self.is_setup_status(room_id)
+            ):
+                await self.start_private_game(room_id)
+                await self.channel_layer.group_send(self.room_group_name, {
+                    "payload": {"type": "START_GAME"},
+                    "type": "send_message",
+                })
+
+        if request_type == "SET_TURN":
+            room_id = response.get("room_id")
+            color = response.get("color")
+            if color in ("white", "black", "red") and await self.game_is_sandbox(room_id) and await self.sandbox_member(room_id):
+                await self.set_turn(room_id, color)
+                await self.channel_layer.group_send(self.room_group_name, {
+                    "payload": {
+                        "type": "TURN_SET",
+                        "turn": color,
                     },
                     "type": "send_message",
                 })
@@ -382,6 +433,15 @@ class Chess(AsyncJsonWebsocketConsumer):
             return False
 
     @database_sync_to_async
+    def game_is_private(self, room_id):
+        if not room_id:
+            return False
+        try:
+            return Game.objects.get(id=room_id).is_private
+        except Game.DoesNotExist:
+            return False
+
+    @database_sync_to_async
     def set_sandbox_ordered_turn(self, room_id, ordered):
         if not room_id:
             return
@@ -391,6 +451,16 @@ class Chess(AsyncJsonWebsocketConsumer):
             return
         go.sandbox_ordered_turn = bool(ordered)
         go.save(update_fields=["sandbox_ordered_turn"])
+
+    @database_sync_to_async
+    def is_setup_status(self, room_id):
+        if not room_id:
+            return False
+        try:
+            go = Game.objects.get(id=room_id)
+        except Game.DoesNotExist:
+            return False
+        return go.status == "setup"
 
     @database_sync_to_async
     def sandbox_member(self, room_id):
@@ -403,15 +473,84 @@ class Chess(AsyncJsonWebsocketConsumer):
         if not go.is_sandbox:
             return False
         user = self.scope["user"]
-        if not user.is_authenticated or not user.is_superuser:
+        if not user.is_authenticated:
+            return False
+        if go.is_private:
+            return user == go.owner and user in (go.player_1, go.player_2, go.player_3)
+        if not user.is_superuser:
             return False
         return user in (go.player_1, go.player_2, go.player_3)
+
+    @database_sync_to_async
+    def set_turn(self, room_id, color):
+        if not room_id or color not in ("white", "black", "red"):
+            return
+        try:
+            go = Game.objects.get(id=room_id)
+        except Game.DoesNotExist:
+            return
+        g = game.Game.json_to_game(go.board)
+        g.turn = color
+        go.board = g.game_to_json()
+        go.save(update_fields=["board"])
+
+    @database_sync_to_async
+    def place_figure_for_setup(self, room_id, cell, piece_type, piece_color, action):
+        if not room_id or not cell:
+            return False
+        try:
+            go = Game.objects.get(id=room_id)
+        except Game.DoesNotExist:
+            return False
+        if go.status != "setup" or not go.is_private:
+            return False
+        g = game.Game.json_to_game(go.board)
+        if action == "erase":
+            g.remove_figure_for_setup(cell)
+        else:
+            if not g.place_figure_for_setup(cell, piece_type, piece_color):
+                return False
+        go.board = g.game_to_json()
+        go.save(update_fields=["board"])
+        return True
+
+    @database_sync_to_async
+    def start_private_game(self, room_id):
+        if not room_id:
+            return
+        try:
+            go = Game.objects.get(id=room_id)
+        except Game.DoesNotExist:
+            return
+        if not go.is_private:
+            return
+        go.status = "started"
+        go.sandbox_ordered_turn = True
+        go.ready_1 = go.ready_2 = go.ready_3 = 1
+        go.save(update_fields=["status", "sandbox_ordered_turn", "ready_1", "ready_2", "ready_3"])
 
     async def _can_apply_move(self, room_id, color):
         if not color:
             return False
         if not await self.status_legal():
             return False
+        if not await self.room_access_allowed(room_id):
+            return False
         if str(room_id) != str(self.room_name):
             return False
         return True
+
+    @database_sync_to_async
+    def room_access_allowed(self, room_id):
+        if not room_id:
+            return False
+        try:
+            go = Game.objects.get(id=room_id)
+        except Game.DoesNotExist:
+            return False
+        if not go.is_private:
+            return True
+        user = self.scope["user"]
+        if not user.is_authenticated:
+            return False
+        return user == go.owner

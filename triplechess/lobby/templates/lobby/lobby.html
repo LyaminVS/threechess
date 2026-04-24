@@ -20,6 +20,9 @@
                     <button type="button" id="btn_new_game" class="btn btn-lobby-primary btn-lg px-4 shadow-sm">
                         Создать игру
                     </button>
+                    <button type="button" id="btn_new_private_game" class="btn btn-outline-primary btn-lg px-4 shadow-sm ms-lg-2 mt-2 mt-lg-0" title="Личная игра-конструктор: видна только вам">
+                        Моя игра (приватная)
+                    </button>
                     {% if user.is_superuser %}
                     <button type="button" id="btn_new_sandbox" class="btn btn-outline-secondary btn-lg px-4 shadow-sm ms-lg-2 mt-2 mt-lg-0" title="Тест: ходить всеми цветами без очереди">
                         Песочница (тест)

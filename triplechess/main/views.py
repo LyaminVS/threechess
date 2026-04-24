@@ -24,6 +24,8 @@ def _game_page_context(game_obj, user, spectator=False):
             "panel_mode_text": "Наблюдатель",
             "panel_is_sandbox": game_obj.is_sandbox,
             "panel_sandbox_ordered_turn": game_obj.sandbox_ordered_turn,
+            "panel_is_private": game_obj.is_private,
+            "panel_is_started": game_obj.status == "started",
         }
     if game_obj.is_sandbox:
         color_text = "Все цвета (песочница)"
@@ -35,12 +37,17 @@ def _game_page_context(game_obj, user, spectator=False):
         color_text = _COLOR_RU.get(game_obj.color_3, game_obj.color_3 or "—")
     else:
         color_text = "—"
+    mode_text = "Игрок"
+    if game_obj.is_private:
+        mode_text = "Личная партия"
     return {
         "panel_room_id": room_id,
         "panel_color_text": color_text,
-        "panel_mode_text": "Игрок",
+        "panel_mode_text": mode_text,
         "panel_is_sandbox": game_obj.is_sandbox,
         "panel_sandbox_ordered_turn": game_obj.sandbox_ordered_turn,
+        "panel_is_private": game_obj.is_private,
+        "panel_is_started": game_obj.status == "started",
     }
 
 
@@ -52,7 +59,11 @@ def join_game(request, room_code):
         if not Game.objects.filter(id=room_code).exists():
             return redirect("/lobby/")
         game_obj = Game.objects.get(id=room_code)
+        if game_obj.is_private and game_obj.owner != user:
+            return redirect("/lobby/")
         if is_spectator:
+            if game_obj.is_private:
+                return redirect("/lobby/")
             ctx = _game_page_context(game_obj, user, spectator=True)
             return render(request, "main/main.html", ctx)
         success = False
@@ -102,6 +113,8 @@ def check_user(request, room_code):
 def get_color_and_ready(request, room_code):
     if request.user.is_authenticated:
         game_obj = Game.objects.get(id=room_code)
+        if game_obj.is_private and game_obj.owner != request.user:
+            return JsonResponse({"success": False}, status=403)
         if request.POST.get("is_spectator") == "1":
             return JsonResponse({
                 "success": True,
@@ -117,6 +130,7 @@ def get_color_and_ready(request, room_code):
                 "is_started": game_obj.status == "started",
                 "sandbox": game_obj.is_sandbox,
                 "sandbox_ordered_turn": game_obj.sandbox_ordered_turn,
+                "is_private": game_obj.is_private,
             }
 
         if request.user == game_obj.player_1:
@@ -185,11 +199,14 @@ def check_start(game_obj):
 def first_connect(request, room_code):
     if Game.objects.filter(id=room_code).exists() and request.user.is_authenticated:
         game_obj = Game.objects.get(id=room_code)
+        if game_obj.is_private and game_obj.owner != request.user:
+            return JsonResponse({"success": False}, status=403)
         return JsonResponse({
             "success": True,
             "is_spectator": not any([getattr(game_obj, f"player_{i}") == request.user for i in range(1, 4)]),
             "sandbox": game_obj.is_sandbox,
             "sandbox_ordered_turn": game_obj.sandbox_ordered_turn,
+            "is_private": game_obj.is_private,
         })
     return JsonResponse({
         "success": False

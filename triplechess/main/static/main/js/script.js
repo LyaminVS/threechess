@@ -39,7 +39,11 @@ function turnBadgeClasses(turn) {
 var player_color = "white"
 var sandboxMode = !!(typeof window.__BOARD_INIT__ !== "undefined" && window.__BOARD_INIT__.sandbox)
 var sandboxOrderedTurn = !!(typeof window.__BOARD_INIT__ !== "undefined" && window.__BOARD_INIT__.sandboxOrderedTurn)
+var privateMode = !!(typeof window.__BOARD_INIT__ !== "undefined" && window.__BOARD_INIT__.isPrivate)
+var gameStarted = !!(typeof window.__BOARD_INIT__ !== "undefined" && window.__BOARD_INIT__.isStarted)
 var activeMoveColor = null
+var setupCellPolygons = {}
+var setupCellCenters = {}
 if ($("#sandbox-banner").length && !$("#sandbox-banner").hasClass("d-none")) {
     sandboxMode = true
 }
@@ -58,11 +62,18 @@ function setPerspective(color) {
 }
 
 function updateSandboxTurnModeUI() {
-    $(".turn-mode-btn").removeClass("active")
-    var key = sandboxOrderedTurn ? "ordered" : "free"
-    $(".turn-mode-btn[data-mode='" + key + "']").addClass("active")
+    // Turn mode switch is intentionally removed from UI.
 }
 updateSandboxTurnModeUI()
+
+const BOARD_LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H", "K", "L", "M", "N"]
+const BOARD_NUMBERS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+var selectedSetupPiece = null
+const SETUP_PIECES = [
+    { type: "King", color: "white" }, { type: "Queen", color: "white" }, { type: "Tara", color: "white" }, { type: "Officer", color: "white" }, { type: "Horse", color: "white" }, { type: "Peshka", color: "white" },
+    { type: "King", color: "black" }, { type: "Queen", color: "black" }, { type: "Tara", color: "black" }, { type: "Officer", color: "black" }, { type: "Horse", color: "black" }, { type: "Peshka", color: "black" },
+    { type: "King", color: "red" }, { type: "Queen", color: "red" }, { type: "Tara", color: "red" }, { type: "Officer", color: "red" }, { type: "Horse", color: "red" }, { type: "Peshka", color: "red" }
+]
 
 function pieceColorFromElement($el) {
     if (!$el || !$el.length) return null
@@ -253,6 +264,8 @@ function connect() {
                 break;
             case "START_GAME":
                 $("#ready-row").addClass("d-none")
+                gameStarted = true
+                updateSetupUI()
                 break;
             case "SANDBOX_TURN_MODE":
                 if (typeof data["ordered"] !== "undefined") {
@@ -260,6 +273,16 @@ function connect() {
                     updateSandboxTurnModeUI()
                     update_turn(player_turn)
                 }
+                break;
+            case "TURN_SET":
+                if (data["turn"]) {
+                    player_turn = data["turn"]
+                    update_turn(player_turn)
+                    get_board($(".board"))
+                }
+                break;
+            case "SETUP_UPDATED":
+                get_board($(".board"))
                 break;
             default:
                 break;
@@ -316,7 +339,18 @@ function clear_board(){
 }
 
 $(function () {
+    renderSetupPalette()
+    renderSetupDropzones()
+    buildSetupHitPolygons()
+    $(".board").on("load", function () {
+        buildSetupHitPolygons()
+    })
+    updateSetupUI()
     first_connect()
+})
+
+$(window).on("resize", function () {
+    buildSetupHitPolygons()
 })
 
 function first_connect(){
@@ -334,6 +368,7 @@ function first_connect(){
                     sandboxOrderedTurn = !!response["sandbox_ordered_turn"]
                     updateSandboxTurnModeUI()
                 }
+                privateMode = !!response["is_private"]
                 if (response["is_spectator"]){
                     start_spectator_options()
                 }
@@ -360,11 +395,13 @@ function start_spectator_options(){
                 player_color = "white"
                 sandboxOrderedTurn = !!response["sandbox_ordered_turn"]
                 updateSandboxTurnModeUI()
+                gameStarted = true
                 $("#player-color-display").text(colorRu(player_color))
                 $("#spectator-display").text("Наблюдатель")
                 $("#room-code-display").text(roomCode || "—")
                 $(".ready-hint").addClass("d-none")
                 $("#ready-row").addClass("d-none")
+                updateSetupUI()
                 get_board($(".board"))
             }
         }
@@ -389,19 +426,21 @@ function start_player_options(){
                     sandboxMode = true
                     $("#sandbox-banner").removeClass("d-none")
                     $("#sandbox-perspective").removeClass("d-none")
-                    $("#sandbox-turn-mode").removeClass("d-none")
                     sandboxOrderedTurn = !!response["sandbox_ordered_turn"]
                     updateSandboxTurnModeUI()
                     $("#player-color-display").text("Все цвета (песочница)")
                 } else {
                     $("#player-color-display").text(colorRu(player_color))
                 }
+                privateMode = !!response["is_private"]
+                gameStarted = !!response["is_started"]
                 $("#spectator-display").text("Игрок")
                 $("#room-code-display").text(roomCode || "—")
                 update_ready(player_ready)
                 if (response["is_started"]){
                     $("#ready-row").addClass("d-none")
                 }
+                updateSetupUI()
                 get_board($(".board"))
             }
         }
@@ -423,16 +462,14 @@ $(document).on("click", ".perspective-btn", function () {
     setPerspective(color)
 })
 
-$(document).on("click", ".turn-mode-btn", function () {
-    if (!sandboxMode) return
-    const ordered = $(this).data("mode") === "ordered"
-    sandboxOrderedTurn = ordered
-    updateSandboxTurnModeUI()
-    update_turn(player_turn)
+$(document).on("click", ".set-turn-btn", function () {
+    if (!sandboxMode || !privateMode || !gameStarted) return
+    const color = $(this).data("color")
+    if (color !== "white" && color !== "black" && color !== "red") return
     gameSocket.send(JSON.stringify({
-        "type": "SET_SANDBOX_TURN_MODE",
+        "type": "SET_TURN",
         "room_id": roomCode,
-        "ordered": ordered
+        "color": color
     }))
 })
 
@@ -471,6 +508,7 @@ function paint_dots(dots){
 }
 
 function get_dots(letter, number, ignore_duplication = false){
+    if (privateMode && !gameStarted) return
     var $cell = $("#" + letter + number)
     var pieceColor = pieceColorFromElement($cell)
     var canSelect = sandboxMode
@@ -497,6 +535,7 @@ function get_dots(letter, number, ignore_duplication = false){
 }
 
 $(document).on("click", ".point", async function() {
+    if (privateMode && !gameStarted) return
     var moveColor = sandboxMode ? activeMoveColor : player_color
     if (!sandboxMode && player_turn != player_color) return
     if (sandboxMode && !moveColor) return
@@ -523,6 +562,7 @@ $(document).on("click", ".point", async function() {
 });
 
 $(document).on("click", ".eat_point", async function(){
+    if (privateMode && !gameStarted) return
     var moveColor = sandboxMode ? activeMoveColor : player_color
     if (!sandboxMode && player_turn != player_color) return
     if (sandboxMode && !moveColor) return
@@ -587,11 +627,286 @@ function update_ready(player_ready) {
 
 function update_turn(player_turn) {
     var el = $("#turn-display")
-    if (sandboxMode && !sandboxOrderedTurn) {
-        el.attr("class", "badge rounded-pill game-turn-badge w-100 py-2 d-inline-block bg-warning text-dark")
-        el.text("Песочница: ход без очереди")
+    if (privateMode && !gameStarted) {
+        el.attr("class", "badge rounded-pill game-turn-badge w-100 py-2 d-inline-block bg-info text-dark")
+        el.text("Режим расстановки: перетащите фигуры и нажмите Старт")
         return
     }
     el.attr("class", turnBadgeClasses(player_turn))
     el.text("Сейчас ход: " + colorRu(player_turn))
 }
+
+function boardCellToCanonical(letter, number) {
+    if (player_color == "black") {
+        letter = RED_TURN[letter]
+        number = RED_TURN[number]
+    }
+    if (player_color == "red") {
+        letter = BLACK_TURN[letter]
+        number = BLACK_TURN[number]
+    }
+    return { letter: letter, number: number }
+}
+
+function renderSetupPalette() {
+    var box = $("#setup-pieces")
+    if (!box.length) return
+    box.empty()
+    SETUP_PIECES.forEach(function (piece) {
+        var path = img_from_type(piece.type, piece.color)
+        var btn = $("<button type='button' class='setup-piece' draggable='true'></button>")
+        btn.attr("data-type", piece.type)
+        btn.attr("data-color", piece.color)
+        btn.attr("title", piece.type + " / " + piece.color)
+        btn.append("<img src='" + path + "' alt='" + piece.type + "' draggable='false'>")
+        box.append(btn)
+    })
+    var eraser = $("<button type='button' class='setup-piece setup-piece--eraser' draggable='true' title='Убрать фигуру'>Ластик</button>")
+    eraser.attr("data-action", "erase")
+    box.append(eraser)
+}
+
+function renderSetupDropzones() {
+    $(".setup-dropzone").remove()
+    var board = $(".board")
+    BOARD_LETTERS.forEach(function (letter) {
+        BOARD_NUMBERS.forEach(function (number) {
+            var cell = letter + number
+            var dz = $("<div class='setup-dropzone cell_item cell_item" + cell + "'></div>")
+            dz.attr("data-cell", cell)
+            board.after(dz)
+        })
+    })
+}
+
+function getCellCentersFromCss() {
+    var wrapper = $(".board-wrapper")
+    if (!wrapper.length) return {}
+    var wrapperRect = wrapper[0].getBoundingClientRect()
+    var centers = {}
+    $(".setup-dropzone").each(function () {
+        var cell = String($(this).data("cell") || "")
+        if (!cell) return
+        var rect = this.getBoundingClientRect()
+        centers[cell] = {
+            x: rect.left + rect.width / 2 - wrapperRect.left,
+            y: rect.top + rect.height / 2 - wrapperRect.top
+        }
+    })
+    return centers
+}
+
+function midpoint(a, b) {
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+}
+
+function buildSetupHitPolygons() {
+    setupCellCenters = getCellCentersFromCss()
+    setupCellPolygons = {}
+    var keys = Object.keys(setupCellCenters)
+    if (!keys.length) return
+    keys.forEach(function (cell) {
+        var c = setupCellCenters[cell]
+        var buckets = { ul: null, ur: null, dr: null, dl: null }
+        keys.forEach(function (otherCell) {
+            if (otherCell === cell) return
+            var o = setupCellCenters[otherCell]
+            var dx = o.x - c.x
+            var dy = o.y - c.y
+            if (dx === 0 || dy === 0) return
+            var dist = Math.hypot(dx, dy)
+            var key = null
+            if (dx < 0 && dy < 0) key = "ul"
+            if (dx > 0 && dy < 0) key = "ur"
+            if (dx > 0 && dy > 0) key = "dr"
+            if (dx < 0 && dy > 0) key = "dl"
+            if (!key) return
+            if (!buckets[key] || dist < buckets[key].dist) buckets[key] = { p: o, dist: dist }
+        })
+        if (!(buckets.ul && buckets.ur && buckets.dr && buckets.dl)) return
+        setupCellPolygons[cell] = [
+            midpoint(c, buckets.ul.p),
+            midpoint(c, buckets.ur.p),
+            midpoint(c, buckets.dr.p),
+            midpoint(c, buckets.dl.p),
+        ]
+    })
+}
+
+function pointInPolygon(point, polygon) {
+    var inside = false
+    for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        var xi = polygon[i].x, yi = polygon[i].y
+        var xj = polygon[j].x, yj = polygon[j].y
+        var intersect = ((yi > point.y) !== (yj > point.y)) &&
+            (point.x < (xj - xi) * (point.y - yi) / ((yj - yi) || 1e-9) + xi)
+        if (intersect) inside = !inside
+    }
+    return inside
+}
+
+function findSetupCellByPoint(x, y) {
+    var p = { x: x, y: y }
+    for (var cell in setupCellPolygons) {
+        if (pointInPolygon(p, setupCellPolygons[cell])) return cell
+    }
+    var nearest = null
+    var best = Infinity
+    for (var c in setupCellCenters) {
+        var cc = setupCellCenters[c]
+        var d = Math.hypot(cc.x - x, cc.y - y)
+        if (d < best) {
+            best = d
+            nearest = c
+        }
+    }
+    // Strict fallback: only accept near-center hits.
+    return best <= 26 ? nearest : null
+}
+
+function updateSetupUI() {
+    if (privateMode && !gameStarted) {
+        $("#setup-panel").removeClass("d-none")
+        $("#setup-controls").removeClass("d-none")
+        $("#sandbox-set-turn").addClass("d-none")
+        $(".setup-dropzone").removeClass("d-none")
+        $("#ready-row").addClass("d-none")
+        update_turn(player_turn)
+        return
+    }
+    $("#setup-panel").addClass("d-none")
+    $("#setup-controls").addClass("d-none")
+    selectedSetupPiece = null
+    $(".setup-piece").removeClass("active")
+    if (sandboxMode) $("#sandbox-set-turn").removeClass("d-none")
+    $(".setup-dropzone").addClass("d-none")
+}
+
+$(document).on("dragstart", ".setup-piece", function (e) {
+    var payload = {
+        type: $(this).data("type") || null,
+        color: $(this).data("color") || null,
+        action: $(this).data("action") || "place"
+    }
+    e.originalEvent.dataTransfer.setData("text/plain", JSON.stringify(payload))
+    e.originalEvent.dataTransfer.effectAllowed = "copy"
+})
+
+$(document).on("dragover", ".setup-dropzone", function (e) {
+    if (!(privateMode && !gameStarted)) return
+    e.preventDefault()
+    $(this).addClass("drag-over")
+})
+
+$(document).on("dragleave", ".setup-dropzone", function () {
+    $(this).removeClass("drag-over")
+})
+
+$(document).on("drop", ".setup-dropzone", function (e) {
+    if (!(privateMode && !gameStarted)) return
+    e.preventDefault()
+    e.stopPropagation()
+    $(this).removeClass("drag-over")
+    var raw = e.originalEvent.dataTransfer.getData("text/plain")
+    if (!raw) return
+    var data = null
+    try { data = JSON.parse(raw) } catch (err) { return }
+    var cell = String($(this).data("cell") || "")
+    if (!cell) return
+    var letter = cell.slice(0, 1)
+    var number = cell.slice(1)
+    var canonical = boardCellToCanonical(letter, number)
+    gameSocket.send(JSON.stringify({
+        "type": "PLACE_FIGURE",
+        "room_id": roomCode,
+        "cell": canonical.letter + canonical.number,
+        "piece_type": data.type,
+        "piece_color": data.color,
+        "action": data.action || "place"
+    }))
+})
+
+$(document).on("dragover", ".board-wrapper", function (e) {
+    if (!(privateMode && !gameStarted)) return
+    e.preventDefault()
+})
+
+$(document).on("drop", ".board-wrapper", function (e) {
+    if (!(privateMode && !gameStarted)) return
+    e.preventDefault()
+    var raw = e.originalEvent.dataTransfer.getData("text/plain")
+    if (!raw) return
+    var data = null
+    try { data = JSON.parse(raw) } catch (err) { return }
+    var rect = this.getBoundingClientRect()
+    var x = e.originalEvent.clientX - rect.left
+    var y = e.originalEvent.clientY - rect.top
+    var cell = findSetupCellByPoint(x, y)
+    if (!cell) return
+    var canonical = boardCellToCanonical(cell.slice(0, 1), cell.slice(1))
+    gameSocket.send(JSON.stringify({
+        "type": "PLACE_FIGURE",
+        "room_id": roomCode,
+        "cell": canonical.letter + canonical.number,
+        "piece_type": data.type,
+        "piece_color": data.color,
+        "action": data.action || "place"
+    }))
+})
+
+$(document).on("click", ".setup-piece", function () {
+    if (!(privateMode && !gameStarted)) return
+    $(".setup-piece").removeClass("active")
+    $(this).addClass("active")
+    selectedSetupPiece = {
+        type: $(this).data("type") || null,
+        color: $(this).data("color") || null,
+        action: $(this).data("action") || "place"
+    }
+})
+
+$(document).on("click", ".setup-dropzone", function (e) {
+    if (!(privateMode && !gameStarted)) return
+    if (!selectedSetupPiece) return
+    e.stopPropagation()
+    var cell = String($(this).data("cell") || "")
+    if (!cell) return
+    var letter = cell.slice(0, 1)
+    var number = cell.slice(1)
+    var canonical = boardCellToCanonical(letter, number)
+    gameSocket.send(JSON.stringify({
+        "type": "PLACE_FIGURE",
+        "room_id": roomCode,
+        "cell": canonical.letter + canonical.number,
+        "piece_type": selectedSetupPiece.type,
+        "piece_color": selectedSetupPiece.color,
+        "action": selectedSetupPiece.action || "place"
+    }))
+})
+
+$(document).on("click", ".board-wrapper", function (e) {
+    if (!(privateMode && !gameStarted)) return
+    if (!selectedSetupPiece) return
+    var rect = this.getBoundingClientRect()
+    var x = e.clientX - rect.left
+    var y = e.clientY - rect.top
+    var cell = findSetupCellByPoint(x, y)
+    if (!cell) return
+    var canonical = boardCellToCanonical(cell.slice(0, 1), cell.slice(1))
+    gameSocket.send(JSON.stringify({
+        "type": "PLACE_FIGURE",
+        "room_id": roomCode,
+        "cell": canonical.letter + canonical.number,
+        "piece_type": selectedSetupPiece.type,
+        "piece_color": selectedSetupPiece.color,
+        "action": selectedSetupPiece.action || "place"
+    }))
+})
+
+$(document).on("click", "#btn_start_private_game", function () {
+    if (!(privateMode && !gameStarted)) return
+    gameSocket.send(JSON.stringify({
+        "type": "START_PRIVATE_GAME",
+        "room_id": roomCode
+    }))
+})
