@@ -17,7 +17,7 @@ class Tara(Figure):
     # массив2 - массив точек, которые эта фигура может съесть
     # входные данные - массивы точек вида ["A1","D5"...]
 
-    def __dots__(self, white, black, red, grey):
+    def __dots__(self, white, black, red, grey, en_passant=None):
 
         def check(flag, mas):
             if flag == -1:

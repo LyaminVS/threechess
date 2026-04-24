@@ -1,5 +1,5 @@
 from .figure import *
-from .consts import *
+from .consts import f, TURN_CHANGE
 
 
 class Peshka(Figure):
@@ -29,6 +29,62 @@ class Peshka(Figure):
         for let in LETTERS_1 + LETTERS_2:
             self.zero_white.append(let + "1")
 
+    @staticmethod
+    def double_step_skipped_cell(pawn_color, old_str, new_str, white, black, red, grey):
+        p = Peshka(old_str, pawn_color)
+        all_occ = list(white) + list(black) + list(red) + list(grey)
+        c = p.cell
+        if pawn_color == "white":
+            if c.cell[0] in p.first_white and c.top[0] not in all_occ:
+                t1 = c.top[0]
+                t2n = f(t1).top[0] if f(t1).top else None
+                if t2n == new_str:
+                    return t1
+            return None
+        if pawn_color == "black":
+            if c.cell[0] in p.red:
+                return None
+            if c.cell[0] in p.first_black and c.bottom[0] not in all_occ:
+                t1 = c.bottom[0]
+                t2n = f(t1).bottom[0] if f(t1).bottom else None
+                if t2n == new_str:
+                    return t1
+            return None
+        if pawn_color == "red":
+            if c.cell[0] in p.black:
+                return None
+            if c.cell[0] in p.first_red and c.bottom[0] not in all_occ:
+                t1 = c.bottom[0]
+                t2n = f(t1).bottom[0] if f(t1).bottom else None
+                if t2n == new_str:
+                    return t1
+            return None
+        return None
+
+    def _peshka_forward_left_right(self):
+        if self.color == "white":
+            return "left_top", "right_top"
+        if self.color == "black":
+            if self.cell.cell[0] in self.red:
+                return "left_top", "right_top"
+            return "left_bottom", "right_bottom"
+        if self.color == "red":
+            if self.cell.cell[0] in self.black:
+                return "left_top", "right_top"
+            return "left_bottom", "right_bottom"
+        return "left_top", "right_top"
+
+    def _diagonal_capture_cell_names(self):
+        la, ra = self._peshka_forward_left_right()
+        out = []
+        for c in getattr(self.cell, la, []) or []:
+            if c:
+                out.append(c)
+        for c in getattr(self.cell, ra, []) or []:
+            if c:
+                out.append(c)
+        return out
+
     def __div_cells__(self):
         self.red = []
         self.black = []
@@ -57,7 +113,7 @@ class Peshka(Figure):
             dots_eat += dots_eat_temp
         return dots, dots_eat
 
-    def __dots__(self, white, black, red, grey):
+    def __dots__(self, white, black, red, grey, en_passant=None):
         dots_eat = []
         dots = []
         dots_replace = []
@@ -112,4 +168,15 @@ class Peshka(Figure):
                                                                               black,
                                                                               red, grey)
                     dots += dots_temp
+        if en_passant and en_passant.get("victim") and en_passant.get("skipped") and en_passant.get("pusher") is not None:
+            pusher = en_passant["pusher"]
+            pusher_list = white if pusher == "white" else black if pusher == "black" else red
+            vcell = en_passant["victim"]
+            st = en_passant.get("stage", 0)
+            r1, r2 = TURN_CHANGE[pusher], TURN_CHANGE[TURN_CHANGE[pusher]]
+            active = r1 if st == 0 else r2
+            if (self.type == "Peshka" and self.color != pusher and self.color == active
+                    and vcell in pusher_list and en_passant["skipped"] in self._diagonal_capture_cell_names()
+                    and en_passant["skipped"] not in dots_eat):
+                dots_eat.append(en_passant["skipped"])
         return dots, dots_eat, dots_replace

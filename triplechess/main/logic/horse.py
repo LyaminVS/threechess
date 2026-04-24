@@ -12,7 +12,7 @@ class Horse(Figure):
         self.number = cell[1::len(cell)]
         self.cell_str = cell
 
-    def __dots__(self, white, black, red, grey):
+    def __dots__(self, white, black, red, grey, en_passant=None):
 
         def check(position, str1, str2, str3):
             c = getattr(getattr(BOARD_RULES, position), str1)

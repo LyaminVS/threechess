@@ -81,6 +81,20 @@ class Board:
         self.grey = []
         self.grey_cells = []
         self.all_figures = self.white + self.black + self.red
+        self.en_passant = None
+
+    def _capture_cell_en_passant(self, figure, move_to):
+        """When simulating a capture, the removed piece is on victim for en passant, not on an empty skipped square."""
+        ep = self.en_passant
+        if not ep or figure.type != "Peshka" or move_to != ep.get("skipped"):
+            return move_to
+        pusher = ep.get("pusher")
+        victim = ep.get("victim")
+        if not pusher or not victim:
+            return move_to
+        if victim in getattr(self, pusher + "_cells", []):
+            return victim
+        return move_to
 
     def _king_figure(self, color):
         """Current king for this color (not self.king_* fields — those go stale after setup/clear)."""
@@ -120,14 +134,14 @@ class Board:
                     or (elem.cell_str in self.black_cells) and (elem.color == "black") \
                     or (elem.cell_str in self.white_cells) and (elem.color == "white"):
                 if king_position in elem.__dots__(self.white_cells, self.black_cells,
-                                                  self.red_cells, self.grey_cells)[1]:
+                                                  self.red_cells, self.grey_cells, self.en_passant)[1]:
                     is_checked = True
         for elem in figures_2:
             if (elem.cell_str in self.red_cells) and (elem.color == "red") \
                     or (elem.cell_str in self.black_cells) and (elem.color == "black") \
                     or (elem.cell_str in self.white_cells) and (elem.color == "white"):
                 if king_position in elem.__dots__(self.white_cells, self.black_cells,
-                                                  self.red_cells, self.grey_cells)[1]:
+                                                  self.red_cells, self.grey_cells, self.en_passant)[1]:
                     is_checked = True
         getattr(self, color + "_cells").remove(cell)
         getattr(self, color + "_cells").append(cell_first)
@@ -135,7 +149,7 @@ class Board:
         return is_checked
 
     def __update_dots__(self, figure):
-        dots = figure.__dots__(self.white_cells, self.black_cells, self.red_cells, self.grey_cells)
+        dots = figure.__dots__(self.white_cells, self.black_cells, self.red_cells, self.grey_cells, self.en_passant)
         cell = figure.cell_str
         cell_temp = cell
         i = 0
@@ -177,29 +191,30 @@ class Board:
             self.red_cells.append(cell)
 
         cell_temp = cell
-        k = ""
         i = 0
         flag = 0
         while i < (len(dots[1])):
+            k = ""
+            cap = self._capture_cell_en_passant(figure, dots[1][i])
             if figure.color == "white":
                 self.white_cells.remove(cell_temp)
                 self.white_cells.append(dots[1][i])
                 figure.change_cell_temp(dots[1][i])
-                if dots[1][i] in self.black_cells:
-                    self.black_cells.remove(dots[1][i])
+                if cap in self.black_cells:
+                    self.black_cells.remove(cap)
                     k = "black"
-                if dots[1][i] in self.red_cells:
-                    self.red_cells.remove(dots[1][i])
+                if cap in self.red_cells:
+                    self.red_cells.remove(cap)
                     k = "red"
                 cell_temp = dots[1][i]
                 if self.__king_is_checked__(figure.color):
                     flag = 1
 
                 if k == "black":
-                    self.black_cells.append(dots[1][i])
+                    self.black_cells.append(cap)
                     k = ""
                 if k == "red":
-                    self.red_cells.append(dots[1][i])
+                    self.red_cells.append(cap)
                     k = ""
                 if flag == 1:
                     flag = 0
@@ -209,20 +224,20 @@ class Board:
                 self.black_cells.remove(cell_temp)
                 self.black_cells.append(dots[1][i])
                 figure.change_cell_temp(dots[1][i])
-                if dots[1][i] in self.white_cells:
-                    self.white_cells.remove(dots[1][i])
+                if cap in self.white_cells:
+                    self.white_cells.remove(cap)
                     k = "white"
-                if dots[1][i] in self.red_cells:
-                    self.red_cells.remove(dots[1][i])
+                if cap in self.red_cells:
+                    self.red_cells.remove(cap)
                     k = "red"
                 cell_temp = dots[1][i]
                 if self.__king_is_checked__(figure.color):
                     flag = 1
                 if k == "white":
-                    self.white_cells.append(dots[1][i])
+                    self.white_cells.append(cap)
                     k = ""
                 if k == "red":
-                    self.red_cells.append(dots[1][i])
+                    self.red_cells.append(cap)
                     k = ""
                 if flag == 1:
                     flag = 0
@@ -233,20 +248,20 @@ class Board:
                 self.red_cells.remove(cell_temp)
                 self.red_cells.append(dots[1][i])
                 figure.change_cell_temp(dots[1][i])
-                if dots[1][i] in self.black_cells:
-                    self.black_cells.remove(dots[1][i])
+                if cap in self.black_cells:
+                    self.black_cells.remove(cap)
                     k = "black"
-                if dots[1][i] in self.white_cells:
-                    self.white_cells.remove(dots[1][i])
+                if cap in self.white_cells:
+                    self.white_cells.remove(cap)
                     k = "white"
                 cell_temp = dots[1][i]
                 if self.__king_is_checked__(figure.color):
                     flag = 1
                 if k == "black":
-                    self.black_cells.append(dots[1][i])
+                    self.black_cells.append(cap)
                     k = ""
                 if k == "white":
-                    self.white_cells.append(dots[1][i])
+                    self.white_cells.append(cap)
                     k = ""
                 if flag == 1:
                     flag = 0

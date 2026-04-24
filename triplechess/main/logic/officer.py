@@ -21,7 +21,7 @@ class Officer(Figure):
                 if self.__not_in_array__(c_child, dots, dots_eat, dots_save):
                     self.__iteration__(c_child, white, black, red, grey, dots_eat, dots, dots_save, turned_d)
 
-    def __dots__(self, white, black, red, grey):
+    def __dots__(self, white, black, red, grey, en_passant=None):
         dots_eat = []
         dots = []
         dots_save = []

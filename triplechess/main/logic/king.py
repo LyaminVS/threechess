@@ -9,7 +9,7 @@ class King(Figure):
 
 
 
-    def __dots__(self, white, black, red, grey):
+    def __dots__(self, white, black, red, grey, en_passant=None):
         cells = []
         cells += getattr(getattr(BOARD_RULES, self.cell_str), "top")
         cells += getattr(getattr(BOARD_RULES, self.cell_str), "right")

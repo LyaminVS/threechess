@@ -7,13 +7,13 @@ class Queen(Officer, Tara):
         super(Queen, self).__init__(cell, color)
         self.type = "Queen"
 
-    def __dots__(self, white, black, red, grey):
+    def __dots__(self, white, black, red, grey, en_passant=None):
         dots = []
         dots_eat = []
-        dots_temp, dots_eat_temp = Officer.__dots__(self, white, black, red, grey)
+        dots_temp, dots_eat_temp = Officer.__dots__(self, white, black, red, grey, en_passant)
         dots += dots_temp
         dots_eat += dots_eat_temp
-        dots_temp, dots_eat_temp = Tara.__dots__(self, white, black, red, grey)
+        dots_temp, dots_eat_temp = Tara.__dots__(self, white, black, red, grey, en_passant)
         dots += dots_temp
         dots_eat += dots_eat_temp
         return dots, dots_eat
