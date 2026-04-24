@@ -307,6 +307,7 @@ function connect() {
                 $("#ready-row").addClass("d-none")
                 gameStarted = true
                 updateSetupUI()
+                get_board($(".board"))
                 break
             case "RETURN_TO_SETUP":
                 gameStarted = false

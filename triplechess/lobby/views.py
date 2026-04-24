@@ -72,7 +72,7 @@ def get_list(request):
     statuses = [filter_status]
     if filter_status == "in_lobby":
         statuses.append("setup")
-    game_list = Game.objects.filter(status__in=statuses)
+    game_list = Game.objects.filter(status__in=statuses, is_sandbox=False)
     if request.user.is_authenticated:
         game_list = game_list.filter(Q(is_private=False) | Q(owner=request.user))
     else:

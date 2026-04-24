@@ -45,7 +45,21 @@ class Chess(AsyncJsonWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
-        game_obj, players, colors = await self.get_game(self.room_name)
+        user = self.scope["user"]
+        if await self.delete_sandbox_if_player_left(user):
+            await self.channel_layer.group_discard(
+                self.room_group_name,
+                self.channel_name
+            )
+            return
+        try:
+            game_obj, players, colors = await self.get_game(self.room_name)
+        except Game.DoesNotExist:
+            await self.channel_layer.group_discard(
+                self.room_group_name,
+                self.channel_name
+            )
+            return
         disconnected_player = self.scope["user"]
         if disconnected_player in players:
             index = players.index(disconnected_player)
@@ -350,6 +364,22 @@ class Chess(AsyncJsonWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "payload": res["payload"],
         }))
+
+    @database_sync_to_async
+    def delete_sandbox_if_player_left(self, user):
+        """Песочница / приватная расстановка: при выходе участника партия удаляется."""
+        if not self.room_name or not user.is_authenticated:
+            return False
+        try:
+            go = Game.objects.get(id=self.room_name)
+        except Game.DoesNotExist:
+            return False
+        if not go.is_sandbox:
+            return False
+        if user not in (go.player_1, go.player_2, go.player_3):
+            return False
+        go.delete()
+        return True
 
     @database_sync_to_async
     def get_game(self, room_id):
