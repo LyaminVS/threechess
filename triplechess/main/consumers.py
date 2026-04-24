@@ -265,6 +265,32 @@ class Chess(AsyncJsonWebsocketConsumer):
                     "type": "send_message",
                 })
 
+        if request_type == "CLEAR_SETUP":
+            room_id = response.get("room_id")
+            if (
+                await self.game_is_private(room_id)
+                and await self.sandbox_member(room_id)
+                and await self.is_setup_status(room_id)
+            ):
+                if await self.clear_setup_board(room_id):
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        "payload": {"type": "SETUP_UPDATED"},
+                        "type": "send_message",
+                    })
+
+        if request_type == "LOAD_STARTING_POSITION":
+            room_id = response.get("room_id")
+            if (
+                await self.game_is_private(room_id)
+                and await self.sandbox_member(room_id)
+                and await self.is_setup_status(room_id)
+            ):
+                if await self.load_starting_position_setup(room_id):
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        "payload": {"type": "SETUP_UPDATED"},
+                        "type": "send_message",
+                    })
+
         if request_type == "SET_TURN":
             room_id = response.get("room_id")
             color = response.get("color")
@@ -510,6 +536,38 @@ class Chess(AsyncJsonWebsocketConsumer):
         else:
             if not g.place_figure_for_setup(cell, piece_type, piece_color):
                 return False
+        go.board = g.game_to_json()
+        go.save(update_fields=["board"])
+        return True
+
+    @database_sync_to_async
+    def clear_setup_board(self, room_id):
+        if not room_id:
+            return False
+        try:
+            go = Game.objects.get(id=room_id)
+        except Game.DoesNotExist:
+            return False
+        if go.status != "setup" or not go.is_private:
+            return False
+        g = game.Game.json_to_game(go.board)
+        g.clear_board_for_setup()
+        go.board = g.game_to_json()
+        go.save(update_fields=["board"])
+        return True
+
+    @database_sync_to_async
+    def load_starting_position_setup(self, room_id):
+        if not room_id:
+            return False
+        try:
+            go = Game.objects.get(id=room_id)
+        except Game.DoesNotExist:
+            return False
+        if go.status != "setup" or not go.is_private:
+            return False
+        g = game.Game.json_to_game(go.board)
+        g.reset()
         go.board = g.game_to_json()
         go.save(update_fields=["board"])
         return True

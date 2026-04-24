@@ -82,23 +82,31 @@ class Board:
         self.grey_cells = []
         self.all_figures = self.white + self.black + self.red
 
+    def _king_figure(self, color):
+        """Current king for this color (not self.king_* fields — those go stale after setup/clear)."""
+        for fig in getattr(self, color):
+            if getattr(fig, "type", None) == "King":
+                return fig
+        return None
+
     def __king_is_checked__(self, color, cell=""):
         is_checked = False
-        king_position = ""
         figures_1 = []
         figures_2 = []
-        king = getattr(self, "king_" + color)
+        king = self._king_figure(color)
+        if king is None:
+            return False
         cell_first = king.cell_str
         if color == "white":
-            king_position = self.king_white.cell_str
+            king_position = king.cell_str
             figures_1 = self.black
             figures_2 = self.red
         elif color == "black":
-            king_position = self.king_black.cell_str
+            king_position = king.cell_str
             figures_1 = self.white
             figures_2 = self.red
         elif color == "red":
-            king_position = self.king_red.cell_str
+            king_position = king.cell_str
             figures_1 = self.black
             figures_2 = self.white
         if cell == "":

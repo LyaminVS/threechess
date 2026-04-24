@@ -127,8 +127,19 @@ body.game-page main {
     pointer-events: auto;
 }
 
-.setup-dropzone:hover,
-.setup-dropzone.drag-over {
+/* Расстановка: зоны чуть видны. Игра: невидимы, без display:none — геометрия валидна. */
+.setup-dropzone.setup-dz--setup {
+    border-color: rgba(17, 24, 39, 0.3);
+    opacity: 0.55;
+}
+
+.setup-dropzone.setup-dz--play {
+    border-color: transparent;
+    opacity: 0;
+}
+
+.setup-dropzone.setup-dz--setup:hover,
+.setup-dropzone.setup-dz--setup.drag-over {
     opacity: 1;
 }
 

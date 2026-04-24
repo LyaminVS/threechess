@@ -87,6 +87,12 @@ window.__BOARD_INIT__ = {
                         </p>
                     </div>
                     <div id="setup-controls" class="mt-4{% if panel_is_started|default:False or not panel_is_private|default:False %} d-none{% endif %}">
+                        <div class="d-grid gap-2 mb-2">
+                            <div class="btn-group" role="group" aria-label="Расстановка">
+                                <button type="button" class="btn btn-outline-danger btn-sm" id="btn_setup_clear">Очистить всё</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="btn_setup_starting">Стартовая позиция</button>
+                            </div>
+                        </div>
                         <button type="button" class="btn btn-primary w-100 py-2" id="btn_start_private_game">
                             Старт
                         </button>

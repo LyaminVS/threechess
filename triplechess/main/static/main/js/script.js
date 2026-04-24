@@ -196,7 +196,7 @@ function connect() {
                 }
                 break;
             case "GET_BOARD":
-                $(".cell_item").addClass("old_cell")
+                $(".board-wrapper > img.cell_item").addClass("old_cell")
                 player_turn = data["turn"]
                 update_turn(player_turn)
                 let figures = data["figures"]
@@ -222,7 +222,7 @@ function connect() {
                     }
                     
                 });
-                $(".old_cell").remove()
+                $(".board-wrapper > img.old_cell").remove()
                 let selected_figure = data["selected_figure"]
                 if (selected_figure){
                     let letter = selected_figure.slice(0, 1)
@@ -237,11 +237,13 @@ function connect() {
                     }
                     get_dots(letter, number, true)
                 }
+                setTimeout(function () { buildSetupHitPolygons() }, 0)
                 break;
             case "GET_DOTS":
                 $(".point").remove()
                 dots = data["dots"]
                 paint_dots(dots)
+                setTimeout(function () { buildSetupHitPolygons() }, 0)
                 break;
             case "CHANGE_POSITION":
                 if (data["success"]){
@@ -335,7 +337,7 @@ function get_board(board){
 }
 
 function clear_board(){
-    $(".cell_item").remove()
+    $(".board-wrapper > img.cell_item").remove()
 }
 
 $(function () {
@@ -447,14 +449,9 @@ function start_player_options(){
     })
 }
 
-$(document).on("click", ".cell_item", function() {
-    if (!($(this).attr("class").split(" ").includes("point"))){
-        let id = $(this).attr('id')
-        let letter = id.slice(0, 1)
-        let number = id.slice(1)
-        get_dots(letter, number)
-    }
-});
+function boardImgsOnCell(cell) {
+    return $(".board-wrapper > img").filter(function () { return this.id === String(cell) })
+}
 
 $(document).on("click", ".perspective-btn", function () {
     if (!sandboxMode) return
@@ -534,69 +531,68 @@ function get_dots(letter, number, ignore_duplication = false){
     }));
 }
 
-$(document).on("click", ".point", async function() {
+function sendMoveToCellFromDropzone(letter, number) {
     if (privateMode && !gameStarted) return
     var moveColor = sandboxMode ? activeMoveColor : player_color
     if (!sandboxMode && player_turn != player_color) return
     if (sandboxMode && !moveColor) return
-    if ($(this).attr("class").split(" ").includes("eat_point")) return
-    cell = $(this).attr("id")
-    var letter = cell.slice(0, 1)
-    var number = cell.slice(1)
-    if (player_color == "black"){
-        letter = RED_TURN[letter]
-        number = RED_TURN[number]
+    var l = letter
+    var n = number
+    if (player_color == "black") {
+        l = RED_TURN[letter]
+        n = RED_TURN[number]
     }
-    if (player_color == "red"){
-        letter = BLACK_TURN[letter]
-        number = BLACK_TURN[number]
+    if (player_color == "red") {
+        l = BLACK_TURN[letter]
+        n = BLACK_TURN[number]
     }
-    cell = letter + number
+    var cell = l + n
     $(".point").remove()
     gameSocket.send(JSON.stringify({
         "type": "MOVE",
         "cell": cell,
         "room_id": roomCode,
-        "color": moveColor,
-    }));
-});
+        "color": moveColor
+    }))
+}
 
-$(document).on("click", ".eat_point", async function(){
+function sendChangePositionFromDropzone(letter, number) {
     if (privateMode && !gameStarted) return
     var moveColor = sandboxMode ? activeMoveColor : player_color
     if (!sandboxMode && player_turn != player_color) return
     if (sandboxMode && !moveColor) return
-    var cell = $(this).attr("id")
-    if (!cell) return
-    var letter = cell.slice(0, 1)
-    var number = cell.slice(1)
-    if (player_color == "black"){
-        letter = RED_TURN[letter]
-        number = RED_TURN[number]
+    var l = letter
+    var n = number
+    if (player_color == "black") {
+        l = RED_TURN[letter]
+        n = RED_TURN[number]
     }
-    if (player_color == "red"){
-        letter = BLACK_TURN[letter]
-        number = BLACK_TURN[number]
+    if (player_color == "red") {
+        l = BLACK_TURN[letter]
+        n = BLACK_TURN[number]
     }
-    cell = letter + number
+    var cell = l + n
     $(".point").remove()
     gameSocket.send(JSON.stringify({
         "type": "CHANGE_POSITION",
         "cell": cell,
         "room_id": roomCode,
-        "color": moveColor,
-    }));
-});
+        "color": moveColor
+    }))
+}
 
-
-$(document).on("click", ".board", function(){
-    $(".point").remove()
-    gameSocket.send(JSON.stringify({
-        "type": "RESET_DOTS",
-        "color": player_color,
-    }));
-})
-
+function handlePlayCellFromHit(letter, number, cell) {
+    var $on = boardImgsOnCell(cell)
+    if ($on.filter(".eat_point").length) {
+        sendChangePositionFromDropzone(letter, number)
+        return
+    }
+    if ($on.filter(".point").length) {
+        sendMoveToCellFromDropzone(letter, number)
+        return
+    }
+    get_dots(letter, number)
+}
 
 function change_color(color){
     gameSocket.send(JSON.stringify({
@@ -769,9 +765,10 @@ function updateSetupUI() {
         $("#setup-panel").removeClass("d-none")
         $("#setup-controls").removeClass("d-none")
         $("#sandbox-set-turn").addClass("d-none")
-        $(".setup-dropzone").removeClass("d-none")
         $("#ready-row").addClass("d-none")
+        $(".setup-dropzone").removeClass("setup-dz--play").addClass("setup-dz--setup")
         update_turn(player_turn)
+        setTimeout(function () { buildSetupHitPolygons() }, 0)
         return
     }
     $("#setup-panel").addClass("d-none")
@@ -779,7 +776,8 @@ function updateSetupUI() {
     selectedSetupPiece = null
     $(".setup-piece").removeClass("active")
     if (sandboxMode) $("#sandbox-set-turn").removeClass("d-none")
-    $(".setup-dropzone").addClass("d-none")
+    $(".setup-dropzone").removeClass("setup-dz--setup").addClass("setup-dz--play")
+    setTimeout(function () { buildSetupHitPolygons() }, 0)
 }
 
 $(document).on("dragstart", ".setup-piece", function (e) {
@@ -865,48 +863,69 @@ $(document).on("click", ".setup-piece", function () {
     }
 })
 
-$(document).on("click", ".setup-dropzone", function (e) {
-    if (!(privateMode && !gameStarted)) return
-    if (!selectedSetupPiece) return
-    e.stopPropagation()
-    var cell = String($(this).data("cell") || "")
-    if (!cell) return
-    var letter = cell.slice(0, 1)
-    var number = cell.slice(1)
-    var canonical = boardCellToCanonical(letter, number)
-    gameSocket.send(JSON.stringify({
-        "type": "PLACE_FIGURE",
-        "room_id": roomCode,
-        "cell": canonical.letter + canonical.number,
-        "piece_type": selectedSetupPiece.type,
-        "piece_color": selectedSetupPiece.color,
-        "action": selectedSetupPiece.action || "place"
-    }))
-})
-
 $(document).on("click", ".board-wrapper", function (e) {
-    if (!(privateMode && !gameStarted)) return
-    if (!selectedSetupPiece) return
+    if ($(e.target).closest("a, button, [role='button']").length) return
     var rect = this.getBoundingClientRect()
     var x = e.clientX - rect.left
     var y = e.clientY - rect.top
     var cell = findSetupCellByPoint(x, y)
-    if (!cell) return
-    var canonical = boardCellToCanonical(cell.slice(0, 1), cell.slice(1))
-    gameSocket.send(JSON.stringify({
-        "type": "PLACE_FIGURE",
-        "room_id": roomCode,
-        "cell": canonical.letter + canonical.number,
-        "piece_type": selectedSetupPiece.type,
-        "piece_color": selectedSetupPiece.color,
-        "action": selectedSetupPiece.action || "place"
-    }))
+
+    if (privateMode && !gameStarted) {
+        if (cell && selectedSetupPiece) {
+            var canonical = boardCellToCanonical(cell.slice(0, 1), cell.slice(1))
+            gameSocket.send(JSON.stringify({
+                "type": "PLACE_FIGURE",
+                "room_id": roomCode,
+                "cell": canonical.letter + canonical.number,
+                "piece_type": selectedSetupPiece.type,
+                "piece_color": selectedSetupPiece.color,
+                "action": selectedSetupPiece.action || "place"
+            }))
+        } else if (!cell) {
+            $(".point").remove()
+            gameSocket.send(JSON.stringify({
+                "type": "RESET_DOTS",
+                "color": player_color
+            }))
+        }
+        return
+    }
+
+    if (!cell) {
+        $(".point").remove()
+        gameSocket.send(JSON.stringify({
+            "type": "RESET_DOTS",
+            "color": player_color
+        }))
+        return
+    }
+
+    var letter = cell.slice(0, 1)
+    var number = cell.slice(1)
+    handlePlayCellFromHit(letter, number, cell)
 })
 
 $(document).on("click", "#btn_start_private_game", function () {
     if (!(privateMode && !gameStarted)) return
     gameSocket.send(JSON.stringify({
         "type": "START_PRIVATE_GAME",
+        "room_id": roomCode
+    }))
+})
+
+$(document).on("click", "#btn_setup_clear", function () {
+    if (!(privateMode && !gameStarted)) return
+    if (!confirm("Убрать все фигуры с доски?")) return
+    gameSocket.send(JSON.stringify({
+        "type": "CLEAR_SETUP",
+        "room_id": roomCode
+    }))
+})
+
+$(document).on("click", "#btn_setup_starting", function () {
+    if (!(privateMode && !gameStarted)) return
+    gameSocket.send(JSON.stringify({
+        "type": "LOAD_STARTING_POSITION",
         "room_id": roomCode
     }))
 })
