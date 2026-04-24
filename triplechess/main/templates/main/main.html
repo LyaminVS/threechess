@@ -100,6 +100,14 @@ window.__BOARD_INIT__ = {
                             До старта перетаскивайте фигуры снизу на доску. После старта ходы идут по очереди.
                         </p>
                     </div>
+                    {% if panel_is_private %}
+                    <div id="private-stop-row" class="mt-2{% if not panel_is_started|default:False %} d-none{% endif %}">
+                        <button type="button" class="btn btn-outline-warning w-100 py-2" id="btn_stop_private_game">Стоп: расстановка</button>
+                        <p class="small text-muted mt-2 mb-0">
+                            Партия снова в режиме настройки: можно добавлять и убирать фигуры. Текущая позиция на доске не сбрасывается.
+                        </p>
+                    </div>
+                    {% endif %}
 
                     <a href="/lobby/" class="btn btn-outline-secondary w-100 mt-3">Выйти в лобби</a>
                 </div>

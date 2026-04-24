@@ -189,6 +189,8 @@ class Chess(AsyncJsonWebsocketConsumer):
                 "type": "GET_DOTS",
                 "dots": dots
             }
+            if response.get("play_drag_id") is not None:
+                res["play_drag_id"] = response.get("play_drag_id")
             await self.send(text_data=json.dumps({
                 "payload": res,
             }))
@@ -264,6 +266,15 @@ class Chess(AsyncJsonWebsocketConsumer):
                     "payload": {"type": "START_GAME"},
                     "type": "send_message",
                 })
+
+        if request_type == "STOP_PRIVATE_GAME":
+            room_id = response.get("room_id")
+            if await self.game_is_private(room_id) and await self.sandbox_member(room_id):
+                if await self.stop_private_to_setup(room_id):
+                    await self.channel_layer.group_send(self.room_group_name, {
+                        "payload": {"type": "RETURN_TO_SETUP"},
+                        "type": "send_message",
+                    })
 
         if request_type == "CLEAR_SETUP":
             room_id = response.get("room_id")
@@ -586,6 +597,21 @@ class Chess(AsyncJsonWebsocketConsumer):
         go.sandbox_ordered_turn = True
         go.ready_1 = go.ready_2 = go.ready_3 = 1
         go.save(update_fields=["status", "sandbox_ordered_turn", "ready_1", "ready_2", "ready_3"])
+
+    @database_sync_to_async
+    def stop_private_to_setup(self, room_id):
+        """Личная партия: снова режим расстановки (доска в БД не сбрасывается)."""
+        if not room_id:
+            return False
+        try:
+            go = Game.objects.get(id=room_id)
+        except Game.DoesNotExist:
+            return False
+        if not go.is_private or go.status != "started":
+            return False
+        go.status = "setup"
+        go.save(update_fields=["status"])
+        return True
 
     async def _can_apply_move(self, room_id, color):
         if not color:

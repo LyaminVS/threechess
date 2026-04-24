@@ -44,6 +44,11 @@ var gameStarted = !!(typeof window.__BOARD_INIT__ !== "undefined" && window.__BO
 var activeMoveColor = null
 var setupCellPolygons = {}
 var setupCellCenters = {}
+var playPointerDrag = null
+var playPointerDragIdSeq = 0
+var playDragPointerDown = null
+var abortedPlayDragIds = {}
+var suppressPlayBoardClickUntil = 0
 if ($("#sandbox-banner").length && !$("#sandbox-banner").hasClass("d-none")) {
     sandboxMode = true
 }
@@ -68,6 +73,10 @@ updateSandboxTurnModeUI()
 
 const BOARD_LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H", "K", "L", "M", "N"]
 const BOARD_NUMBERS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+// Клетки, для которых в circles.css задано положение .cell_item* (остальные 12×12 не рисуются с координатами и давали круги «в пустоте»).
+const CELLS_WITH_CIRCLE_POS = [
+    "A1", "A2", "A3", "A4", "A9", "A10", "A11", "A12", "B1", "B2", "B3", "B4", "B9", "B10", "B11", "B12", "C1", "C2", "C3", "C4", "C9", "C10", "C11", "C12", "D1", "D2", "D3", "D4", "D9", "D10", "D11", "D12", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "K5", "K6", "K7", "K8", "K9", "K10", "K11", "K12", "L5", "L6", "L7", "L8", "L9", "L10", "L11", "L12", "M5", "M6", "M7", "M8", "M9", "M10", "M11", "M12", "N5", "N6", "N7", "N8", "N9", "N10", "N11", "N12"
+]
 var selectedSetupPiece = null
 const SETUP_PIECES = [
     { type: "King", color: "white" }, { type: "Queen", color: "white" }, { type: "Tara", color: "white" }, { type: "Officer", color: "white" }, { type: "Horse", color: "white" }, { type: "Peshka", color: "white" },
@@ -102,7 +111,7 @@ function appendLegacySprite(board, path, letter, number, color, add_class, id) {
     var classStr = classes.join(" ")
     var idAttr = id ? " id='" + letter + number + "'" : ""
     var dataAttr = color ? " data-piece-color='" + color + "'" : ""
-    board.after("<img src='" + path + "'" + idAttr + dataAttr + " class='" + classStr + "' />")
+    board.after("<img src='" + path + "' draggable='false'" + idAttr + dataAttr + " class='" + classStr + "' />")
 }
 
 connect();
@@ -224,7 +233,7 @@ function connect() {
                 });
                 $(".board-wrapper > img.old_cell").remove()
                 let selected_figure = data["selected_figure"]
-                if (selected_figure){
+                if (selected_figure && !playPointerDrag) {
                     let letter = selected_figure.slice(0, 1)
                     let number = selected_figure.slice(1)
                     if (player_color == "black"){
@@ -240,8 +249,30 @@ function connect() {
                 setTimeout(function () { buildSetupHitPolygons() }, 0)
                 break;
             case "GET_DOTS":
+                if (data["play_drag_id"] != null && data["play_drag_id"] !== undefined && abortedPlayDragIds[data["play_drag_id"]]) {
+                    delete abortedPlayDragIds[data["play_drag_id"]]
+                    gameSocket.send(JSON.stringify({
+                        "type": "RESET_DOTS",
+                        "color": player_color
+                    }))
+                    break
+                }
+                if (data["play_drag_id"] != null && data["play_drag_id"] !== undefined && !playPointerDrag) {
+                    break
+                }
+                if ((data["play_drag_id"] == null || data["play_drag_id"] === undefined) && playPointerDrag) {
+                    removePlayDragGhost(playPointerDrag)
+                    tearDownPlayDragGlobal()
+                    playPointerDrag = null
+                }
                 $(".point").remove()
                 dots = data["dots"]
+                if (data["play_drag_id"] != null && data["play_drag_id"] !== undefined
+                    && playPointerDrag && playPointerDrag.id === data["play_drag_id"] && playPointerDrag.phase === "loading") {
+                    playPointerDrag.phase = "armed"
+                    playPointerDrag.dots0 = new Set((dots[0] || []).map(String))
+                    playPointerDrag.dots1 = new Set((dots[1] || []).map(String))
+                }
                 paint_dots(dots)
                 setTimeout(function () { buildSetupHitPolygons() }, 0)
                 break;
@@ -268,7 +299,12 @@ function connect() {
                 $("#ready-row").addClass("d-none")
                 gameStarted = true
                 updateSetupUI()
-                break;
+                break
+            case "RETURN_TO_SETUP":
+                gameStarted = false
+                updateSetupUI()
+                get_board($(".board"))
+                break
             case "SANDBOX_TURN_MODE":
                 if (typeof data["ordered"] !== "undefined") {
                     sandboxOrderedTurn = !!data["ordered"]
@@ -504,32 +540,238 @@ function paint_dots(dots){
     });
 }
 
-function get_dots(letter, number, ignore_duplication = false){
+function viewToCanonical(letter, number) {
+    var l = letter
+    var n = number
+    if (player_color == "black") {
+        l = RED_TURN[letter]
+        n = RED_TURN[number]
+    }
+    if (player_color == "red") {
+        l = BLACK_TURN[letter]
+        n = BLACK_TURN[number]
+    }
+    return l + n
+}
+
+function viewCellIdToCanonical(viewCellId) {
+    if (!viewCellId || viewCellId.length < 2) return ""
+    return viewToCanonical(viewCellId.slice(0, 1), viewCellId.slice(1))
+}
+
+function canGetDotsOnPiece($cell) {
+    if (!$cell || !$cell.length) return false
+    var pieceColor = pieceColorFromElement($cell)
+    if (sandboxMode) return pieceColor !== null
+    return $cell.hasClass(player_color)
+}
+
+function get_dots(letter, number, ignore_duplication, playDragId) {
+    if (ignore_duplication === undefined) ignore_duplication = false
     if (privateMode && !gameStarted) return
     var $cell = $("#" + letter + number)
+    if (!canGetDotsOnPiece($cell)) return
     var pieceColor = pieceColorFromElement($cell)
-    var canSelect = sandboxMode
-        ? pieceColor !== null
-        : $cell.hasClass(player_color)
-    if (!canSelect) return
     activeMoveColor = sandboxMode ? pieceColor : player_color
-    if (player_color == "black"){
+    if (player_color == "black") {
         letter = RED_TURN[letter]
         number = RED_TURN[number]
     }
-    if (player_color == "red"){
+    if (player_color == "red") {
         letter = BLACK_TURN[letter]
         number = BLACK_TURN[number]
     }
-
-    gameSocket.send(JSON.stringify({
+    var msg = {
         "type": "GET_DOTS",
-        'letter': letter,
-        'number': number,
-        'color': activeMoveColor,
-        'ignore_duplication': ignore_duplication,
-    }));
+        "letter": letter,
+        "number": number,
+        "color": activeMoveColor,
+        "ignore_duplication": ignore_duplication
+    }
+    if (playDragId != null && playDragId !== undefined) {
+        msg["play_drag_id"] = playDragId
+    }
+    gameSocket.send(JSON.stringify(msg))
 }
+
+var PLAY_DRAG_MOVE_PX = 8
+
+function clearPlayDragThresholdListeners() {
+    $(document).off("pointermove.playDragThreshold pointerup.playDragThreshold pointercancel.playDragThreshold")
+}
+
+function tearDownPlayDragGlobal() {
+    $(document).off("pointerup.playDragGlobal pointercancel.playDragGlobal", onGlobalPointerUpForPlayDrag)
+}
+
+var PLAY_DRAG_GHOST_HALF = 16
+
+function positionPlayDragGhost(ghost, clientX, clientY) {
+    if (!ghost) return
+    ghost.style.left = (clientX - PLAY_DRAG_GHOST_HALF) + "px"
+    ghost.style.top = (clientY - PLAY_DRAG_GHOST_HALF) + "px"
+}
+
+function buildPlayDragGhostClassName(sourceEl) {
+    var arr = (sourceEl.className || "").split(/\s+/)
+    var out = arr.filter(function (c) {
+        if (!c) return false
+        if (c === "point" || c === "eat_point" || c === "old_cell" || c === "play-drag-source--dim") return false
+        if (/^cell_item[A-N]/.test(c)) return false
+        return true
+    })
+    out.push("play-drag-ghost")
+    return out.join(" ")
+}
+
+function createPlayDragGhost(pState, sourceEl, clientX, clientY) {
+    if (!pState || !sourceEl) return
+    var ghost = document.createElement("img")
+    ghost.src = sourceEl.getAttribute("src") || sourceEl.src
+    ghost.alt = ""
+    ghost.className = buildPlayDragGhostClassName(sourceEl)
+    document.body.appendChild(ghost)
+    positionPlayDragGhost(ghost, clientX, clientY)
+    pState.ghostEl = ghost
+    pState.sourceEl = sourceEl
+    sourceEl.classList.add("play-drag-source--dim")
+    $(document).on("pointermove.playDragFollow", onPlayDragFollow)
+}
+
+function onPlayDragFollow(e) {
+    if (!playPointerDrag || !playPointerDrag.ghostEl) return
+    if (e.pointerId !== playPointerDrag.pointerId) return
+    positionPlayDragGhost(playPointerDrag.ghostEl, e.clientX, e.clientY)
+}
+
+function removePlayDragGhost(pState) {
+    $(document).off("pointermove.playDragFollow", onPlayDragFollow)
+    var s = pState || playPointerDrag
+    if (!s) return
+    if (s.ghostEl) {
+        try { $(s.ghostEl).remove() } catch (err) { }
+    }
+    if (s.sourceEl) {
+        try { s.sourceEl.classList.remove("play-drag-source--dim") } catch (err) { }
+    }
+    s.ghostEl = null
+    s.sourceEl = null
+}
+
+function onGlobalPointerUpForPlayDrag(e) {
+    if (!playPointerDrag || e.pointerId !== playPointerDrag.pointerId) return
+    if (playPointerDrag.phase === "loading") {
+        var cap = playPointerDrag.captureEl
+        var pid = playPointerDrag.pointerId
+        var rid = playPointerDrag.id
+        var tmpDrag = playPointerDrag
+        playPointerDrag = null
+        tearDownPlayDragGlobal()
+        removePlayDragGhost(tmpDrag)
+        abortedPlayDragIds[rid] = true
+        try {
+            if (cap && pid != null) cap.releasePointerCapture(pid)
+        } catch (err) { }
+        return
+    }
+    if (playPointerDrag.phase === "armed") {
+        finishPlayDragAtClient(e.clientX, e.clientY)
+    }
+}
+
+function finishPlayDragAtClient(clientX, clientY) {
+    tearDownPlayDragGlobal()
+    var p = playPointerDrag
+    playPointerDrag = null
+    if (!p || p.phase !== "armed") return
+    removePlayDragGhost(p)
+    try {
+        if (p.captureEl && p.pointerId != null) p.captureEl.releasePointerCapture(p.pointerId)
+    } catch (err) { }
+    suppressPlayBoardClickUntil = Date.now() + 500
+    $(".point").remove()
+    var wrap = document.querySelector(".board-wrapper")
+    if (!wrap) {
+        gameSocket.send(JSON.stringify({ "type": "RESET_DOTS", "color": player_color }))
+        return
+    }
+    var rect = wrap.getBoundingClientRect()
+    var x = clientX - rect.left
+    var y = clientY - rect.top
+    var targetCell = findSetupCellByPoint(x, y)
+    if (!targetCell || targetCell === p.fromId) {
+        gameSocket.send(JSON.stringify({ "type": "RESET_DOTS", "color": player_color }))
+        return
+    }
+    var tCanon = viewCellIdToCanonical(targetCell)
+    var L = targetCell.slice(0, 1)
+    var N = targetCell.slice(1)
+    if (p.dots0 && p.dots0.has(tCanon)) {
+        sendMoveToCellFromDropzone(L, N)
+    } else if (p.dots1 && p.dots1.has(tCanon)) {
+        sendChangePositionFromDropzone(L, N)
+    } else {
+        gameSocket.send(JSON.stringify({ "type": "RESET_DOTS", "color": player_color }))
+    }
+}
+
+function onPlayDragPointerMove(e) {
+    if (!playDragPointerDown || e.pointerId !== playDragPointerDown.pointerId) return
+    var dx = e.clientX - playDragPointerDown.x
+    var dy = e.clientY - playDragPointerDown.y
+    if (Math.hypot(dx, dy) < PLAY_DRAG_MOVE_PX) return
+    if (privateMode && !gameStarted) return
+    if (!canGetDotsOnPiece($("#" + playDragPointerDown.fromId))) return
+    var pd = playDragPointerDown
+    playDragPointerDown = null
+    clearPlayDragThresholdListeners()
+    var pieceColor = pieceColorFromElement($("#" + pd.fromId))
+    activeMoveColor = sandboxMode ? pieceColor : player_color
+    suppressPlayBoardClickUntil = Date.now() + 500
+    e.preventDefault()
+    var dragId = ++playPointerDragIdSeq
+    playPointerDrag = {
+        id: dragId,
+        phase: "loading",
+        fromId: pd.fromId,
+        pointerId: e.pointerId,
+        captureEl: pd.el
+    }
+    try {
+        pd.el.setPointerCapture(e.pointerId)
+    } catch (err) { }
+    createPlayDragGhost(playPointerDrag, pd.el, e.clientX, e.clientY)
+    $(document).on("pointerup.playDragGlobal pointercancel.playDragGlobal", onGlobalPointerUpForPlayDrag)
+    get_dots(pd.fromL, pd.fromN, false, dragId)
+}
+
+function onPlayDragPointerUpThreshold(e) {
+    if (!playDragPointerDown || e.pointerId !== playDragPointerDown.pointerId) return
+    playDragPointerDown = null
+    clearPlayDragThresholdListeners()
+}
+
+$(document).on("pointerdown", ".board-wrapper > img.cell_item", function (e) {
+    if (e.button != null && e.button !== 0) return
+    if (privateMode && !gameStarted) return
+    if (!gameStarted) return
+    var $t = $(e.target)
+    if ($t.is("img.point, img.eat_point, .point, .eat_point")) return
+    if (!canGetDotsOnPiece($t)) return
+    var id = $t.attr("id")
+    if (!id) return
+    playDragPointerDown = {
+        x: e.clientX,
+        y: e.clientY,
+        fromId: id,
+        fromL: id.charAt(0),
+        fromN: id.slice(1),
+        pointerId: e.pointerId,
+        el: e.currentTarget
+    }
+    $(document).on("pointermove.playDragThreshold", onPlayDragPointerMove)
+    $(document).on("pointerup.playDragThreshold pointercancel.playDragThreshold", onPlayDragPointerUpThreshold)
+})
 
 function sendMoveToCellFromDropzone(letter, number) {
     if (privateMode && !gameStarted) return
@@ -591,7 +833,7 @@ function handlePlayCellFromHit(letter, number, cell) {
         sendMoveToCellFromDropzone(letter, number)
         return
     }
-    get_dots(letter, number)
+    get_dots(letter, number, false)
 }
 
 function change_color(color){
@@ -665,13 +907,10 @@ function renderSetupPalette() {
 function renderSetupDropzones() {
     $(".setup-dropzone").remove()
     var board = $(".board")
-    BOARD_LETTERS.forEach(function (letter) {
-        BOARD_NUMBERS.forEach(function (number) {
-            var cell = letter + number
-            var dz = $("<div class='setup-dropzone cell_item cell_item" + cell + "'></div>")
-            dz.attr("data-cell", cell)
-            board.after(dz)
-        })
+    CELLS_WITH_CIRCLE_POS.forEach(function (cell) {
+        var dz = $("<div class='setup-dropzone cell_item cell_item" + cell + "'></div>")
+        dz.attr("data-cell", cell)
+        board.after(dz)
     })
 }
 
@@ -762,14 +1001,22 @@ function findSetupCellByPoint(x, y) {
 
 function updateSetupUI() {
     if (privateMode && !gameStarted) {
+        $("#private-stop-row").addClass("d-none")
         $("#setup-panel").removeClass("d-none")
         $("#setup-controls").removeClass("d-none")
         $("#sandbox-set-turn").addClass("d-none")
         $("#ready-row").addClass("d-none")
         $(".setup-dropzone").removeClass("setup-dz--play").addClass("setup-dz--setup")
+        selectedSetupPiece = null
+        $(".setup-piece").removeClass("active")
         update_turn(player_turn)
         setTimeout(function () { buildSetupHitPolygons() }, 0)
         return
+    }
+    if (privateMode && gameStarted) {
+        $("#private-stop-row").removeClass("d-none")
+    } else {
+        $("#private-stop-row").addClass("d-none")
     }
     $("#setup-panel").addClass("d-none")
     $("#setup-controls").addClass("d-none")
@@ -864,6 +1111,7 @@ $(document).on("click", ".setup-piece", function () {
 })
 
 $(document).on("click", ".board-wrapper", function (e) {
+    if (Date.now() < suppressPlayBoardClickUntil) return
     if ($(e.target).closest("a, button, [role='button']").length) return
     var rect = this.getBoundingClientRect()
     var x = e.clientX - rect.left
@@ -913,9 +1161,16 @@ $(document).on("click", "#btn_start_private_game", function () {
     }))
 })
 
+$(document).on("click", "#btn_stop_private_game", function () {
+    if (!privateMode || !gameStarted) return
+    gameSocket.send(JSON.stringify({
+        "type": "STOP_PRIVATE_GAME",
+        "room_id": roomCode
+    }))
+})
+
 $(document).on("click", "#btn_setup_clear", function () {
     if (!(privateMode && !gameStarted)) return
-    if (!confirm("Убрать все фигуры с доски?")) return
     gameSocket.send(JSON.stringify({
         "type": "CLEAR_SETUP",
         "room_id": roomCode

@@ -172,3 +172,24 @@ body.game-page main {
     font-weight: 700;
     color: #374151;
 }
+
+/* Перетаскивание фигуры: «призрак» и полупрозрачная клетка-источник */
+img.play-drag-ghost {
+    position: fixed !important;
+    z-index: 10050;
+    pointer-events: none;
+    left: 0;
+    top: 0;
+    width: 32px !important;
+    height: 32px !important;
+    max-width: none;
+    box-sizing: border-box;
+    margin: 0 !important;
+    transform: none !important;
+    object-fit: contain;
+    opacity: 0.96;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+}
+.board-wrapper img.cell_item.play-drag-source--dim {
+    opacity: 0.32;
+}
